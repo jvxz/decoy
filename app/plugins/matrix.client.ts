@@ -4,7 +4,7 @@ export default defineNuxtPlugin({
   name: 'matrix',
   parallel: true,
   setup: () => {
-    const matrix = createClient({ baseUrl: 'https://matrix.org' })
+    const matrix = createClient({ baseUrl: MATRIX_BASE_URL })
 
     return {
       provide: {
