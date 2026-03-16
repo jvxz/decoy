@@ -20,6 +20,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "evlog": "^2.3.0",
+    "matrix-js-sdk": "^41.1.0-rc.0",
     "nuxt": "^4.3.1",
     "nuxt-security": "2.5.1",
     "nuxt-vitalizer": "2.0.0",
