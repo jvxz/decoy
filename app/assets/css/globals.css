@@ -51,7 +51,7 @@
 }
 
 @utility scrollbar-fancy {
-  scrollbar-color: var(--color-border) #0000;
+  scrollbar-color: var(--border) var(--background);
 }
 
 @utility scrollbar-gutter-stable {
@@ -70,6 +70,7 @@
 * {
   @apply border-border outline-ring/50 min-h-0 min-w-0;
   transition-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+  scrollbar-color: var(--border) var(--background);
 }
 
 html {
