@@ -8,6 +8,9 @@ export default defineConfig({
     }),
     presetAnimations,
   ],
+  shortcuts: {
+    'page-top-padding': 'pt-36',
+  },
   theme: {
     colors: {
       'accent': 'var(--accent)',

@@ -8,8 +8,8 @@ const { data: publicRooms, error } = getPublicRooms({
 
 <template>
   <template v-if="!error && publicRooms">
-    <div class="mx-auto flex flex-col gap-4 max-w-screen-xl">
-      <h1 class="font-medium">
+    <div class="page-top-padding mx-auto flex flex-col gap-4 max-w-screen-xl">
+      <h1 class="text-xl font-medium">
         Public Rooms
       </h1>
 
@@ -22,7 +22,7 @@ const { data: publicRooms, error } = getPublicRooms({
           <div class="bg-primary h-1/3 inset-0 absolute" />
 
           <div class="p-4 pt-1/5 bg-card flex flex-col gap-2">
-            <AvatarRoot class="border border-4 border-card z-10 rounded-2xl bg-card flex size-16 items-center justify-center overflow-hidden">
+            <AvatarRoot class="border border-4 border-card rounded-2xl bg-card flex size-16 items-center justify-center z-10 overflow-hidden">
               <AvatarImage
                 v-if="room.avatar_url"
                 :src="mxcToHttps(room.avatar_url, {
