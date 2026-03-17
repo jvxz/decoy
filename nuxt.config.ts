@@ -40,6 +40,13 @@ export default defineNuxtConfig({
     ],
   },
 
+  experimental: {
+    payloadExtraction: true,
+    typedPages: true,
+    typescriptPlugin: true,
+    viteEnvironmentApi: true,
+  },
+
   fonts: {
     defaults: {
       preload: true,
