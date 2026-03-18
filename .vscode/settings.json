@@ -10,11 +10,7 @@
   "files.associations": {
     "*.css": "tailwindcss"
   },
-  "tailwindCSS.experimental.classRegex": [
-    "tw`(.*?)`",
-    "tw\\('(.*?)'\\)",
-    "tw\\(\\s*('(.*?)'|\"(.*?)\")\\s*\\)"
-  ],
+  "tailwindCSS.files.exclude": ["**/*.{js,ts,vue}"],
   "editor.quickSuggestions": {
     "strings": true
   },
