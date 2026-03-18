@@ -8,8 +8,15 @@ export default defineConfig({
     }),
     presetAnimations,
   ],
+  rules: [
+    ['scrollbar-gutter-stable', {
+      'scrollbar-gutter': 'stable',
+    }],
+  ],
+  safelist: ['group'],
   shortcuts: {
-    'page-top-padding': 'pt-36',
+    'header-height': 'h-16',
+    'page-top-padding': 'pt-24',
   },
   theme: {
     colors: {
@@ -18,6 +25,7 @@ export default defineConfig({
       'background': 'var(--background)',
       'border': 'var(--border)',
       'card': 'var(--card)',
+      'card-2': 'var(--card-2)',
       'card-foreground': 'var(--card-foreground)',
       'danger': 'var(--danger)',
       'danger-foreground': 'var(--danger-foreground)',
@@ -49,7 +57,7 @@ export default defineConfig({
       DEFAULT: '0.235rem',
     },
     tracking: {
-      normal: '0.01em',
+      normal: '0.015em',
     },
   },
   transformers: [transformerDirectives({ throwOnMissing: false })],
