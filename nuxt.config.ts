@@ -44,7 +44,6 @@ export default defineNuxtConfig({
     payloadExtraction: true,
     typedPages: true,
     typescriptPlugin: true,
-    viteEnvironmentApi: true,
   },
 
   fonts: {
@@ -52,6 +51,10 @@ export default defineNuxtConfig({
       preload: true,
       weights: ['100 900'],
     },
+  },
+
+  future: {
+    compatibilityVersion: 5,
   },
 
   i18n: {
@@ -108,12 +111,6 @@ export default defineNuxtConfig({
           imports: ['z'],
         },
       ],
-    },
-  },
-
-  routeRules: {
-    '/app/**': {
-      appLayout: 'app',
     },
   },
 
