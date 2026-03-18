@@ -13,7 +13,7 @@ const [DefineHeader, Header] = createReusableTemplate()
 
 <template>
   <DefineHeader v-slot="{ $slots }">
-    <div class="border-b bg-card header-height w-full top-0 sticky z-20">
+    <div class="h-header-height border-b bg-card shrink-0 w-full top-0 sticky z-20">
       <component :is="$slots.default" />
     </div>
   </DefineHeader>
@@ -36,7 +36,7 @@ const [DefineHeader, Header] = createReusableTemplate()
           class="bg-background shrink-0 min-h-screen top-0 sticky"
           size-unit="px"
         >
-          <div class="p-4 border-b flex header-height items-center">
+          <div class="h-header-height p-4 border-b flex items-center">
             <h2 class="text-lg font-medium">
               {{ upperFirst($route.name) }}
             </h2>
@@ -51,7 +51,7 @@ const [DefineHeader, Header] = createReusableTemplate()
           :default-size="layout[1]"
           size-unit="px"
         >
-          <div class="h-full">
+          <div class="flex flex-col h-full">
             <Header v-if="$slots.header">
               <slot name="header" />
             </Header>
@@ -61,13 +61,13 @@ const [DefineHeader, Header] = createReusableTemplate()
         </SplitterPanel>
       </SplitterGroup>
 
-      <template v-else>
+      <div v-else class="flex flex-col h-full">
         <Header v-if="$slots.header">
           <slot name="header" />
         </Header>
 
         <slot />
-      </template>
+      </div>
     </main>
   </div>
 </template>

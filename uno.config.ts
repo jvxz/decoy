@@ -14,10 +14,6 @@ export default defineConfig({
     }],
   ],
   safelist: ['group'],
-  shortcuts: {
-    'header-height': 'h-16',
-    'page-top-padding': 'pt-24',
-  },
   theme: {
     colors: {
       'accent': 'var(--accent)',
@@ -54,7 +50,9 @@ export default defineConfig({
       normal: '425',
     },
     spacing: {
-      DEFAULT: '0.235rem',
+      'DEFAULT': '0.235rem',
+      'header-height': '4rem',
+      'page-y-padding': '6rem',
     },
     tracking: {
       normal: '0.015em',

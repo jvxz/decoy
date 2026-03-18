@@ -53,7 +53,7 @@ const params = useUrlSearchParams<{ q: string }>('history', {
     </template>
 
     <div
-      class="page-top-padding h-full scrollbar-gutter-stable"
+      class="py-page-y-padding h-full scrollbar-gutter-stable"
       :class="publicRooms ? 'overflow-y-auto' : 'overflow-y-hidden'"
     >
       <div class="mx-auto container gap-4 grid grid-cols-4 max-w-screen-xl">
