@@ -115,6 +115,12 @@ export default defineNuxtConfig({
     },
   },
 
+  routeRules: {
+    '/playground': {
+      appLayout: false,
+    },
+  },
+
   security: {
     headers: {
       contentSecurityPolicy: {
