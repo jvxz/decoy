@@ -4,7 +4,7 @@ const interactiveStyles = {
   size: {
     default: 'h-8 px-2.5 py-0.75 text-sm',
     icon: 'aspect-square size-8',
-    lg: 'h-10 px-5 text-base text-lg',
+    lg: 'h-10 px-5 text-base text-base',
     sm: 'h-7 px-2.5 py-1 text-xs',
   },
   variant: {
@@ -40,7 +40,7 @@ const popoverStyles = {
     interactiveStyles.base,
     interactiveStyles.variant.ghost,
     interactiveStyles.size.default,
-    'focus:bg-muted focus:text-accent-foreground [&_svg:not([class*=\'text-\'])]:text-muted-foreground [&_svg:not([class*=\'size-\'])]:size-12 data-[variant=danger]:text-danger-foreground data-[variant=danger]:focus:bg-danger/10 data-[variant=danger]:focus:text-danger-foreground data-[variant=danger]:*:[svg]:!text-danger-foreground dark:data-[variant=danger]:focus:bg-danger/40 relative flex cursor-default items-center p-1 px-2 text-sm outline-hidden transition-all select-none focus-visible:ring-0 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0',
+    'focus:bg-muted focus:text-accent-foreground font-normal duration-0 [&_svg:not([class*=\'text-\'])]:text-muted-foreground [&_svg:not([class*=\'size-\'])]:size-12 data-[variant=danger]:text-danger-foreground data-[variant=danger]:focus:bg-danger/10 data-[variant=danger]:focus:text-danger-foreground data-[variant=danger]:*:[svg]:!text-danger-foreground dark:data-[variant=danger]:focus:bg-danger/40 relative flex cursor-default items-center p-1 px-2 text-sm outline-hidden transition-all select-none focus-visible:ring-0 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0',
   ],
 }
 

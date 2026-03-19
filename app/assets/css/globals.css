@@ -7,9 +7,9 @@
   --radius-lg: calc(var(--radius) + 2px);
   --radius-xl: calc(var(--radius) + 4px);
 
-  --chroma: 285.74;
+  --chroma: 273.85;
 
-  --primary: oklch(50.55% 0.09005 var(--chroma));
+  --primary: oklch(57.74% 0.2091 var(--chroma));
   --accent: var(--primary);
   --ring: var(--primary);
 
