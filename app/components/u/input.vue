@@ -22,7 +22,7 @@ const inputClass = computed(() => cn(
   staticStyles.base,
   interactiveStyles.size.default,
   staticStyles.variant.default,
-  'flex w-full min-w-0 cursor-text truncate py-1 selection:bg-primary selection:text-primary-foreground file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:text-foreground placeholder:text-muted-foreground focus-visible:ring-3 text-sm bg-background',
+  'flex w-full min-w-0 cursor-text truncate py-1 selection:bg-primary selection:text-primary-foreground file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:text-foreground placeholder:text-muted-foreground focus-visible:ring-3 text-sm',
   props.class,
 ))
 </script>
