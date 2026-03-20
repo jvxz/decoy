@@ -4,6 +4,7 @@ export interface FormPrimitiveProps {
   class?: string
   required?: boolean
   error?: string | string[] | undefined
+  isLoading?: boolean
 }
 </script>
 
@@ -29,8 +30,12 @@ const errorMessage = computed(() => {
         {{ label }}
         <span v-if="required" class="text-danger">*</span>
       </ULabel>
+      <USpinner
+        v-if="isLoading"
+        class="shrink-0 size-4.5"
+      />
       <p
-        v-if="errorMessage"
+        v-else-if="errorMessage"
         :title="errorMessage"
         class="text-xs text-danger text-end max-w-2/3 truncate"
       >
