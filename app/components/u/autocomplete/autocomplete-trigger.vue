@@ -20,15 +20,15 @@ const forwarded = useForwardProps(delegatedProps)
     v-bind="forwarded"
     :class="cn(
       interactiveStyles.base,
-      interactiveStyles.variant.ghost,
       interactiveStyles.size.icon,
-      'mr-2',
+      interactiveStyles.variant.ghost,
+      'mr-2 size-6',
       props.class,
 
     )"
   >
     <slot>
-      <Icon name="mingcute:down-line" class="text-muted-foreground translate-y-0.5 size-3.5!" />
+      <Icon name="mingcute:down-line" class="text-muted-foreground size-3! translate-y-0.5" />
     </slot>
   </AutocompleteTrigger>
 </template>
