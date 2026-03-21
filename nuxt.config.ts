@@ -119,9 +119,9 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/playground': {
-      appLayout: false,
-    },
+    '/app/**': { appMiddleware: 'auth', ssr: false },
+    '/login': { appMiddleware: 'auth', ssr: false },
+    '/playground': { appLayout: false },
   },
 
   security: {
