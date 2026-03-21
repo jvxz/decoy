@@ -3,7 +3,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return
 
   const clientStore = useClientStore()
-  const unauthed = !clientStore.client.getUserId()
+  const unauthed = clientStore.client.isGuest()
 
   if (unauthed && to.path.includes('/app'))
     return navigateTo('/login')
