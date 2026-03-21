@@ -50,7 +50,7 @@ const params = useUrlSearchParams<{ q: string }>('history', {
           <UDialogTrigger as-child>
             <UButton
               variant="soft"
-              class="text-base px-4 h-12 w-full"
+              class="text-base px-4 h-12 w-full justify-start"
             >
               <Icon name="mingcute:add-line" class="" />
               Add server
