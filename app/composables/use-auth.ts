@@ -1,7 +1,7 @@
 import type { ICreateClientOpts, LoginRequest as MatrixLoginRequest } from 'matrix-js-sdk'
 import { createClient } from 'matrix-js-sdk'
 
-type AuthPayload = Pick<ICreateClientOpts, 'baseUrl' | 'deviceId' | 'refreshToken' | 'userId' | 'accessToken'>
+type AuthPayload = Pick<ICreateClientOpts, 'baseUrl' | 'deviceId' | 'refreshToken' | 'userId' | 'accessToken'> & { expiresAt?: number }
 
 interface PasswordLoginRequest extends MatrixLoginRequest {
   type: 'm.login.password'
@@ -49,10 +49,11 @@ export function useAuth() {
       })
 
       clientStore.client = authedClient
-      await idb.setItem('auth', {
+      await idb.setItem<AuthPayload>('auth', {
         accessToken: loginRes.access_token,
         baseUrl: homeserver,
         deviceId: createDeviceId(userAgent),
+        expiresAt: loginRes.expires_in_ms ? Date.now() + loginRes.expires_in_ms : undefined,
         refreshToken: loginRes.refresh_token,
         userId: loginRes.user_id,
       })
@@ -65,26 +66,26 @@ export function useAuth() {
   }
 
   async function loginPersisted() {
-    const auth = await idb.getItem<AuthPayload>('auth')
-    if (!auth)
-      return
+    try {
+      const auth = await idb.getItem<AuthPayload>('auth')
+      if (!auth || !auth.accessToken)
+        return
 
-    const client = createClient({
-      ...auth,
-      tokenRefreshFunction: async (refreshToken) => {
-        const res = await client.refreshToken(refreshToken)
+      if (auth.refreshToken && auth.expiresAt && Date.now() >= auth.expiresAt - 60_000) {
+        const tempClient = createTempClient(withHttps(auth.baseUrl))
+        const refreshed = await tempClient.refreshToken(auth.refreshToken)
+        return createClient({
+          accessToken: refreshed.access_token,
+          baseUrl: auth.baseUrl,
+          deviceId: auth.deviceId,
+          refreshToken: refreshed.refresh_token,
+          userId: auth.userId,
+        })
+      }
 
-        return {
-          accessToken: res.access_token,
-          expiry: res.expires_in_ms
-            ? new Date(Date.now() + res.expires_in_ms)
-            : undefined,
-          refreshToken: res.refresh_token,
-        }
-      },
-    })
-
-    return client
+      return createClient(auth)
+    }
+    catch {}
   }
 
   async function logout() {
