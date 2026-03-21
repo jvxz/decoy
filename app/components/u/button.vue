@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { Slot } from 'reka-ui'
 
-interface ButtonProps {
+export interface ButtonProps {
   asChild?: boolean
   disabled?: MaybeRefOrGetter<boolean>
   size?: 'default' | 'icon' | 'lg' | 'sm'
@@ -39,7 +39,7 @@ const loading = computed(() => toValue(props.isLoading))
     )"
     :aria-busy="loading || undefined"
   >
-    <USpinner
+    <LazyUSpinner
       v-if="loading"
       :invert="true"
       class="shrink-0 size-4.5"
