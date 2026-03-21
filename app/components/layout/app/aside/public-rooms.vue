@@ -10,7 +10,7 @@
         params: { baseUrl: 'matrix.org' },
       }"
     >
-      <Icon name="mingcute:home-3-fill" class="text-foreground size-6" />
+      <Icon name="mingcute:compass-fill" class="text-foreground size-6" />
     </NuxtLink>
   </UButton>
 </template>
