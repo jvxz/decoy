@@ -1,9 +1,3 @@
 <script lang="ts" setup>
-definePageMeta({
-  layout: 'app',
-})
+definePageMeta({ middleware: () => navigateTo('/app') })
 </script>
-
-<template>
-  <p>my cool page</p>
-</template>
