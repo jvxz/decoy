@@ -99,6 +99,7 @@ export default defineNuxtConfig({
     '@nuxtjs/i18n',
     '@nuxtjs/device',
     '@regle/nuxt',
+    '@pinia/nuxt',
   ],
 
   nitro: {
