@@ -100,6 +100,7 @@ export default defineNuxtConfig({
     '@nuxtjs/device',
     '@regle/nuxt',
     '@pinia/nuxt',
+    '@nuxt/hints',
   ],
 
   nitro: {
