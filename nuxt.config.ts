@@ -50,6 +50,10 @@ export default defineNuxtConfig({
     },
   },
 
+  future: {
+    compatibilityVersion: 5,
+  },
+
   hooks: {
     'pages:extend': pages => {
       function requireAuth(pages: NuxtPage[]) {
@@ -176,6 +180,11 @@ export default defineNuxtConfig({
     },
   },
 
+  // nuxt-schema-org currently does not support unhead v3
+  schemaOrg: {
+    enabled: false,
+  },
+
   security: {
     headers: {
       contentSecurityPolicy: {
@@ -202,56 +211,6 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    optimizeDeps: {
-      exclude: [
-        '@matrix-org/matrix-sdk-crypto-wasm',
-        'workbox-core',
-        'workbox-expiration',
-        'workbox-precaching',
-        'workbox-strategies',
-        '@vue/devtools-core',
-        '@vue/devtools-kit',
-        'workbox-window',
-        'es-toolkit',
-      ],
-      include: [
-        '@jamii/vue-paginated-scroll',
-        '@regle/core',
-        '@regle/rules',
-        '@tanstack/query-persist-client-core',
-        '@tanstack/vue-hotkeys',
-        '@tanstack/vue-query',
-        '@tanstack/vue-virtual',
-        '@tiptap/extension-emoji',
-        '@tiptap/extension-mention',
-        '@tiptap/extension-placeholder',
-        '@tiptap/pm/state',
-        '@unhead/schema-org/vue',
-        'dompurify',
-        'marked',
-        'matrix-js-sdk',
-        'matrix-js-sdk/lib/indexeddb-worker',
-        'prosemirror-commands',
-        'prosemirror-dropcursor',
-        'prosemirror-gapcursor',
-        'prosemirror-history',
-        'prosemirror-inputrules',
-        'prosemirror-keymap',
-        'prosemirror-model',
-        'prosemirror-schema-list',
-        'prosemirror-state',
-        'prosemirror-transform',
-        'prosemirror-view',
-        'quick-lru',
-        'tailwind-merge',
-        'tailwind-variants',
-        'temporal-polyfill',
-        'tiptap-extension-code-block-shiki',
-        'mime/lite',
-        'valibot',
-        'virtua/vue',
-      ],
-    },
     worker: {
       format: 'es',
     },

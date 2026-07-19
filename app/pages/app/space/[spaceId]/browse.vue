@@ -4,10 +4,19 @@ definePageMeta({
   name: 'space-browse',
 })
 
+const currentSpaceId = useCurrentSpaceId()
 const currentSpace = useCurrentSpace()
-const { conversationRooms, isLoading, subspaces, suggestedRooms } = useSpaceHierarchy(
-  () => currentSpace.value?.roomId,
-  true,
+const { conversationRooms, isLoading, isSuccess, subspaces, suggestedRooms } = useSpaceHierarchy(currentSpaceId, true)
+
+const conversationCachedCount = useCachedCount(
+  () => `${currentSpaceId.value}-conversations`,
+  () => (isSuccess.value ? Math.min(50, conversationRooms.value.size) : undefined),
+  6,
+)
+const subspaceCachedCount = useCachedCount(
+  () => `${currentSpaceId.value}-subspaces`,
+  () => (isSuccess.value ? Math.min(24, subspaces.value.size) : undefined),
+  4,
 )
 
 const scrollEl = useTemplateRef('scrollEl')
@@ -29,6 +38,7 @@ provideIntersectionObserver(scrollEl)
       <UShowcaseSeparator />
 
       <UShowcaseContent>
+        <!-- conversations -->
         <PageRoomBrowseSection title="Rooms" :default-open="true" class="h-fit">
           <template v-if="!isLoading">
             <VisibleLazy v-for="room in conversationRooms.values()" :key="room.room_id" :height="72" use-injection>
@@ -36,13 +46,15 @@ provideIntersectionObserver(scrollEl)
             </VisibleLazy>
           </template>
 
+          <!-- conversation skeletons -->
           <template v-else>
-            <VisibleLazy v-for="i in 12" :key="i" :height="72" use-injection>
+            <VisibleLazy v-for="i in conversationCachedCount" :key="i" :height="72" use-injection>
               <USkeleton class="h-18 w-full" />
             </VisibleLazy>
           </template>
         </PageRoomBrowseSection>
 
+        <!-- subspaces -->
         <template v-if="!isLoading">
           <PageRoomBrowseSection
             v-for="space in subspaces.values()"
@@ -59,8 +71,9 @@ provideIntersectionObserver(scrollEl)
           </PageRoomBrowseSection>
         </template>
 
+        <!-- subspace skeletons -->
         <template v-else>
-          <USkeleton v-for="key in 4" :key class="h-12" />
+          <USkeleton v-for="key in subspaceCachedCount" :key class="h-12" />
         </template>
       </UShowcaseContent>
     </UShowcaseRoot>

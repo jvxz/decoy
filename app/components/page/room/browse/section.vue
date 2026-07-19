@@ -11,7 +11,7 @@ const props = defineProps<{
   avatarPlaceholder?: boolean
 }>()
 
-const openModel = defineModel('open', { default: false })
+const openModel = defineModel<boolean>('open', { default: false })
 if (props.defaultOpen) openModel.value = props.defaultOpen
 
 const resolvedAvatar = useResolveAvatarUrl(() => props.avatar)

@@ -15,7 +15,7 @@ const emits = defineEmits<LeaveDialogEmits>()
 const { leave } = useRoomActions(() => props.room)
 const { isPending: isLeaving } = leave
 
-const openModel = defineModel('open', { default: false })
+const openModel = defineModel<boolean>('open', { default: false })
 const open = computed({
   get: () => openModel.value,
   set: (e: boolean) => {
