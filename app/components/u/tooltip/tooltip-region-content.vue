@@ -1,14 +1,25 @@
-<script lang="ts" setup>
+<script lang="ts" setup generic="TName extends TooltipName">
 import type { PopoverContentEmits, PopoverContentProps } from 'reka-ui'
+import type { HTMLAttributes } from 'vue'
 
 import { useForwardPropsEmits } from 'reka-ui'
 
-const props = defineProps<PopoverContentProps & { class?: string }>()
+export type UTooltipRegionContentProps<TName extends TooltipName> = PopoverContentProps & {
+  name: TName
+  class?: HTMLAttributes['class']
+}
+
+const props = withDefaults(defineProps<UTooltipRegionContentProps<TName>>(), {
+  align: 'center',
+  collisionPadding: 4,
+  side: 'top',
+  sideOffset: 4,
+})
 const emits = defineEmits<PopoverContentEmits>()
 
-const { datetime, referenceElement } = useRoomEventTimestampTooltip()
+const { close, payload, reference } = useTooltipRegion(props.name)
 
-const delegated = reactiveOmit(props, 'class')
+const delegated = reactiveOmit(props, ['name', 'reference'])
 const forwarded = useForwardPropsEmits(delegated, emits)
 </script>
 
@@ -16,29 +27,19 @@ const forwarded = useForwardPropsEmits(delegated, emits)
   <PopoverPortal>
     <PopoverContent
       v-bind="forwarded"
-      data-slot="timestamp-tooltip-content"
-      :reference="referenceElement ?? undefined"
-      :collision-padding="4"
-      :side-offset="4"
+      data-slot="tooltip-region-content"
+      :reference="reference ?? undefined"
       :class="
         cn(
           staticBase({ variant: 'default' }),
-          'tooltip-content will-change-transform will-change-opacity z-tooltip p-0 bg-surface-raised px-3 py-1.5 text-sm text-balance font-medium',
+          'tooltip-content will-change-[transform,opacity] z-tooltip p-0 bg-surface-raised px-3 py-1.5 text-sm text-balance font-medium',
           props.class,
         )
       "
-      side="top"
+      @open-auto-focus.prevent
+      @close-auto-focus.prevent
     >
-      <NuxtTime
-        v-if="datetime"
-        :datetime
-        weekday="long"
-        month="long"
-        day="numeric"
-        year="numeric"
-        hour="numeric"
-        minute="numeric"
-      />
+      <slot :payload :close />
 
       <PopoverArrow rounded class="translate-y-px scale-140 fill-surface-raised stroke-border" />
     </PopoverContent>

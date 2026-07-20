@@ -54,48 +54,36 @@ const groupedEvents = useEventGrouping({
 </script>
 
 <template>
-  <UContextMenuRegionRoot name="event">
-    <UContextMenuRegionRoot name="member">
-      <div
-        ref="container"
-        class="scroll-container grid h-[calc(100%-3rem)] w-full content-end absolute overflow-x-hidden overflow-y-scroll"
-        data-testid="scroll-container"
-      >
-        <div class="w-full" data-testid="scroll-container-wrapper">
-          <div data-ignore class="h-4.25" />
+  <RoomEventListProviders>
+    <div
+      ref="container"
+      class="scroll-container grid h-[calc(100%-3rem)] w-full content-end absolute overflow-x-hidden overflow-y-scroll"
+      data-testid="scroll-container"
+    >
+      <div class="w-full" data-testid="scroll-container-wrapper">
+        <div data-ignore class="h-4.25" />
 
-          <RoomPaginateSkeleton v-if="!isFullyLoaded" />
+        <RoomPaginateSkeleton v-if="!isFullyLoaded" />
 
-          <div
-            v-for="(event, idx) in groupedEvents.events"
-            :key="`${event.getId() ?? idx}:${getEventVersion(event.getId() ?? '')}`"
-            v-item="event.getId()!"
-            :data-index="idx"
-            :data-item-id="event.getId()"
-            :style="isTestMode() ? { height: `${(event as any)._size}px` } : undefined"
-          >
-            <RoomEventGeneric
-              :event
-              :grouped="groupedEvents.grouped[idx] !== false"
-              :date-diffed="!!groupedEvents.dateDiffed[idx]"
-              :room
-            />
-          </div>
-          <div data-ignore class="h-12" />
+        <div
+          v-for="(event, idx) in groupedEvents.events"
+          :key="`${event.getId() ?? idx}:${getEventVersion(event.getId() ?? '')}`"
+          v-item="event.getId()!"
+          :data-index="idx"
+          :data-item-id="event.getId()"
+          :style="isTestMode() ? { height: `${(event as any)._size}px` } : undefined"
+        >
+          <RoomEventGeneric
+            :event
+            :grouped="groupedEvents.grouped[idx] !== false"
+            :date-diffed="!!groupedEvents.dateDiffed[idx]"
+            :room
+          />
         </div>
+        <div data-ignore class="h-12" />
       </div>
-
-      <!-- member ctx menu -->
-      <UContextMenuRegionContent v-slot="{ payload }" name="member">
-        <RoomContextMenuMember v-if="payload" v-bind="payload" />
-      </UContextMenuRegionContent>
-    </UContextMenuRegionRoot>
-
-    <!-- event ctx menu -->
-    <UContextMenuRegionContent v-slot="{ payload }" name="event">
-      <RoomContextMenuEvent v-if="payload" v-bind="payload" />
-    </UContextMenuRegionContent>
-  </UContextMenuRegionRoot>
+    </div>
+  </RoomEventListProviders>
 </template>
 
 <style scoped>

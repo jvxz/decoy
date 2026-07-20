@@ -27,28 +27,15 @@ const nuxtTimeProps = computed<NuxtTimeProps>(() => {
     minute: 'numeric',
   }
 })
-
-const { hide, show } = useRoomEventTimestampTooltip()
-const { start, stop } = useTimeoutFn((el: HTMLElement) => show(el, props.datetime), 700, { immediate: false })
-
-function onEnter(e: PointerEvent) {
-  start(e.currentTarget as HTMLElement)
-}
-function onLeave() {
-  stop()
-  hide()
-}
 </script>
 
 <template>
-  <Primitive
+  <UTooltipRegionTrigger
+    region="timestamp"
+    :value="{ datetime }"
     v-bind="props"
-    :class="cn('text-xs text-muted-foreground select-none', props.class)"
-    @pointerenter="onEnter"
-    @pointerleave="onLeave"
-    @focus="show($event.currentTarget as HTMLElement, props.datetime)"
-    @blur="hide"
+    class="text-xs text-muted-foreground select-none"
   >
     <NuxtTime v-bind="nuxtTimeProps" />
-  </Primitive>
+  </UTooltipRegionTrigger>
 </template>

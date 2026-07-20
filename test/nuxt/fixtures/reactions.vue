@@ -5,13 +5,9 @@ defineProps<{ event: MatrixEvent; room: Room }>()
 </script>
 
 <template>
-  <TooltipProvider>
-    <PopoverRoot>
-      <UContextMenuRegionRoot name="event">
-        <UContextMenuRegionRoot name="member">
-          <RoomEventMessage v-if="event && room" :room :event :grouped="false" />
-        </UContextMenuRegionRoot>
-      </UContextMenuRegionRoot>
-    </PopoverRoot>
-  </TooltipProvider>
+  <UTooltipProvider>
+    <RoomEventListProviders>
+      <RoomEventMessage v-if="event && room" :room :event :grouped="false" />
+    </RoomEventListProviders>
+  </UTooltipProvider>
 </template>
