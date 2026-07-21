@@ -1,6 +1,16 @@
 // @unocss-include
 export const interactiveBase = tv({
   base: 'font-medium cursor-pointer shadow-none select-none focus-visible:ring-ring/40 focus-visible:ring-[3px] aria-invalid:border-danger shrink-0 gap-2 rounded text-base whitespace-nowrap outline-none disabled:pointer-events-none hover:disabled:cursor-not-allowed disabled:opacity-50 underline-offset-4 [&_svg]:pointer-events-none transition-transform duration-75',
+  compoundVariants: [
+    {
+      class: 'h-fit py-0',
+      variant: 'link',
+    },
+    {
+      class: 'h-fit p-0',
+      variant: 'ghost-inline',
+    },
+  ],
   variants: {
     size: {
       default: 'h-8 px-2.5 py-0.75 text-sm',
@@ -15,6 +25,7 @@ export const interactiveBase = tv({
       default: 'bg-primary text-primary-foreground border border-transparent active:(bg-primary-press) ',
       ghost:
         'text-muted-foreground border border-transparent hover:(bg-secondary text-foreground) data-[highlighted]:(bg-secondary text-foreground) data-[state=open]:(bg-secondary text-foreground) active:(bg-secondary-press)',
+      'ghost-inline': 'text-muted-foreground hover:text-foreground data-[state=open]:text-foreground',
       link: 'text-foreground px-2.5 -mx-2.5 underline-offset-4 hover:underline data-[state=open]:underline',
       outline:
         'text-muted-foreground border-border/90 hover:(text-foreground bg-secondary not-active:border-border-strong) focus-visible:(text-foreground bg-secondary not-active:border-border-strong) data-[state=open]:(text-foreground bg-secondary not-active:border-border-strong) active:(border-border bg-secondary-press) border bg-transparent',

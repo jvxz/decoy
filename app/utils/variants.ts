@@ -8,6 +8,10 @@ export const buttonVariants = tv({
       class: 'h-fit py-0',
       variant: 'link',
     },
+    {
+      class: 'h-fit p-0',
+      variant: 'ghost-inline',
+    },
   ],
   defaultVariants: {
     size: 'default',
