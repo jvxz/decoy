@@ -44,7 +44,7 @@ body {
   @apply bg-background text-foreground font-sans text-pretty min-h-screen underline-offset-2 font-normal tracking-normal select-none;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  letter-spacing: 0.0185em;
+  letter-spacing: 0.0125em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

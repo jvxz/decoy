@@ -7,6 +7,7 @@ export interface ClickToCopyProps extends PrimitiveProps {
   class?: HTMLAttributes['class']
   withTitle?: boolean
   copiedDuration?: number
+  side?: 'top' | 'bottom' | 'left' | 'right'
 }
 </script>
 
@@ -16,6 +17,7 @@ defineOptions({ inheritAttrs: false })
 const props = withDefaults(defineProps<ClickToCopyProps>(), {
   as: 'button',
   copiedDuration: 1000,
+  side: 'top',
   withTitle: true,
 })
 
@@ -54,44 +56,28 @@ defineExpose({ copied, copy: onCopy })
     </Primitive>
 
     <slot name="overlay" :copied :copy="onCopy">
-      <Transition name="copied">
+      <Presence v-slot="{ present }" :present="copied">
         <div
-          v-if="copied"
+          v-show="present"
+          :data-state="copied ? 'open' : 'closed'"
+          :data-side="side"
           :class="
             cn(
-              'absolute pointer-events-none flex items-center copied-anim gap-1 inset-0 -top-1.5em size-fit',
+              'absolute text-sm pointer-events-none flex items-center gap-1 inset-0 size-fit',
+              'data-[state=open]:(animate-in fade-in)',
+              'data-[state=closed]:(animate-out fade-out)',
+              'data-[side=top]:(-top-1.5em data-[state=open]:slide-in-b-1 data-[state=closed]:slide-out-t-1)',
+              'data-[side=bottom]:(top-2em data-[state=open]:slide-in-t-1 data-[state=closed]:slide-out-b-1)',
+              'data-[side=left]:(top-1/2 -translate-y-1/2 -left-150% data-[state=open]:slide-in-r-1 data-[state=closed]:slide-out-l-1)',
+              'data-[side=right]:(top-1/2 -translate-y-1/2 left-110% data-[state=open]:slide-in-l-1 data-[state=closed]:slide-out-r-1)',
               props.class,
             )
           "
         >
-          <span class="text-sm"> Copied </span>
-          <Icon name="tabler:check" class="text-foreground size-0.8em" />
+          <span>Copied</span>
+          <Icon name="tabler:check" class="text-foreground size-1em" />
         </div>
-      </Transition>
+      </Presence>
     </slot>
   </span>
 </template>
-
-<style>
-.copied-enter-active,
-.copied-leave-active {
-  transition: all 150ms;
-  @apply ease-snappy;
-}
-
-.copied-enter-to,
-.copied-leave-from {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.copied-enter-from {
-  opacity: 0;
-  transform: translateY(25%);
-}
-
-.copied-leave-to {
-  opacity: 0;
-  transform: translateY(-25%);
-}
-</style>

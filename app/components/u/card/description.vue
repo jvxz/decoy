@@ -1,11 +1,18 @@
 <script lang="ts" setup>
-const props = defineProps<{
-  class?: string
-}>()
+import type { PrimitiveProps } from 'reka-ui'
+import type { HTMLAttributes } from 'vue'
+
+export interface UCardDescriptionProps extends PrimitiveProps {
+  class?: HTMLAttributes['class']
+}
+
+const props = defineProps<UCardDescriptionProps>()
+
+const delegated = reactiveOmit(props, 'class')
 </script>
 
 <template>
-  <div data-slot="card-description" :class="cn('text-sm text-muted-foreground', props.class)">
+  <Primitive v-bind="delegated" :class="cn('text-sm text-muted-foreground', props.class)" data-slot="card-description">
     <slot />
-  </div>
+  </Primitive>
 </template>

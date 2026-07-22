@@ -1,25 +1,24 @@
 <script lang="ts" setup>
 import type { PrimitiveProps } from 'reka-ui'
 import type { VariantProps } from 'tailwind-variants'
+import type { HTMLAttributes } from 'vue'
 
-const props = withDefaults(
-  defineProps<
-    PrimitiveProps & {
-      class?: string
-      variant?: VariantProps<typeof staticBase>['variant']
-    }
-  >(),
-  {
-    variant: 'default',
-  },
-)
+export interface UCardProps extends PrimitiveProps {
+  class?: HTMLAttributes['class']
+  variant?: VariantProps<typeof staticBase>['variant']
+  spacing?: VariantProps<typeof staticBase>['spacing']
+}
+
+const props = defineProps<UCardProps>()
+
+const delegated = reactiveOmit(props, 'class')
 </script>
 
 <template>
   <Primitive
-    v-bind="$props"
+    v-bind="delegated"
+    :class="cn(staticBase({ variant, spacing }), 'flex flex-col shadow-lg', props.class)"
     data-slot="card"
-    :class="cn(staticBase({ variant }), 'flex flex-col gap-2.5 shadow-lg', props.class)"
   >
     <slot />
   </Primitive>
