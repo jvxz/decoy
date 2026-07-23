@@ -105,6 +105,7 @@
     "knip": "^6.26.0",
     "oxfmt": "^0.54.0",
     "oxlint": "^1.73.0",
+    "pathe": "^2.0.3",
     "playwright-core": "^1.61.1",
     "taze": "^19.14.1",
     "typescript": "^6.0.3",

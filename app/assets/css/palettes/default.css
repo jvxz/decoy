@@ -1,6 +1,6 @@
 /* https://colorbox.io/?c0=~p%24s%24%3D11~p%24m%24%3Dok~p%24h%24st%24%3D220~p%24h%24e%24%3D240~p%24h%24c%24%3Deqo~p%24sa%24st%24%3D0.08~p%24sa%24e%24%3D1~p%24sa%24r%24%3D1~p%24sa%24c%24%3Deqo~p%24b%24st%24%3D1~p%24b%24e%24%3D0.2~p%24b%24c%24%3Deqti~p%24li%24st%24%3D98~p%24li%24e%24%3D16~p%24li%24c%24%3D0.12%2C0%2C0.4083333333333333%2C0.6916666666666667~p%24ch%24st%24%3D0.0075~p%24ch%24e%24%3D0.0075~p%24ch%24r%24%3D1~p%24ch%24c%24%3Dl~p%24oh%24st%24%3D285~p%24oh%24e%24%3D285~p%24oh%24c%24%3Deqo~o%24ms%24%3D%5B%5D~o%24n%24%3DNeutral~o%24ro%24%3Dcw~o%24gm%24%3Dsr~o%24lockHex%24%3D%2309090c&c1=~p%24s%24%3D11~p%24m%24%3Dok~p%24h%24st%24%3D220~p%24h%24e%24%3D240~p%24h%24c%24%3Deqo~p%24sa%24st%24%3D0.08~p%24sa%24e%24%3D1~p%24sa%24r%24%3D1~p%24sa%24c%24%3Deqo~p%24b%24st%24%3D1~p%24b%24e%24%3D0.2~p%24b%24c%24%3Deqti~p%24li%24st%24%3D91~p%24li%24e%24%3D19~p%24li%24c%24%3Dl~p%24ch%24st%24%3D0.6~p%24ch%24e%24%3D0.6~p%24ch%24r%24%3D1~p%24ch%24c%24%3Deqo~p%24oh%24st%24%3D273.85~p%24oh%24e%24%3D273.85~p%24oh%24c%24%3Deqo~o%24ms%24%3D%5B%5D~o%24n%24%3DPrimary~o%24ro%24%3Dcw~o%24gm%24%3Dsr&ly=g&col=2&ns=tw */
 
-.dark {
+.default {
   --shift-hover: 0.02;
   --shift-press: -0.008;
 

@@ -1,3 +1,5 @@
+import type { PublicRuntimeConfig } from 'nuxt/schema'
+
 export const SETTINGS_CATEGORIES = [
   'general',
   'appearance',
@@ -11,6 +13,7 @@ export const SETTINGS_DEFAULT_TAB: SettingsCategory = 'accessibility'
 export interface Settings {
   appearance: {
     font: 'Inter' | 'System'
+    palette: PublicRuntimeConfig['colorModes'][number]
   }
   accessibility: {
     uiAnimations: boolean
@@ -34,6 +37,7 @@ export const DEFAULT_SETTINGS: EnforcedSettingsKeys<Settings> = {
   },
   appearance: {
     font: 'System',
+    palette: 'default',
   },
   devices: {},
   general: {},
@@ -94,6 +98,10 @@ export const SETTINGS_ITEM_METADATA: SettingsItemMetadata = {
       description: 'The font to use in the app',
       options: ['Inter', 'System'],
       title: 'Font',
+    },
+    palette: {
+      description: 'Color palette of the app',
+      title: 'Color palette',
     },
   },
   devices: {},

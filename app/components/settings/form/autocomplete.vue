@@ -18,7 +18,7 @@ const modelValue = defineModel<ValueType>()
     <USelectRoot v-model:model-value="modelValue">
       <USelectTrigger class="min-w-48">
         <USelectValue>
-          {{ modelValue }}
+          <slot name="selectValue" :model-value>{{ modelValue }}</slot>
         </USelectValue>
       </USelectTrigger>
       <USelectContent>

@@ -1,4 +1,5 @@
 export default defineNuxtPlugin({
+  name: 'settings',
   parallel: true,
   setup: () => {
     const settings = useScopedLocalStorage<Settings>('settings', DEFAULT_SETTINGS)

@@ -4,4 +4,10 @@ declare module '#app' {
   }
 }
 
+declare module 'nuxt/schema' {
+  interface PublicRuntimeConfig {
+    colorModes: string[]
+  }
+}
+
 export {}
