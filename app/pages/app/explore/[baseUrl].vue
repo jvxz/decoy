@@ -137,9 +137,7 @@ function handlePaginate(dir: 'f' | 'b') {
   </LayoutAppSlot>
 
   <LayoutAppSlot name="aside-header">
-    <div class="p-2.5 px-4 flex size-full items-center">
-      <p>Explore</p>
-    </div>
+    <LayoutAppAsideHeaderTitle> Explore </LayoutAppAsideHeaderTitle>
   </LayoutAppSlot>
 
   <div class="py-page-y-padding h-full relative overflow-y-scroll scrollbar-gutter-stable">

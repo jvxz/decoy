@@ -19,11 +19,9 @@ const isPaginating = shallowRef(false)
 
 <template>
   <LayoutAppSlot name="aside-header">
-    <div class="p-2.5 px-4 flex size-full items-center">
-      <p class="font-medium">
-        {{ currentSpace?.name }}
-      </p>
-    </div>
+    <LayoutAppAsideHeaderTitle>
+      {{ currentSpace?.name }}
+    </LayoutAppAsideHeaderTitle>
   </LayoutAppSlot>
 
   <LayoutAppSlot name="aside">
