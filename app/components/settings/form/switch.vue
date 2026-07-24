@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { SettingsFormPrimitiveProps } from './types'
+import type { SettingsFormPrimitiveProps } from './primitive.vue'
 
 defineProps<SettingsFormPrimitiveProps>()
 

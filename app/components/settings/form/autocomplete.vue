@@ -1,5 +1,5 @@
 <script lang="ts" setup generic="T extends string[] | undefined">
-import type { SettingsFormPrimitiveProps } from './types'
+import type { SettingsFormPrimitiveProps } from './primitive.vue'
 
 type ValueType = T extends string[] ? T[number] : string
 
