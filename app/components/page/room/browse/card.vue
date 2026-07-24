@@ -13,7 +13,7 @@ const manualAvatarSrc = useResolveAvatarUrl(() => props.room.avatar_url)
 </script>
 
 <template>
-  <URoomShowcaseCardRoot always-show-avatar :as :as-child :manual-avatar-src>
+  <URoomShowcaseCardRoot always-show-avatar :as :as-child :room="room.room_id" :manual-avatar-src>
     <URoomShowcaseCardContent>
       <URoomShowcaseCardHeader class="shrink">
         <URoomShowcaseCardTitle class="flex gap-2 max-h-1em items-center">
