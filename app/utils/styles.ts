@@ -83,7 +83,7 @@ export const popoverItemBase = tv({
       default: 'p-1 px-2',
     },
     variant: {
-      ghost: 'text-foreground',
+      ghost: 'text-foreground focus:bg-secondary-raised active:bg-secondary-raised-press',
     },
   },
 })
