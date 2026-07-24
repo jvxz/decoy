@@ -43,13 +43,13 @@ const sortedDevices = computed(() => {
         <SettingsContentLayout class="flex flex-col h-full">
           <SettingsItemPrimitive class="gap-2 w-full">
             <template #label>
-              <div class="flex items-center justify-between w-full">
+              <div class="flex w-full items-center justify-between">
                 <p class="font-medium">Device list</p>
 
                 <USortSelect
+                  v-model:model-value="sortState"
                   :default-value="{ dir: 'asc', option: 'last-active' }"
                   :options="['last-active', 'name', 'verified']"
-                  v-model:model-value="sortState"
                   size="sm"
                 />
               </div>
