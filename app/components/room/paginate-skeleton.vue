@@ -11,9 +11,11 @@ const rows = Array.from({ length: 7 }, () => ({
 </script>
 
 <template>
-  <div class="pb-4.25" data-ignore>
+  <div class="pb-4.25" data-ignore data-slot="room-paginate-skeleton">
     <div v-for="(row, idx) in rows" :key="idx" class="pb-4.25">
-      <RoomEvent event-type="" room="" class="hover:bg-transparent">
+      <div
+        class="group px-6 shrink-0 data-[grouped=false]:mt-4.5 context-menu-open:bg-hover data-[popover-open]:bg-hover hover:bg-hover hover:bg-transparent data-[grouped=true]:min-h-0"
+      >
         <RoomEventMessageRoot>
           <RoomEventMessageAvatar :user="undefined" ghost />
           <RoomEventMessageContent class="flex flex-col gap-1.5 translate-y-1">
@@ -29,7 +31,7 @@ const rows = Array.from({ length: 7 }, () => ({
             </div>
           </RoomEventMessageContent>
         </RoomEventMessageRoot>
-      </RoomEvent>
+      </div>
     </div>
   </div>
 </template>

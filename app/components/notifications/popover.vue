@@ -11,7 +11,7 @@ const { sortState } = useSortRegion('notificationsPopover')
       :class="
         cn(
           popoverContentBase(),
-          'z-popover flex flex-col h-96 w-toast p-0',
+          'z-popover shadow-popover flex flex-col h-96 w-toast p-0',
           'origin-[var(--reka-popper-transform-origin,top_right)]',
           'data-[state=open]:(animate-in fade-in-0 zoom-in-96 ease-snappy)',
           'data-[state=closed]:(animate-out fade-out-0 zoom-out-96 ease-snappy)',

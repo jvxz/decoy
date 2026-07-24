@@ -12,7 +12,7 @@ const { data: mutualRooms, error: mutualRoomsError, isPending: isPendingMutualRo
         <div
           v-for="i in 3"
           :key="i"
-          class="border-2 border-popover rounded-full bg-secondary-raised size-4 not-first:-ml-2"
+          class="border-2 border-surface-raised rounded-full bg-secondary-raised size-4 not-first:-ml-2"
         />
       </div>
     </div>

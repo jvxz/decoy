@@ -33,7 +33,7 @@ export const badgeVariants = tv({
     size: {
       default: 'px-2 h-fit py-0.5 text-xs',
       lg: 'px-2.5 py-1 h-fit text-sm',
-      sm: 'px-1.5 py-px h-fit text-2xs ',
+      sm: 'px-1.5 py-px h-fit text-2xs rounded-md',
     },
   },
 })

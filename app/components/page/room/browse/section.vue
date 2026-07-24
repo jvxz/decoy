@@ -19,13 +19,14 @@ const resolvedAvatar = useResolveAvatarUrl(() => props.avatar)
 
 <template>
   <UCollapsibleRoot v-model:open="openModel" class="gap-0" :default-open>
-    <UCollapsibleTrigger class="h-12">
+    <UCollapsibleTrigger :class="title !== 'Rooms' && 'h-12'">
       <UCollapsibleTriggerIcon />
 
       <MatrixAvatar
         v-if="isDefined(avatar) || avatarPlaceholder"
         :src="resolvedAvatar"
         :alt="title"
+        square
         class="rounded-sm shrink-0 h-full w-fit aspect-square object-contain"
       />
 

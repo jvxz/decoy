@@ -15,6 +15,8 @@ onMounted(() => {
     btn.focus = (options?: FocusOptions) => nativeFocus({ ...options, preventScroll: true })
   }
 })
+
+const { user: profilePopoverUser } = useProfilePopover()
 </script>
 
 <template>
@@ -32,14 +34,15 @@ onMounted(() => {
   >
     <UButton
       ref="trigger"
-      class="text-foreground font-normal gap-2 h-10 w-full justify-start data-[popover-open]:bg-selected"
+      class="text-foreground font-normal gap-2 h-10 w-full justify-start"
       variant="ghost"
+      :class="`data-[state=open]:${profilePopoverUser?.userId === props.userId ? 'bg-selected' : 'bg-transparent'}`"
     >
       <div class="shrink-0 size-6 [&>svg]:!size-full">
         <MatrixAvatar :user="userId" class="size-full" />
       </div>
 
-      <p class="shrink-0 truncate">
+      <p :title="profile?.displayname" class="truncate">
         {{ profile?.displayname }}
       </p>
 

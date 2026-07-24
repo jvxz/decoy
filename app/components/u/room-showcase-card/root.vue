@@ -22,7 +22,9 @@ const props = withDefaults(
 
 const room = useRoom(() => props.room)
 
-const avatarProps = computed(() => (props.manualAvatarSrc ? { src: props.manualAvatarSrc } : { room: room.value }))
+const avatarProps = computed(() =>
+  props.manualAvatarSrc ? { room: room.value, src: props.manualAvatarSrc } : { room: room.value },
+)
 
 const isJoined = useRoomIsJoined(room)
 
@@ -35,6 +37,7 @@ const forwarded = useForwardProps(delegated)
 <template>
   <UCard
     v-bind="forwarded"
+    variant="raised"
     :class="
       cn(
         'w-full relative h-18 p-3.5 border flex-row gap-3.5',

@@ -27,14 +27,14 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
       :collision-padding="4"
       :class="
         cn(
-          staticBase({ variant: 'default' }),
-          'will-change-transform will-change-opacity z-tooltip p-0 bg-surface-raised px-3 py-1.5 text-sm text-balance font-medium',
+          staticBase({ variant: 'raised' }),
+          'will-change-transform will-change-opacity border-border-strong bg-surface-top z-tooltip p-0 px-3 py-1.5 text-sm text-balance font-medium',
           props.class,
         )
       "
     >
       <slot />
-      <TooltipArrow rounded class="translate-y-px scale-140 fill-surface-raised stroke-border" />
+      <TooltipArrow rounded class="translate-y-px scale-140 fill-surface-top stroke-border-strong" />
     </TooltipContent>
   </TooltipPortal>
 </template>

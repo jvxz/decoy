@@ -30,11 +30,11 @@ function handleCopyUserId() {
     </UButton>
     <UDropdownMenuRoot>
       <UDropdownMenuTrigger as-child>
-        <UButton size="icon" variant="soft" class="rounded-full border-none">
+        <UButton size="icon" variant="soft" class="rounded-full border-none bg-popover">
           <Icon name="tabler:dots" />
         </UButton>
       </UDropdownMenuTrigger>
-      <UDropdownMenuContent class="bg-popover">
+      <UDropdownMenuContent>
         <UDropdownMenuItem :disabled="!isSupported || !props.userId" @click="handleCopyUserId">
           <Icon name="tabler:tag" /> Copy ID
         </UDropdownMenuItem>

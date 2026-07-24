@@ -22,11 +22,11 @@ definePageMeta({
 
 <template>
   <LayoutAppSlot name="aside-header">
-    <div class="px-2.5 flex size-full items-center justify-center">
+    <LayoutAppAsideHeaderTitle class="px-2">
       <UButton variant="soft" class="w-full">
         <p class="text-xs">Find or start a conversation</p>
       </UButton>
-    </div>
+    </LayoutAppAsideHeaderTitle>
   </LayoutAppSlot>
 
   <LayoutAppSlot name="aside">
