@@ -120,3 +120,9 @@ export async function resetClientData(client: MatrixClient) {
   client.stopClient()
   await client.store.deleteAllData()
 }
+export function getCryptoSafe(client: MatrixClient) {
+  const crypto = client.getCrypto()
+  assert(crypto, '`crypto` was undefined')
+
+  return crypto
+}
