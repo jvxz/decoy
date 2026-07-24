@@ -53,15 +53,28 @@ const mxcUrl = computed(() => {
 
 const resolvedAvatar = useResolveAvatarUrl(mxcUrl, { size: props.imageSize })
 
-const isError = ref(false)
+const isSrcError = ref(false)
+const isResolvedError = ref(false)
 watch(
-  () => props.src ?? resolvedAvatar.value,
-  url => {
-    emits('url', url)
-    isError.value = false
+  () => props.src,
+  () => {
+    isSrcError.value = false
   },
-  { immediate: true },
 )
+watch(
+  () => resolvedAvatar.value,
+  () => {
+    isResolvedError.value = false
+  },
+)
+
+const activeSrc = computed(() => {
+  if (props.src && !isSrcError.value) return props.src
+  if (resolvedAvatar.value && !isResolvedError.value) return resolvedAvatar.value
+  return undefined
+})
+
+watch(activeSrc, url => emits('url', url), { immediate: true })
 
 const placeholderName = computed(() => {
   if (props.placeholderKey) return props.placeholderKey
@@ -88,14 +101,14 @@ const forwarded = useForwardPropsEmits(delegated, emits)
 <template>
   <Slot data-slot="matrix-avatar">
     <Img
-      v-if="(props.src || resolvedAvatar) && !isError"
+      v-if="activeSrc"
       v-bind="forwarded"
-      :key="props.src ?? resolvedAvatar"
+      :key="activeSrc"
       :alt
-      :src="props.src ?? resolvedAvatar"
+      :src="activeSrc"
       :class="cn('object-cover', !square && 'rounded-full', props.class)"
       :do-placeholder="false"
-      @error="isError = true"
+      @error="activeSrc === props.src ? (isSrcError = true) : (isResolvedError = true)"
     />
     <AvatarPlaceholder
       v-else
