@@ -2,7 +2,7 @@
 import type { PopoverContentEmits, PopoverContentProps } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
 
-import { useForwardPropsEmits } from 'reka-ui'
+import { PopoverContent, useForwardPropsEmits } from 'reka-ui'
 
 export type UTooltipRegionContentProps<TName extends TooltipName> = PopoverContentProps & {
   name: TName
@@ -29,19 +29,14 @@ const forwarded = useForwardPropsEmits(delegated, emits)
       v-bind="forwarded"
       data-slot="tooltip-region-content"
       :reference="reference ?? undefined"
-      :class="
-        cn(
-          staticBase({ variant: 'default' }),
-          'tooltip-content will-change-[transform,opacity] z-tooltip p-0 bg-surface-raised px-3 py-1.5 text-sm text-balance font-medium',
-          props.class,
-        )
-      "
+      :collision-padding="4"
+      :class="cn(tooltipContentBase(), 'tooltip-content', props.class)"
       @open-auto-focus.prevent
       @close-auto-focus.prevent
     >
       <slot :payload :close />
 
-      <PopoverArrow rounded class="translate-y-px scale-140 fill-surface-raised stroke-border" />
+      <PopoverArrow rounded class="translate-y-px scale-140 fill-secondary-raised stroke-border-strong" />
     </PopoverContent>
   </PopoverPortal>
 </template>
