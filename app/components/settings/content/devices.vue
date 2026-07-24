@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-const { devices } = useDevices()
+const { devices, error } = useDevices()
 const currentDevice = useCurrentDevice()
 
-const cachedCount = useCachedCount('devices', () => (devices.value ? devices.value.size : undefined), 4)
+const cachedCount = useCachedCount('devices', () => (devices.value ? devices.value.size || undefined : undefined), 4)
 
 const { sortState } = useSortRegion('deviceList')
 
@@ -47,6 +47,7 @@ const sortedDevices = computed(() => {
                 <p class="font-medium">Device list</p>
 
                 <USortSelect
+                  :disabled="!!error"
                   v-model:model-value="sortState"
                   :default-value="{ dir: 'asc', option: 'last-active' }"
                   :options="['last-active', 'name', 'verified']"
@@ -55,18 +56,30 @@ const sortedDevices = computed(() => {
               </div>
             </template>
 
-            <UCardGroupRoot variant="raised" class="w-full">
-              <template v-if="sortedDevices">
+            <UCardGroupRoot v-if="!error" variant="raised" class="w-full">
+              <template v-if="sortedDevices.size">
                 <template v-for="(device, i) in sortedDevices.values()" :key="device.device_id">
                   <UCardGroupSeparator v-if="i" />
                   <SettingsContentDevicesCard :is-current="device.device_id === currentDevice?.device_id" :device />
                 </template>
               </template>
 
-              <template v-else-if="!sortedDevices">
+              <template v-else>
                 <USkeleton v-for="key in cachedCount" :key class="h-17.5 w-full" />
               </template>
             </UCardGroupRoot>
+
+            <UAlertRoot variant="danger" v-else>
+              <UAlertIcon name="tabler:exclamation-circle" />
+              <UAlertContent>
+                <UAlertTitle>
+                  {{ error.name }}
+                </UAlertTitle>
+                <UAlertDescription>
+                  {{ error.message }}
+                </UAlertDescription>
+              </UAlertContent>
+            </UAlertRoot>
           </SettingsItemPrimitive>
         </SettingsContentLayout>
 
