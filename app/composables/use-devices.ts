@@ -49,5 +49,7 @@ export const useDevices = createGlobalState(() => {
     )
   })
 
-  return { cryptoDevices, devices, sessionDevices }
+  const error = computed(() => cryptoDevices.error.value ?? sessionDevices.error.value)
+
+  return { cryptoDevices, devices, error, sessionDevices }
 })
