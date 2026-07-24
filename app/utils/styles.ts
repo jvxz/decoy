@@ -67,6 +67,7 @@ export const popoverContentBase = tv({
     },
     variant: {
       default: 'bg-popover border-border-strong',
+      raised: '',
     },
   },
 })
@@ -86,6 +87,13 @@ export const popoverItemBase = tv({
       ghost: 'text-foreground focus:bg-secondary-raised active:bg-secondary-raised-press',
     },
   },
+})
+
+export const tooltipContentBase = tv({
+  base: [
+    popoverContentBase({ variant: 'raised' }),
+    'will-change-transform relative overflow-visible w-fit will-change-opacity border-border-strong bg-surface-top z-tooltip p-0 px-3 py-1.5 text-sm text-balance font-medium shadow',
+  ],
 })
 
 export const overlayStyles =
