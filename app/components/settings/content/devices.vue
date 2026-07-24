@@ -47,8 +47,8 @@ const sortedDevices = computed(() => {
                 <p class="font-medium">Device list</p>
 
                 <USortSelect
-                  :disabled="!!error"
                   v-model:model-value="sortState"
+                  :disabled="!!error"
                   :default-value="{ dir: 'asc', option: 'last-active' }"
                   :options="['last-active', 'name', 'verified']"
                   size="sm"
@@ -69,7 +69,7 @@ const sortedDevices = computed(() => {
               </template>
             </UCardGroupRoot>
 
-            <UAlertRoot variant="danger" v-else>
+            <UAlertRoot v-else variant="danger">
               <UAlertIcon name="tabler:exclamation-circle" />
               <UAlertContent>
                 <UAlertTitle>
