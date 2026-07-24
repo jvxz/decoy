@@ -12,18 +12,19 @@ export function useScopedLocalStorage<T = unknown>(
   initialValue: MaybeRefOrGetter<T>,
   options?: UseStorageOptions<T>,
 ): RemovableRef<T> {
-  const { self } = useSelf()
+  const { client } = useMatrixClient()
+  const userId = computed(() => client.value.getUserId() ?? undefined)
 
   const filter = pausableFilter(undefined, { initialState: 'paused' })
 
-  const storageRef = useLocalStorage<T>(() => `${self.value?.userId}:${toValue(key)}`, initialValue, {
+  const storageRef = useLocalStorage<T>(() => `${userId.value}:${toValue(key)}`, initialValue, {
     eventFilter: filter.eventFilter,
     writeDefaults: false,
     ...options,
   } as UseStorageOptions<T>)
 
   watchImmediate(
-    () => !!self.value?.userId,
+    () => !!userId.value,
     exists => filter[exists ? 'resume' : 'pause'](),
   )
 
