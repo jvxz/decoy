@@ -4,17 +4,17 @@
   --shift-hover: 0.02;
   --shift-press: -0.008;
 
-  --neutral-50: oklch(84% 0 0);
-  --neutral-100: oklch(70.7% 0 0);
-  --neutral-200: oklch(58.6% 0 0);
-  --neutral-300: oklch(48.1% 0 0);
-  --neutral-400: oklch(39.4% 0 0);
-  --neutral-500: oklch(32.3% 0 0);
-  --neutral-600: oklch(26.5% 0 0);
-  --neutral-700: oklch(21.7% 0 0);
-  --neutral-800: oklch(17.6% 0 0);
-  --neutral-900: oklch(14.1% 0 0);
-  --neutral-950: oklch(11% 0 0);
+  --neutral-50: oklch(96% 0 0);
+  --neutral-100: oklch(82.8% 0 0);
+  --neutral-200: oklch(70% 0 0);
+  --neutral-300: oklch(58.2% 0 0);
+  --neutral-400: oklch(47.8% 0 0);
+  --neutral-500: oklch(39.1% 0 0);
+  --neutral-600: oklch(31.8% 0 0);
+  --neutral-700: oklch(25.5% 0 0);
+  --neutral-800: oklch(20% 0 0);
+  --neutral-900: oklch(14.8% 0 0);
+  --neutral-950: oklch(10% 0 0);
 
   --primary-50: oklch(91% 0.043 273.9);
   --primary-100: oklch(83.8% 0.08 273.9);
