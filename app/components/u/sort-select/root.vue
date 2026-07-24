@@ -1,4 +1,6 @@
 <script lang="ts">
+import type { HTMLAttributes } from 'vue'
+
 import { createContext } from 'reka-ui'
 
 export const SORT_SELECT_OPTIONS = ['name', 'date-modified', 'date-created', 'last-active', 'verified'] as const
@@ -12,7 +14,7 @@ export interface SortSelectModelValue {
 }
 
 export interface SortSelectRootProps {
-  class?: string
+  class?: HTMLAttributes['class']
   options?: SortSelectOption[]
   modelValue?: SortSelectModelValue
   defaultValue?: SortSelectModelValue
