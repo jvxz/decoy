@@ -22,7 +22,9 @@ const props = withDefaults(
 
 const room = useRoom(() => props.room)
 
-const avatarProps = computed(() => (props.manualAvatarSrc ? { src: props.manualAvatarSrc } : { room: room.value }))
+const avatarProps = computed(() =>
+  props.manualAvatarSrc ? { room: room.value, src: props.manualAvatarSrc } : { room: room.value },
+)
 
 const isJoined = useRoomIsJoined(room)
 
