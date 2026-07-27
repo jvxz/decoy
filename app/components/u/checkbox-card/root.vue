@@ -1,32 +1,25 @@
 <script lang="ts" setup>
 import type { CheckboxRootEmits, CheckboxRootProps } from 'reka-ui'
+import type { HTMLAttributes } from 'vue'
 
-import { CheckboxRoot, useForwardPropsEmits } from 'reka-ui'
+import { useForwardPropsEmits } from 'reka-ui'
 
-const props = withDefaults(defineProps<CheckboxRootProps & { class?: string }>(), { as: 'button' })
-const emits = defineEmits<CheckboxRootEmits>()
+export interface UCheckboxCardRootProps extends CheckboxRootProps {
+  class?: HTMLAttributes['class']
+}
+export type UCheckboxCardRootEmits = CheckboxRootEmits
 
-const delegated = reactiveOmit(props, ['class', 'as'])
+const props = defineProps<UCheckboxCardRootProps>()
+const emits = defineEmits<UCheckboxCardRootEmits>()
+
+const delegated = reactiveOmit(props, ['as'])
 const forwarded = useForwardPropsEmits(delegated, emits)
 </script>
 
 <template>
-  <CheckboxRoot
-    v-bind="forwarded"
-    as-child
-    :class="
-      cn(
-        staticBase(),
-        buttonVariants({
-          variant: 'soft',
-        }),
-        'p-4 shadow-none bg-surface active:(bg-surface) group size-fit flex justify-between items-start gap-2 flex-row',
-        props.class,
-      )
-    "
-  >
-    <UCard :as>
+  <CheckboxRoot v-bind="forwarded" as-child>
+    <UButtonCardRoot :as>
       <slot />
-    </UCard>
+    </UButtonCardRoot>
   </CheckboxRoot>
 </template>
