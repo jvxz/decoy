@@ -1,28 +1,13 @@
 <script lang="ts" setup>
-import type { PrimitiveProps } from 'reka-ui'
+import type { UButtonCardIconProps } from '../button-card/icon.vue'
 
-const props = defineProps<
-  PrimitiveProps & {
-    class?: string
-  } & (
-      | {
-          name: string
-          src?: never
-          alt?: never
-        }
-      | {
-          name?: never
-          src: string
-          alt: string
-        }
-    )
->()
+export type UCheckboxCardIconProps = UButtonCardIconProps
 
-const delegated = reactiveOmit(props, ['class', 'src', 'name', 'alt'])
-const classProp = computed(() => cn('shrink-0', props.class))
+const props = defineProps<UCheckboxCardIconProps>()
 </script>
 
 <template>
-  <Icon v-if="name" :name v-bind="delegated" :class="classProp" />
-  <Img v-else :src :alt v-bind="delegated" :class="classProp" />
+  <UButtonCardIcon v-bind="props" data-slot="checkbox-card-icon">
+    <slot />
+  </UButtonCardIcon>
 </template>

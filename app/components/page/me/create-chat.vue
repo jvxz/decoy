@@ -87,7 +87,7 @@ const inputEl = useTemplateRef('inputEl')
         <UCheckboxCardRoot v-model:model-value="r$.encrypt.$value" :disabled="isCreating" class="w-full">
           <UCheckboxCardIcon name="tabler:lock" />
           <UCheckboxCardContent>
-            <UCheckboxCardLabel> Encrypt room </UCheckboxCardLabel>
+            <UCheckboxCardTitle> Encrypt room </UCheckboxCardTitle>
             <UCheckboxCardDescription>
               Enable end-to-end encryption for this room.
               <span class="font-medium underline">Once the room is created, this cannot be changed.</span>

@@ -111,3 +111,21 @@ export const checkboxVariants = tv({
 })
 
 export type CheckboxVariants = VariantProps<typeof checkboxVariants>
+
+export const buttonCardVariants = tv({
+  base: ['group justify-between items-start gap-2 flex-row flex'],
+  defaultVariants: {
+    size: 'default',
+    variant: 'soft',
+  },
+  extend: interactiveBase,
+  variants: {
+    size: {
+      default: 'p-4 size-fit',
+      lg: 'p-5 size-fit',
+      sm: 'p-3 size-fit',
+    },
+  },
+})
+
+export type ButtonCardVariants = VariantProps<typeof buttonCardVariants>
