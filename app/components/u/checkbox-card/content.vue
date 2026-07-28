@@ -1,13 +1,13 @@
 <script lang="ts" setup>
-import type { PrimitiveProps } from 'reka-ui'
+import type { UButtonCardContentProps } from '../button-card/content.vue'
 
-const props = defineProps<PrimitiveProps & { class?: string }>()
+export interface UCheckboxCardContentProps extends UButtonCardContentProps {}
 
-const delegated = reactiveOmit(props, 'class')
+const props = defineProps<UCheckboxCardContentProps>()
 </script>
 
 <template>
-  <Primitive v-bind="delegated" :class="cn('h-full space-y-2 ', $props.class)">
+  <UButtonCardContent v-bind="props" data-slot="checkbox-card-content">
     <slot />
-  </Primitive>
+  </UButtonCardContent>
 </template>
