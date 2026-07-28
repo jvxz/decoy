@@ -1,3 +1,4 @@
+import type { IMyDevice } from 'matrix-js-sdk'
 import type { MaybeRefOrGetter } from 'vue'
 
 import { toRef } from '@vueuse/core'
@@ -8,6 +9,9 @@ const defineKey = <const T extends readonly unknown[]>(...parts: T): T => parts
  * query key factory
  */
 export const $qk = {
+  cryptoDevices: (myUserId: MaybeRefOrGetter<string | undefined>) => defineKey('cryptoDevices', toRef(myUserId)),
+  deviceVerificationStatus: (deviceId: MaybeRefOrGetter<IMyDevice['device_id'] | undefined>) =>
+    defineKey('deviceVerificationStatus', toRef(deviceId)),
   homeserverConfig: (homeserverUrl: MaybeRefOrGetter<string | undefined>) =>
     defineKey('homeserverConfig', toRef(homeserverUrl)),
   homeserverLoginFlows: (homeserverUrl: MaybeRefOrGetter<string | undefined>) =>
@@ -20,6 +24,7 @@ export const $qk = {
   roomReplyEvent: (replyEventId: MaybeRefOrGetter<string | undefined>, roomId: MaybeRefOrGetter<string>) =>
     defineKey('roomReplyEvent', toRef(replyEventId), toRef(roomId)),
   roomSummary: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('roomSummary', toRef(roomId)),
+  sessionDevices: (myUserId: MaybeRefOrGetter<string | undefined>) => defineKey('sessionDevices', toRef(myUserId)),
   spaceSubspaces: (spaceId: MaybeRefOrGetter<string>) => defineKey('spaceSubspaces', toRef(spaceId)),
 } as const
 

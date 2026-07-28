@@ -1,8 +1,8 @@
-import type { UnwrapRef } from 'vue'
+import type { HTMLAttributes, UnwrapRef } from 'vue'
 
 export type { RemovableRef } from '@vueuse/core'
 
-export type DefineClasses<T extends keyof any> = Partial<Record<T, string>>
+export type DefineClasses<T extends keyof any> = Partial<Record<T, HTMLAttributes['class']>>
 
 export type Prettify<T> = {
   [K in keyof T]: T[K]

@@ -20,7 +20,7 @@ onUnmounted(() => {
 
           <div class="flex flex-1 flex-col">
             <UDialogHeader
-              class="pe-2.5 ps-4 border-b flex shrink-0 gap-2 h-header-height justify-center sm:text-left"
+              class="mb-0 pe-2.5 ps-4 border-b flex shrink-0 gap-2 h-header-height justify-center sm:text-left"
               :ui="{
                 closeButton: 'top-2 right-2',
               }"
