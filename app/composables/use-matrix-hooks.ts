@@ -1,5 +1,6 @@
 import type { ClientEventHandlerMap, EmittedEvents, Listener, MatrixClient } from 'matrix-js-sdk'
 
+import { HttpApiEvent } from 'matrix-js-sdk'
 import { RoomEvent } from 'matrix-js-sdk'
 import { ClientEvent, MatrixEventEvent, RoomMemberEvent, RoomStateEvent } from 'matrix-js-sdk'
 
@@ -15,6 +16,7 @@ const eventHook = createEventHook<Parameters<EmitterListener<ClientEvent.Event>>
 const userProfileHook = createEventHook<Parameters<EmitterListener<ClientEvent.UserProfileUpdate>>>()
 const accountDataHook = createEventHook<Parameters<EmitterListener<ClientEvent.Event>>>()
 const myMembershipHook = createEventHook<Parameters<EmitterListener<RoomEvent.MyMembership>>>()
+const logoutHook = createEventHook<Parameters<EmitterListener<HttpApiEvent.SessionLoggedOut>>>()
 export const roomMemberTypingHook = createEventHook<Parameters<EmitterListener<RoomMemberEvent.Typing>>>()
 
 export const useMatrixHooks = createSharedComposable(() => {
@@ -34,6 +36,7 @@ export const useMatrixHooks = createSharedComposable(() => {
       bindListener(ClientEvent.UserProfileUpdate, userProfileHook.trigger, { current, prev })
       bindListener(ClientEvent.AccountData, accountDataHook.trigger, { current, prev })
       bindListener(RoomEvent.MyMembership, myMembershipHook.trigger, { current, prev })
+      bindListener(HttpApiEvent.SessionLoggedOut, logoutHook.trigger, { current, prev })
     },
     { immediate: true },
   )
@@ -42,6 +45,7 @@ export const useMatrixHooks = createSharedComposable(() => {
     onAccountData: accountDataHook.on,
     onDecrypted: decryptedHook.on,
     onEvent: eventHook.on,
+    onLogout: logoutHook.on,
     onMyMembership: myMembershipHook.on,
     onRoom: roomEvent.on,
     onRoomMembership: roomMembershipEvent.on,
