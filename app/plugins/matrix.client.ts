@@ -6,7 +6,7 @@ export default defineNuxtPlugin({
   parallel: true,
   setup: () => {
     const status = useMatrixStatus()
-    const { onSync, onLogout } = useMatrixHooks()
+    const { onLogout, onSync } = useMatrixHooks()
     const { client, initAuthedClient } = useMatrixClient()
     const { logout } = useAuth()
     // always ready in e2e tests
