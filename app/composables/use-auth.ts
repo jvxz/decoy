@@ -34,7 +34,9 @@ export function useAuth() {
   const login = useAsyncState(
     async (req: LoginRequest) => {
       const homeserver =
-        req.type === 'm.login.password' ? await resolveHomeserverBaseUrl(normalizeHomeserverUrl(req.baseUrl)) : req.baseUrl
+        req.type === 'm.login.password'
+          ? await resolveHomeserverBaseUrl(normalizeHomeserverUrl(req.baseUrl))
+          : req.baseUrl
 
       const tempClient = createClient({
         baseUrl: homeserver,
