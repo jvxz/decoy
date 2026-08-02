@@ -48,7 +48,7 @@ function createTokenRefreshFunction(): TokenRefreshFunction {
       const auth = await idb.getItem<AuthPayload>('auth')
       if (!auth) throw new TokenRefreshLogoutError()
 
-      const tempClient = createTempClient(withHttps(auth.baseUrl), {
+      const tempClient = createTempClient(normalizeHomeserverUrl(auth.baseUrl), {
         accessToken: auth.accessToken,
         refreshToken,
       })
