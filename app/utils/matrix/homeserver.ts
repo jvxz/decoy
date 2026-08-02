@@ -13,11 +13,11 @@ export function isHomeserverValid(config: ClientConfig) {
 
 export async function getLoginFlows(homeserver: string) {
   const config = await getHomeserverConfig(homeserver)
+  const baseUrl = isHomeserverValid(config)
+    ? (config['m.homeserver'].base_url ?? homeserver)
+    : normalizeHomeserverUrl(homeserver)
 
-  const isValid = isHomeserverValid(config)
-  if (!isValid) return throwErr()
-
-  const client = createClient({ baseUrl: config['m.homeserver'].base_url ?? homeserver })
+  const client = createClient({ baseUrl })
 
   const [loginFlowsError, loginFlows] = await attemptAsync<ILoginFlowsResponse, Error>(() => client.loginFlows())
   if (loginFlowsError) {
@@ -53,11 +53,15 @@ export async function resolveHomeserverBaseUrl(baseUrl: string): Promise<string>
   try {
     const homeserverConfig = await getHomeserverConfig(baseUrl)
 
-    if (homeserverConfig['m.homeserver'].state !== AutoDiscoveryAction.SUCCESS)
-      throw homeserverConfig['m.homeserver']?.error
+    if (homeserverConfig['m.homeserver'].state !== AutoDiscoveryAction.SUCCESS) return normalizeHomeserverUrl(baseUrl)
 
     return homeserverConfig['m.homeserver'].base_url ?? baseUrl
   } catch (error) {
     throw parseError(error, { fallbackMessage: 'Failed to resolve base URL' }).message
   }
+}
+
+export function normalizeHomeserverUrl(input: string) {
+  if (hasProtocol(input, { acceptRelative: false })) return input
+  return withHttps(input)
 }
