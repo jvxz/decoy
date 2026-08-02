@@ -61,3 +61,8 @@ export async function resolveHomeserverBaseUrl(baseUrl: string): Promise<string>
     throw parseError(error, { fallbackMessage: 'Failed to resolve base URL' }).message
   }
 }
+
+export function normalizeHomeserverUrl(input: string) {
+  if (hasProtocol(input, { acceptRelative: false })) return input
+  return withHttps(input)
+}
