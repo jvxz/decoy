@@ -3,8 +3,6 @@ import type { EventHookReturn } from '@vueuse/core'
 import type { EditableRootEmits } from 'reka-ui'
 import type { ShallowRef } from 'vue'
 
-import { createContext } from 'reka-ui'
-
 export const [injectLoginPageEditableStateContext, provideLoginPageEditableStateContext] = createContext<{
   editableInput: Ref<string>
   editableState: Ref<EditableRootEmits['update:state'][number]>
@@ -13,7 +11,7 @@ export const [injectLoginPageEditableStateContext, provideLoginPageEditableState
   isLoggingIn: Ref<boolean>
   refreshHook: EventHookReturn<void>
   error: ShallowRef<ErrorShape | undefined>
-}>('app/pages/login/new.vue')
+}>('app/pages/login/index.vue')
 </script>
 
 <script lang="ts" setup>

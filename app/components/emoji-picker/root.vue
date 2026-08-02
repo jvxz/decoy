@@ -3,7 +3,7 @@ import type { EventHookOn, EventHookTrigger } from '@vueuse/core'
 import type { CompactEmoji } from 'emojibase'
 import type { PrimitiveProps } from 'reka-ui'
 
-import { createContext, useForwardPropsEmits } from 'reka-ui'
+import { useForwardPropsEmits } from 'reka-ui'
 
 type Dir = 'up' | 'down' | 'left' | 'right'
 
