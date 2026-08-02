@@ -1,7 +1,5 @@
 import type { Ref } from 'vue'
 
-import { createContext } from 'reka-ui'
-
 export { default as CommandDialog } from './command-dialog.vue'
 export { default as CommandEmpty } from './command-empty.vue'
 export { default as CommandGroup } from './command-group.vue'
