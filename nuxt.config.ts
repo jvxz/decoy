@@ -128,6 +128,7 @@ export default defineNuxtConfig({
     'nuxt-twemoji',
     'nuxt-tiptap-editor',
     '@nuxtjs/i18n',
+    '@nuxt/scripts',
   ],
 
   nitro: {
@@ -184,6 +185,14 @@ export default defineNuxtConfig({
   // nuxt-schema-org currently does not support unhead v3
   schemaOrg: {
     enabled: false,
+  },
+
+  scripts: {
+    registry: {
+      googleRecaptcha: {
+        siteKey: '6LdHpHMtAAAAABfwQ8suQAhl-Qsu50iU1M2372Zk',
+      },
+    },
   },
 
   security: {
