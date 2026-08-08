@@ -129,7 +129,7 @@ export const useInteractiveAuth = createGlobalState(() => {
     () => !dialogOpen.value,
     async () => {
       if (!completed) {
-        rejectPromise(UIACancellationError)
+        rejectPromise(new UIACancellationError())
       }
       completed = false
       promise = undefined
