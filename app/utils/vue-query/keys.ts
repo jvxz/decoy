@@ -8,10 +8,13 @@ const defineKey = <const T extends readonly unknown[]>(...parts: T): T => parts
  * query key factory
  */
 export const $qk = {
+  authMetadata: () => defineKey('authMetadata'),
   homeserverConfig: (homeserverUrl: MaybeRefOrGetter<string | undefined>) =>
     defineKey('homeserverConfig', toRef(homeserverUrl)),
   homeserverLoginFlows: (homeserverUrl: MaybeRefOrGetter<string | undefined>) =>
     defineKey('homeserverLoginFlows', toRef(homeserverUrl)),
+  homeserverRegistrationFlows: (homeserverUrl: MaybeRefOrGetter<string | undefined>) =>
+    defineKey('homeserverRegistrationFlows', toRef(homeserverUrl)),
   homeserverSSOUrl: (homeserverUrl: MaybeRefOrGetter<string | undefined>) =>
     defineKey('homeserverSSOUrl', toRef(homeserverUrl)),
   mutualRooms: (userId: MaybeRefOrGetter<string | undefined>) => defineKey('mutualRooms', toRef(userId)),
@@ -37,6 +40,7 @@ export const $mk = {
   leaveRoom: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('leaveRoom', toRef(roomId)),
   message: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('message', toRef(roomId)),
   react: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('react', toRef(roomId)),
+  register: () => defineKey('register'),
   scrollEvents: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('scrollEvents', toRef(roomId)),
 } as const
 
