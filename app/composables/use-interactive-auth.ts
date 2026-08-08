@@ -103,8 +103,6 @@ export const useInteractiveAuth = createGlobalState(() => {
   }
 
   function completeFlow() {
-    assert(isDefined(flowResult), '`flowResult` was undefined when attempting to complete flow')
-
     completed = true
     dialogOpen.value = false
     resolvePromise(flowResult)
