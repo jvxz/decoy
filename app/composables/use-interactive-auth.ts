@@ -47,7 +47,7 @@ export const useInteractiveAuth = createGlobalState(() => {
     const { openDialog = true } = opts ?? {}
 
     const [err, res] = await attemptAsync<Awaited<ReturnType<T>>, MatrixError>(() => request(null, false))
-    if (res) return res
+    if (!err) return res
 
     if (!(err instanceof MatrixError)) throw err
 
