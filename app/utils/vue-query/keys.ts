@@ -8,6 +8,7 @@ const defineKey = <const T extends readonly unknown[]>(...parts: T): T => parts
  * query key factory
  */
 export const $qk = {
+  authMetadata: () => defineKey('authMetadata'),
   homeserverConfig: (homeserverUrl: MaybeRefOrGetter<string | undefined>) =>
     defineKey('homeserverConfig', toRef(homeserverUrl)),
   homeserverLoginFlows: (homeserverUrl: MaybeRefOrGetter<string | undefined>) =>
