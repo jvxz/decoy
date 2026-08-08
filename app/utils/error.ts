@@ -26,7 +26,7 @@ export interface ErrorShape {
   code?: $ErrorOptions['code']
   message: string
   title?: string
-  raw: string
+  raw?: string
 }
 
 export function parseError(error: unknown, opts?: { fallbackMessage?: string }): ErrorShape {
