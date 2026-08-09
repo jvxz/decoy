@@ -5,18 +5,13 @@ import { InteractiveAuth } from 'matrix-js-sdk'
 
 type InteractiveAuthOptions<T = unknown> = ConstructorParameters<typeof InteractiveAuth<T>>[0]
 
-export class UIALegacyUnsupportedError extends Error {
-  override name = 'UIALegacyUnsupportedError'
-}
-
-export class UIACancellationError extends Error {
-  override name = 'UIACancellationError'
-}
-
 export type UIARequestFn = (auth: AuthDict | null, background: boolean) => any
 
 export type AttemptActionOptions<T extends UIARequestFn> = Partial<
-  Pick<InteractiveAuthOptions<Awaited<ReturnType<T>>>, 'stateUpdated' | 'busyChanged' | 'requestEmailToken' | 'inputs'>
+  Pick<
+    InteractiveAuthOptions<Awaited<ReturnType<T>>>,
+    'stateUpdated' | 'busyChanged' | 'requestEmailToken' | 'inputs' | 'emailSid' | 'clientSecret'
+  >
 > & {
   /**
    * @default true
@@ -40,10 +35,13 @@ export const useInteractiveAuth = createGlobalState(() => {
   let completed = false
   let promise: Promise<unknown> | undefined
   let flowResult: unknown
-  let resolvePromise: (value: unknown) => void
-  let rejectPromise: (reason: unknown) => void
+  let resolvePromise: (value: any) => void
+  let rejectPromise: (reason: any) => void
 
-  const attemptAction = async <T extends UIARequestFn>(request: T, opts?: AttemptActionOptions<T>) => {
+  const attemptAction = async <T extends UIARequestFn>(
+    request: T,
+    opts?: AttemptActionOptions<T>,
+  ): Promise<Awaited<ReturnType<T>>> => {
     const { openDialog = true } = opts ?? {}
 
     const [err, res] = await attemptAsync<Awaited<ReturnType<T>>, MatrixError>(() => request(null, false))
@@ -67,6 +65,7 @@ export const useInteractiveAuth = createGlobalState(() => {
         isBusy.value = busy
       },
       doRequest: request,
+      emailSid: opts?.emailSid,
       inputs: opts?.inputs,
       matrixClient: opts?.matrixClient ?? client.value,
       requestEmailToken:
@@ -83,7 +82,7 @@ export const useInteractiveAuth = createGlobalState(() => {
       },
     })
 
-    promise = new Promise((resolve, reject) => {
+    promise = new Promise<Awaited<ReturnType<T>>>((resolve, reject) => {
       resolvePromise = resolve
       rejectPromise = reject
       auth.attemptAuth().then(value => {
@@ -92,14 +91,12 @@ export const useInteractiveAuth = createGlobalState(() => {
       }, reject)
     })
 
-    if (authState.value?.nextStage === AuthType.Email) await auth.requestEmailToken()
-
     authInstance.value = markRaw(auth)
 
     dialogOpen.value = openDialog
     opts?.onChallenge?.(err.data.flows)
 
-    return promise
+    return promise as Awaited<ReturnType<T>>
   }
 
   function completeFlow() {
