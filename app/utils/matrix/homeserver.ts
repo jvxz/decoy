@@ -1,14 +1,41 @@
-import type { ClientConfig, ILoginFlowsResponse, LoginFlow } from 'matrix-js-sdk'
+import type { ClientConfig, IAuthData, ILoginFlowsResponse, LoginFlow, UIAFlow } from 'matrix-js-sdk'
 
+import { AuthType, MatrixError } from 'matrix-js-sdk'
 import { AutoDiscovery, AutoDiscoveryAction, createClient } from 'matrix-js-sdk'
 
 export async function getHomeserverConfig(homeserver: string) {
-  return AutoDiscovery.findClientConfig(withoutProtocol(homeserver))
+  return AutoDiscovery.findClientConfig(
+    hasProtocol(homeserver, { acceptRelative: false }) ? homeserver : withoutProtocol(homeserver),
+  )
 }
 
 export function isHomeserverValid(config: ClientConfig) {
   const { state } = config['m.homeserver']
   return state !== AutoDiscoveryAction.FAIL_ERROR && state !== AutoDiscoveryAction.FAIL_PROMPT
+}
+
+/**
+ * @throws RegistrationDisabledError, MatrixError
+ */
+export async function getRegistrationFlows(homeserver: string) {
+  const client = createTempClient(await resolveHomeserverBaseUrl(homeserver))
+
+  const [err] = await attemptAsync(() => client.registerRequest({}))
+  if (!(err instanceof MatrixError)) throw err
+
+  if (err.httpStatus === 403) {
+    const loginFlows = await getLoginFlows(homeserver)
+    if (!loginFlows) throw new RegistrationDisabledError()
+
+    const hasSSO = loginFlows.flows.some(f => f.type === AuthType.Sso)
+    if (!hasSSO) throw new RegistrationDisabledError()
+
+    return [{ stages: [AuthType.Sso] }] satisfies UIAFlow[]
+  } else if (err.httpStatus !== 401 || !err.data?.flows) throw err
+
+  const data = err.data as IAuthData
+
+  return data.flows
 }
 
 export async function getLoginFlows(homeserver: string) {
@@ -21,7 +48,7 @@ export async function getLoginFlows(homeserver: string) {
 
   const [loginFlowsError, loginFlows] = await attemptAsync<ILoginFlowsResponse, Error>(() => client.loginFlows())
   if (loginFlowsError) {
-    if (loginFlowsError instanceof TypeError && loginFlowsError.message.includes('URL')) return throwErr()
+    if (loginFlowsError instanceof TypeError && loginFlowsError.message.includes('URL')) throw throwErr()
     throw loginFlowsError
   }
 
