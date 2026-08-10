@@ -1,49 +1,65 @@
-<script lang="ts">
-import type { EventHookReturn } from '@vueuse/core'
-import type { EditableRootEmits } from 'reka-ui'
-import type { ShallowRef } from 'vue'
-
-export const [injectLoginPageEditableStateContext, provideLoginPageEditableStateContext] = createContext<{
-  editableInput: Ref<string>
-  editableState: Ref<EditableRootEmits['update:state'][number]>
-  isPending: Ref<boolean>
-  isSSONavigating: Ref<boolean>
-  isLoggingIn: Ref<boolean>
-  refreshHook: EventHookReturn<void>
-  error: ShallowRef<ErrorShape | undefined>
-}>('app/pages/login/index.vue')
-</script>
-
 <script lang="ts" setup>
-const urlParams = useUrlSearchParams('history', {
-  initialValue: {
-    homeserver: 'matrix.org',
-  },
-})
-const editableInput = toRef(urlParams, 'homeserver')
-const editableState = ref<EditableRootEmits['update:state'][number]>('cancel')
-const error = shallowRef()
-const isLoggingIn = ref(false)
-const isPending = ref(false)
-const isSSONavigating = ref(false)
-const refreshHook = createEventHook()
+import { PageLoginFlowPw, PageLoginFlowSso } from '#components'
+import { injectAuthLayoutContext } from '~/layouts/auth.vue'
 
-provideLoginPageEditableStateContext({
-  editableInput,
-  editableState,
-  error,
-  isLoggingIn,
-  isPending,
-  isSSONavigating,
-  refreshHook,
+definePageMeta({
+  layout: 'auth',
 })
+
+const {
+  editableInput: homeserverInput,
+  error: contextError,
+  urlParams,
+  registrationDisabled,
+} = injectAuthLayoutContext()
+
+const {
+  data: loginFlows,
+  dataUpdatedAt,
+  isFetching,
+  isSuccess: isHomeserverLoginFlowsSuccess,
+} = useHomeserverLoginFlows(homeserverInput)
+
+const flows = computed(() =>
+  [
+    getPwFlow(loginFlows.value?.flows ?? []) && PageLoginFlowPw,
+    getSSOFlow(loginFlows.value?.flows ?? []) && PageLoginFlowSso,
+  ].filter(c => !!c),
+)
+
+watch(dataUpdatedAt, () => (contextError.value = undefined))
 </script>
 
 <template>
-  <div class="p-16 flex flex-col w-full">
-    <div class="flex flex-col gap-6 max-w-sm w-full">
-      <PageLoginHeading />
-      <PageLoginForm />
-    </div>
-  </div>
+  <template v-if="isHomeserverLoginFlowsSuccess && !isFetching">
+    <template v-for="(flow, i) in flows" :key="i">
+      <div v-if="i > 0" class="my-1 flex gap-3 items-center">
+        <USeparator class="shrink" />
+        <span class="text-xs text-muted-foreground shrink-0">or</span>
+        <USeparator class="shrink" />
+      </div>
+
+      <component :is="flow" />
+    </template>
+
+    <UTooltipRoot :disabled="!registrationDisabled">
+      <UTooltipTrigger as-child>
+        <p
+          :class="
+            cn(
+              'text-center mt-2 text-base text-muted-foreground w-fit mx-auto',
+              registrationDisabled && 'decoration-line-through opacity-50',
+            )
+          "
+        >
+          Need an account?
+          <UButton :disabled="registrationDisabled" variant="link" as-child class="text-base text-muted-foreground">
+            <NuxtLink inherit :to="{ name: 'register', query: { ...urlParams } }">Register</NuxtLink>
+          </UButton>
+        </p>
+      </UTooltipTrigger>
+
+      <UTooltipContent> Registrations are disabled on this homeserver. </UTooltipContent>
+    </UTooltipRoot>
+  </template>
 </template>
