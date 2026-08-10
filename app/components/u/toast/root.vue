@@ -44,9 +44,7 @@ const forwarded = useForwardPropsEmits(picked, emits)
       :variant
     >
       <ToastClose as-child>
-        <UButton size="icon" aria-label="Close" variant="ghost" class="rounded-sm size-6 right-4 top-4 absolute">
-          <Icon name="tabler:x" />
-        </UButton>
+        <UAlertClose />
       </ToastClose>
 
       <slot />
