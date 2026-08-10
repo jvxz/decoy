@@ -81,7 +81,7 @@ export function useAuth() {
       username: string
     }
   >({
-    mutationFn: async ({ email, password, username, manualClient }) => {
+    mutationFn: async ({ email, manualClient, password, username }) => {
       const matrixClient = manualClient ?? client.value
 
       const { inUse, sid } = await isEmailInUse(matrixClient, email, crypto.randomUUID())

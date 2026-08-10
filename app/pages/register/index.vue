@@ -14,7 +14,7 @@ definePageMeta({
   layout: 'auth',
 })
 
-const { editableInput: homeserverInput, urlParams, registrationDisabled } = injectAuthLayoutContext()
+const { editableInput: homeserverInput, registrationDisabled, urlParams } = injectAuthLayoutContext()
 
 const { data: registrationFlows } = useHomeserverRegistration(homeserverInput, false)
 
@@ -35,7 +35,7 @@ const renderableFlows = computed(() =>
       <component :is="flowFormComponentMap[flow.renderableStages[0]!]" />
     </template>
 
-    <p class="text-center mt-2 text-base text-muted-foreground">
+    <p class="text-base text-muted-foreground mt-2 text-center">
       Have an account?
       <UButton variant="link" as-child class="text-base text-muted-foreground">
         <NuxtLink :to="{ name: 'login', query: { ...urlParams } }">Login</NuxtLink>

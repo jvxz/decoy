@@ -14,17 +14,17 @@ const flowMap: Partial<
     { name: string; component?: Component; icon: string; title?: string; description?: string; submittable?: boolean }
   >
 > = {
-  [AuthType.Password]: {
-    component: DialogUiaStagePassword,
-    icon: 'tabler:lock-password',
-    name: 'password',
-  },
   [AuthType.Email]: {
     description: "Check your inbox to verify your account. If you don't see the email, check your spam folder",
     icon: 'tabler:mail',
     name: 'email',
     submittable: false,
     title: 'Email verification pending',
+  },
+  [AuthType.Password]: {
+    component: DialogUiaStagePassword,
+    icon: 'tabler:lock-password',
+    name: 'password',
   },
   [AuthType.Recaptcha]: {
     component: DialogUiaStageRecaptcha,
@@ -54,7 +54,7 @@ const emits = defineEmits<UiaDialogEmits>()
 
 const isFormValid = ref(false)
 
-const { dialogOpen, authState, chosenFlow, authFlows, authInstance, submitStage, isBusy } = useInteractiveAuth()
+const { authFlows, authInstance, authState, chosenFlow, dialogOpen, isBusy, submitStage } = useInteractiveAuth()
 
 const authDict = ref<AuthDict>({})
 
@@ -100,15 +100,15 @@ const currentState = computed(() => (authState.value?.nextStage ? flowMap[authSt
         </UButtonCardRoot>
       </template>
 
-      <component v-else-if="authState && chosenFlow" :is="flowMap[authState.nextStage]?.component || 'div'" />
+      <component :is="flowMap[authState.nextStage]?.component || 'div'" v-else-if="authState && chosenFlow" />
 
       <UAlertDialogFooter>
         <UAlertDialogCancel> Cancel </UAlertDialogCancel>
         <UButton
           v-if="currentState?.submittable !== false"
-          @click="handleSubmit"
           :is-loading="isBusy"
           :disabled="!isFormValid"
+          @click="handleSubmit"
         >
           <span>Continue</span>
         </UButton>

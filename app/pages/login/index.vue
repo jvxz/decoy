@@ -9,8 +9,8 @@ definePageMeta({
 const {
   editableInput: homeserverInput,
   error: contextError,
-  urlParams,
   registrationDisabled,
+  urlParams,
 } = injectAuthLayoutContext()
 
 const {

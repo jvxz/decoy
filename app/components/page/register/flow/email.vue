@@ -3,7 +3,7 @@ import { email, required, sameAs, withMessage } from '@regle/rules'
 
 import { injectAuthLayoutContext } from '~/layouts/auth.vue'
 
-const { matrixClient, setFormError, clearFormError } = injectAuthLayoutContext()
+const { clearFormError, matrixClient, setFormError } = injectAuthLayoutContext()
 
 const form = ref({
   confirmPassword: '',
@@ -27,9 +27,9 @@ const { r$ } = useRegle(form, {
   password: { required },
   username: { required },
 })
-const { register, login } = useAuth()
+const { login, register } = useAuth()
 const { isPending: isLoggingIn } = login
-const { isPending: isRegistering, error: registerError, reset: resetRegisterError } = register
+const { error: registerError, isPending: isRegistering, reset: resetRegisterError } = register
 
 whenever(registerError, err => {
   if (err instanceof EmailInUseError)
@@ -74,30 +74,30 @@ async function handleSubmit() {
 
 <template>
   <form class="contents" @submit.prevent="handleSubmit">
-    <FormInput required v-model:model-value="r$.username.$value" label="Username" :error="r$.username.$errors" />
-    <FormInput required v-model:model-value="r$.email.$value" label="Email" :error="r$.email.$errors" />
+    <FormInput v-model:model-value="r$.username.$value" required label="Username" :error="r$.username.$errors" />
+    <FormInput v-model:model-value="r$.email.$value" required label="Email" :error="r$.email.$errors" />
     <FormInput
+      v-model:model-value="r$.password.$value"
       type="password"
       required
-      v-model:model-value="r$.password.$value"
       label="Password"
       :error="r$.password.$errors"
     />
     <FormInput
+      v-model:model-value="r$.confirmPassword.$value"
       type="password"
       required
-      v-model:model-value="r$.confirmPassword.$value"
       label="Confirm password"
       :error="r$.confirmPassword.$errors"
     />
 
     <UButton
       :is-loading="isRegistering || isLoggingIn"
-      @click="handleSubmit"
       :disabled="r$.$invalid"
       size="lg"
       variant="default"
       class="w-full"
+      @click="handleSubmit"
     >
       <span>Register</span>
     </UButton>

@@ -3,7 +3,7 @@ import { AuthType } from 'matrix-js-sdk'
 
 import { injectDialogUiaContext } from '~/components/dialog/uia.vue'
 
-const { authDict, isFormValid, handleSubmit } = injectDialogUiaContext()
+const { authDict, handleSubmit, isFormValid } = injectDialogUiaContext()
 const { authInstance, authState } = useInteractiveAuth()
 
 const siteKey = computed(() => authInstance.value?.getStageParams(AuthType.Recaptcha)?.public_key as string | undefined)

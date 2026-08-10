@@ -3,7 +3,7 @@ import { required } from '@regle/rules'
 
 import { injectDialogUiaContext } from '../../uia.vue'
 
-const { isFormValid, handleSubmit, authDict } = injectDialogUiaContext()
+const { authDict, handleSubmit, isFormValid } = injectDialogUiaContext()
 const { client } = useMatrixClient()
 
 const { r$ } = useRegle(
@@ -27,12 +27,12 @@ watchEffect(() => {
 <template>
   <form @submit.prevent="handleSubmit">
     <FormInput
-      @keydown.enter="handleSubmit"
+      v-model:model-value="r$.password.$value"
       type="password"
       label="Password"
       required
-      v-model:model-value="r$.password.$value"
       :error="r$.password.$errors"
+      @keydown.enter="handleSubmit"
     />
   </form>
 </template>
