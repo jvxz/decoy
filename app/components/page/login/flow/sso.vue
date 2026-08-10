@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { createClient } from 'matrix-js-sdk'
 
-import { injectLoginPageEditableStateContext } from '~/pages/login/index.vue'
+import { injectAuthLayoutContext } from '~/layouts/auth.vue'
 
-const { editableInput: homeserverUrl, isLoggingIn, isSSONavigating } = injectLoginPageEditableStateContext()
+const { editableInput: homeserverUrl, isLoggingIn, isSSONavigating } = injectAuthLayoutContext()
 
 const router = useRouter()
 const requestUrl = useRequestURL()
