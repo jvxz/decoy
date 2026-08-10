@@ -12,9 +12,16 @@ const { copy } = useClipboard()
     icon="tabler:exclamation-circle"
   >
     <template #footer="{ handleDismiss, isToast }">
-      <UAlertFooter>
+      <UAlertFooter v-if="isDefined(notification.payload.raw) || !isToast">
         <UButton v-if="!isToast" size="sm" @click="handleDismiss"> Dismiss </UButton>
-        <UButton variant="danger" size="sm" @click="copy(notification.payload.raw)"> Copy error </UButton>
+        <UButton
+          v-if="isDefined(notification.payload.raw)"
+          variant="danger"
+          size="sm"
+          @click="copy(notification.payload.raw)"
+        >
+          Copy error
+        </UButton>
       </UAlertFooter>
     </template>
   </NotificationsPopoverNotiCard>
