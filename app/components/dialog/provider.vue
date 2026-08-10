@@ -6,4 +6,6 @@ const { open, state } = useGlobalDialog()
   <DialogLeave v-if="state?.name === 'leave'" v-model:open="open" :room="state.room" />
   <DialogInvite v-else-if="state?.name === 'invite'" v-model:open="open" :room="state.roomId" />
   <DialogAvatar v-else-if="state?.name === 'avatar'" v-model:open="open" v-bind="state" />
+
+  <DialogUia />
 </template>
