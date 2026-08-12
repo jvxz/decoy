@@ -135,4 +135,9 @@ export const GENERIC_ERROR = {
     message: 'The provided homeserver is invalid. Please ensure the URL provided is correct with no misspellings.',
     title: 'Invalid homeserver',
   },
+  UNKNOWN: {
+    code: ErrorCode.Unknown,
+    message: 'An unexpected error occurred. Please try again later',
+    title: 'Unknown error',
+  },
 } satisfies Record<string, ErrorShape>
