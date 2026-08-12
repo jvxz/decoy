@@ -9,7 +9,7 @@ export type UEditablePreviewProps = EditablePreviewProps & { class?: string }
 
 const props = defineProps<UEditablePreviewProps>()
 
-const { inputValue } = injectEditableRootContext()
+const { modelValue } = injectEditableRootContext()
 const leadingIcon = inject(editableAreaLeadingIconInjectionKey)
 
 const delegated = reactiveOmit(props, ['class'])
@@ -29,7 +29,7 @@ const delegated = reactiveOmit(props, ['class'])
   >
     <slot>
       <Icon v-if="leadingIcon" :name="leadingIcon" class="shrink-0" />
-      <span class="truncate">{{ inputValue }}</span>
+      <span class="truncate">{{ modelValue }}</span>
     </slot>
   </EditablePreview>
 </template>

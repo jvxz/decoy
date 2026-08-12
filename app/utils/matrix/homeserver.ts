@@ -1,14 +1,40 @@
-import type { ClientConfig, ILoginFlowsResponse, LoginFlow } from 'matrix-js-sdk'
+import type { ClientConfig, ILoginFlowsResponse, LoginFlow, UIAFlow } from 'matrix-js-sdk'
 
+import { AuthType, MatrixError } from 'matrix-js-sdk'
 import { AutoDiscovery, AutoDiscoveryAction, createClient } from 'matrix-js-sdk'
 
 export async function getHomeserverConfig(homeserver: string) {
-  return AutoDiscovery.findClientConfig(withoutProtocol(homeserver))
+  return AutoDiscovery.findClientConfig(
+    hasProtocol(homeserver, { acceptRelative: false }) ? homeserver : withoutProtocol(homeserver),
+  )
 }
 
 export function isHomeserverValid(config: ClientConfig) {
   const { state } = config['m.homeserver']
   return state !== AutoDiscoveryAction.FAIL_ERROR && state !== AutoDiscoveryAction.FAIL_PROMPT
+}
+
+/**
+ * @throws RegistrationDisabledError, MatrixError
+ */
+export async function getRegistrationFlows(homeserver: string) {
+  const client = createTempClient(await resolveHomeserverBaseUrl(homeserver))
+
+  const [err] = await attemptAsync(() => client.registerRequest({}))
+  if (!(err instanceof MatrixError)) throw err
+
+  const ssoFlow = getSSOFlow((await getLoginFlows(homeserver))?.flows ?? [])
+    ? [{ stages: [AuthType.Sso] } satisfies UIAFlow]
+    : []
+
+  if (err.httpStatus === 403) {
+    if (!ssoFlow.length) throw new RegistrationDisabledError()
+    return { flows: ssoFlow }
+  }
+
+  if (err.httpStatus !== 401 || !err.data?.flows) throw err
+
+  return { flows: [...err.data.flows, ...ssoFlow], params: err.data.params, session: err.data.session }
 }
 
 export async function getLoginFlows(homeserver: string) {
@@ -21,7 +47,7 @@ export async function getLoginFlows(homeserver: string) {
 
   const [loginFlowsError, loginFlows] = await attemptAsync<ILoginFlowsResponse, Error>(() => client.loginFlows())
   if (loginFlowsError) {
-    if (loginFlowsError instanceof TypeError && loginFlowsError.message.includes('URL')) return throwErr()
+    if (loginFlowsError instanceof TypeError && loginFlowsError.message.includes('URL')) throw throwErr()
     throw loginFlowsError
   }
 

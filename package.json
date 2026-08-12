@@ -93,6 +93,7 @@
     "@nuxt/test-utils": "^4.0.3",
     "@playwright/test": "^1.61.1",
     "@regle/nuxt": "1.28.3",
+    "@types/grecaptcha": "^3.0.9",
     "@types/node": "^25.9.5",
     "@unocss/eslint-plugin": "^66.7.5",
     "@unocss/nuxt": "^66.7.5",

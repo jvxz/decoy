@@ -13,6 +13,8 @@ export const $qk = {
     defineKey('homeserverConfig', toRef(homeserverUrl)),
   homeserverLoginFlows: (homeserverUrl: MaybeRefOrGetter<string | undefined>) =>
     defineKey('homeserverLoginFlows', toRef(homeserverUrl)),
+  homeserverRegistrationFlows: (homeserverUrl: MaybeRefOrGetter<string | undefined>) =>
+    defineKey('homeserverRegistrationFlows', toRef(homeserverUrl)),
   homeserverSSOUrl: (homeserverUrl: MaybeRefOrGetter<string | undefined>) =>
     defineKey('homeserverSSOUrl', toRef(homeserverUrl)),
   mutualRooms: (userId: MaybeRefOrGetter<string | undefined>) => defineKey('mutualRooms', toRef(userId)),
@@ -36,8 +38,10 @@ export const $mk = {
   invite: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('invite', toRef(roomId)),
   joinRoom: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('joinRoom', toRef(roomId)),
   leaveRoom: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('leaveRoom', toRef(roomId)),
+  login: () => defineKey('login'),
   message: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('message', toRef(roomId)),
   react: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('react', toRef(roomId)),
+  register: () => defineKey('register'),
   scrollEvents: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('scrollEvents', toRef(roomId)),
 } as const
 

@@ -2,9 +2,9 @@
 import { required } from '@regle/rules'
 import { MatrixError } from 'matrix-js-sdk'
 
-import { injectLoginPageEditableStateContext } from '~/pages/login/index.vue'
+import { injectAuthLayoutContext } from '~/layouts/auth.vue'
 
-const { editableInput: homeserverUrl, error, isLoggingIn, isSSONavigating } = injectLoginPageEditableStateContext()
+const { editableInput: homeserverUrl, error, isLoggingIn, isSSONavigating } = injectAuthLayoutContext()
 
 const { r$ } = useRegle(
   {
@@ -30,7 +30,7 @@ async function handleLogin() {
 
   isLoggingIn.value = true
 
-  const res = await login.executeImmediate({
+  const res = await login.mutateAsync({
     baseUrl: homeserverUrl.value,
     identifier: {
       type: 'm.id.user',
@@ -71,7 +71,7 @@ async function handleLogin() {
 
     <UButton
       :disabled="!canLogin"
-      :is-loading="login.isLoading.value"
+      :is-loading="isLoggingIn"
       variant="default"
       size="lg"
       class="mt-1 w-full"

@@ -216,6 +216,7 @@ export default defineNuxtConfig({
     tsConfig: {
       compilerOptions: {
         allowImportingTsExtensions: true,
+        types: ['grecaptcha'],
       },
     },
   },
