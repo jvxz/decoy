@@ -1,4 +1,4 @@
-import type { ClientConfig, IAuthData, ILoginFlowsResponse, LoginFlow, UIAFlow } from 'matrix-js-sdk'
+import type { ClientConfig, ILoginFlowsResponse, LoginFlow, UIAFlow } from 'matrix-js-sdk'
 
 import { AuthType, MatrixError } from 'matrix-js-sdk'
 import { AutoDiscovery, AutoDiscoveryAction, createClient } from 'matrix-js-sdk'
@@ -23,19 +23,18 @@ export async function getRegistrationFlows(homeserver: string) {
   const [err] = await attemptAsync(() => client.registerRequest({}))
   if (!(err instanceof MatrixError)) throw err
 
+  const ssoFlow = getSSOFlow((await getLoginFlows(homeserver))?.flows ?? [])
+    ? [{ stages: [AuthType.Sso] } satisfies UIAFlow]
+    : []
+
   if (err.httpStatus === 403) {
-    const loginFlows = await getLoginFlows(homeserver)
-    if (!loginFlows) throw new RegistrationDisabledError()
+    if (!ssoFlow.length) throw new RegistrationDisabledError()
+    return { flows: ssoFlow }
+  }
 
-    const hasSSO = loginFlows.flows.some(f => f.type === AuthType.Sso)
-    if (!hasSSO) throw new RegistrationDisabledError()
+  if (err.httpStatus !== 401 || !err.data?.flows) throw err
 
-    return [{ stages: [AuthType.Sso] }] satisfies UIAFlow[]
-  } else if (err.httpStatus !== 401 || !err.data?.flows) throw err
-
-  const data = err.data as IAuthData
-
-  return data.flows
+  return { flows: [...err.data.flows, ...ssoFlow], params: err.data.params, session: err.data.session }
 }
 
 export async function getLoginFlows(homeserver: string) {
