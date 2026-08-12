@@ -1,11 +1,14 @@
 <script lang="ts">
-import { AuthType } from 'matrix-js-sdk'
+import { AuthType, MatrixError, SSOAction } from 'matrix-js-sdk'
 
-import { PageRegisterFlowEmail } from '#components'
+import { AuthSsoRedirectButton, PageRegisterFlowEmail } from '#components'
 import { injectAuthLayoutContext } from '~/layouts/auth.vue'
 
-const flowFormComponentMap: Partial<Record<AuthType | (string & {}), Component>> = {
-  [AuthType.Email]: PageRegisterFlowEmail,
+const flowFormComponentMap: Partial<
+  Record<AuthType | (string & {}), { component: Component; props?: Record<string, unknown> }>
+> = {
+  [AuthType.Email]: { component: PageRegisterFlowEmail },
+  [AuthType.Sso]: { component: AuthSsoRedirectButton, props: { action: SSOAction.REGISTER } },
 }
 </script>
 
@@ -14,30 +17,58 @@ definePageMeta({
   layout: 'auth',
 })
 
-const { editableInput: homeserverInput, registrationDisabled, urlParams } = injectAuthLayoutContext()
+const { editableInput: homeserverInput, registrationDisabled, urlParams, setFormError } = injectAuthLayoutContext()
 
-const { data: registrationFlows } = useHomeserverRegistration(homeserverInput, false)
+const { data: registrationFlows, error: registrationFlowsError } = useHomeserverRegistration(homeserverInput, false)
 
 const compatibleFlows = computed(() =>
-  registrationFlows.value?.filter(f => f.stages.every(s => MATRIX.AUTH.UIA.SUPPORTED_STAGES.has(s))),
+  registrationFlows.value?.flows?.filter(f => f.stages.every(s => MATRIX.AUTH.UIA.SUPPORTED_STAGES.has(s))),
 )
 const renderableFlows = computed(() =>
   compatibleFlows.value?.map(f => ({
+    entry: flowFormComponentMap[f.stages.find(s => s in flowFormComponentMap)!],
     rawStages: f.stages,
-    renderableStages: f.stages.filter(s => objectKeys(flowFormComponentMap).includes(s)),
   })),
+)
+
+whenever(
+  () => registrationFlowsError.value instanceof MatrixError,
+  () => {
+    const { errcode } = registrationFlowsError.value as MatrixError
+    if (errcode === MatrixErrorCode.M_UNKNOWN) {
+      setFormError({
+        message: 'This homeserver returned an error. Try again shortly, or try a different one',
+        title: 'Unknown error',
+      })
+    }
+  },
+  {
+    immediate: true,
+  },
 )
 </script>
 
 <template>
   <template v-if="!registrationDisabled">
-    <template v-for="(flow, key) in renderableFlows" :key>
-      <component :is="flowFormComponentMap[flow.renderableStages[0]!]" />
-    </template>
+    <template v-if="renderableFlows?.length">
+      <template v-for="(flow, i) in renderableFlows" :key="i">
+        <div v-if="i > 0" class="my-1 flex gap-3 items-center">
+          <USeparator class="shrink" />
+          <span class="text-xs text-muted-foreground shrink-0">or</span>
+          <USeparator class="shrink" />
+        </div>
 
-    <p class="text-base text-muted-foreground mt-2 text-center">
+        <component :is="flow.entry!.component" v-bind="flow.entry!.props || {}" :homeserver="homeserverInput" />
+      </template>
+    </template>
+    <p v-else class="italic text-muted-foreground text-base">
+      Magi currently does not support the authentication flows available on this homeserver. Feel free to try a
+      different one
+    </p>
+
+    <p class="text-base mt-2 text-center">
       Have an account?
-      <UButton variant="link" as-child class="text-base text-muted-foreground">
+      <UButton variant="link" as-child class="text-base">
         <NuxtLink :to="{ name: 'login', query: { ...urlParams } }">Login</NuxtLink>
       </UButton>
     </p>
@@ -49,7 +80,7 @@ const renderableFlows = computed(() =>
     <UAlertContent>
       <UAlertTitle>Registrations disabled</UAlertTitle>
       <UAlertDescription>
-        Registrations are disabled on this homeserver. Login instead, or choose a different one.
+        Registrations are disabled on this homeserver. Login instead, or choose a different one
       </UAlertDescription>
 
       <UAlertFooter>

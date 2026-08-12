@@ -46,14 +46,11 @@ watch(dataUpdatedAt, () => (contextError.value = undefined))
       <UTooltipTrigger as-child>
         <p
           :class="
-            cn(
-              'text-center mt-2 text-base text-muted-foreground w-fit mx-auto',
-              registrationDisabled && 'decoration-line-through opacity-50',
-            )
+            cn('text-center mt-2 text-base w-fit mx-auto', registrationDisabled && 'decoration-line-through opacity-50')
           "
         >
           Need an account?
-          <UButton :disabled="registrationDisabled" variant="link" as-child class="text-base text-muted-foreground">
+          <UButton :disabled="registrationDisabled" variant="link" as-child class="text-base">
             <NuxtLink inherit :to="{ name: 'register', query: { ...urlParams } }">Register</NuxtLink>
           </UButton>
         </p>
