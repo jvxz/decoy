@@ -1,6 +1,6 @@
-import type { MatrixClient } from 'matrix-js-sdk'
+import type { LoginResponse, MatrixClient } from 'matrix-js-sdk'
 
-import { MatrixError } from 'matrix-js-sdk'
+import { createClient, MatrixError } from 'matrix-js-sdk'
 
 const emailsInUseCache = new Set<string>()
 /**
@@ -25,4 +25,36 @@ export async function isEmailInUse(client: MatrixClient, email: string, clientSe
   }
 
   return { inUse: false, sid: res?.sid } as const
+}
+
+export async function loginUser(req: LoginRequest) {
+  const homeserver =
+    req.type === 'm.login.password' ? await resolveHomeserverBaseUrl(normalizeHomeserverUrl(req.baseUrl)) : req.baseUrl
+
+  const tempClient = createClient({
+    baseUrl: homeserver,
+  })
+
+  const [loginError, loginRes] = await attemptAsync<LoginResponse, MatrixError>(() =>
+    tempClient.loginRequest({
+      ...req,
+      refresh_token: true,
+    }),
+  )
+
+  if (loginError) {
+    return loginError
+  }
+
+  const authPayload: AuthPayload = {
+    accessToken: loginRes.access_token,
+    baseUrl: homeserver,
+    deviceId: loginRes.device_id,
+    expiresAt: loginRes.expires_in_ms ? Date.now() + loginRes.expires_in_ms : undefined,
+    refreshToken: loginRes.refresh_token,
+    userId: loginRes.user_id,
+  }
+  await idb.setItem<AuthPayload>('auth', authPayload)
+
+  return authPayload
 }
