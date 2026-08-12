@@ -73,6 +73,12 @@ watchEffect(() => {
   if (isPendingRegistrationCapability.value) return (pendingText.value = 'Fetching registration capability...')
 })
 
+const router = useRouter()
+router.afterEach(() => {
+  formError.value = undefined
+  error.value = undefined
+})
+
 provideAuthLayoutContext({
   clearFormError: () => (formError.value = undefined),
   editableInput,
@@ -122,7 +128,7 @@ provideAuthLayoutContext({
         </UAlertContent>
       </UAlertRoot>
 
-      <template v-else-if="isValid">
+      <template v-else-if="isValid && !isLoading">
         <UAlertRoot v-if="formError" variant="danger">
           <UAlertIcon name="tabler:exclamation-circle" class="shrink-0" />
 
