@@ -54,7 +54,7 @@ const emits = defineEmits<UiaDialogEmits>()
 
 const isFormValid = ref(false)
 
-const { authFlows, authInstance, authState, chosenFlow, dialogOpen, isBusy, submitStage } = useInteractiveAuth()
+const { authInstance, authState, dialogOpen, isBusy, submitStage } = useInteractiveAuth()
 
 const authDict = ref<AuthDict>({})
 
@@ -91,16 +91,7 @@ const currentState = computed(() => (authState.value?.nextStage ? flowMap[authSt
         </UAlertDialogDescription>
       </UAlertDialogHeader>
 
-      <template v-if="authInstance && !chosenFlow">
-        <UButtonCardRoot v-for="({ stages }, key) in authFlows" :key>
-          <UButtonCardIcon :name="flowMap[stages[0]!]!.icon!" />
-          <UButtonCardContent>
-            <UButtonCardTitle> </UButtonCardTitle>
-          </UButtonCardContent>
-        </UButtonCardRoot>
-      </template>
-
-      <component :is="flowMap[authState.nextStage]?.component || 'div'" v-else-if="authState && chosenFlow" />
+      <component :is="currentState?.component || 'div'" />
 
       <UAlertDialogFooter>
         <UAlertDialogCancel> Cancel </UAlertDialogCancel>
