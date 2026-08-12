@@ -1,4 +1,4 @@
-import type { MatrixError, UIAFlow } from 'matrix-js-sdk'
+import type { IAuthData, MatrixError } from 'matrix-js-sdk'
 
 export function useHomeserverRegistration(
   homeserverUrl: MaybeRefOrGetter<string | undefined>,
@@ -7,7 +7,7 @@ export function useHomeserverRegistration(
   const homeserverUrlRef = toRef(homeserverUrl)
   const enabledRef = toRef(enabled)
 
-  const query = useQuery<UIAFlow[] | null | undefined, RegistrationDisabledError | MatrixError>({
+  const query = useQuery<IAuthData | null | undefined, RegistrationDisabledError | MatrixError>({
     enabled: enabledRef,
     queryFn: async () => {
       const url = homeserverUrlRef.value
