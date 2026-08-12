@@ -8,7 +8,7 @@ const requestUrl = useRequestURL()
 const redirectUrl = computed(() => new URL(router.resolve('/login/sso').href, requestUrl.origin).href)
 const resolvedHomeserverBaseUrl = useResolveHomeserverBaseUrl(homeserverUrl)
 
-const ssoLoginUrl = useSsoUrl(homeserverUrl, redirectUrl)
+const ssoLoginUrl = useSsoUrl(resolvedHomeserverBaseUrl, redirectUrl)
 
 const handleClick = async () => {
   if (isLoggingIn.value) return
