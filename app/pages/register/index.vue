@@ -17,7 +17,7 @@ definePageMeta({
   layout: 'auth',
 })
 
-const { editableInput: homeserverInput, registrationDisabled, urlParams, setFormError } = injectAuthLayoutContext()
+const { editableInput: homeserverInput, registrationDisabled, setFormError, urlParams } = injectAuthLayoutContext()
 
 const { data: registrationFlows, error: registrationFlowsError } = useHomeserverRegistration(homeserverInput, false)
 
@@ -61,7 +61,7 @@ whenever(
         <component :is="flow.entry!.component" v-bind="flow.entry!.props || {}" :homeserver="homeserverInput" />
       </template>
     </template>
-    <p v-else class="italic text-muted-foreground text-base">
+    <p v-else class="text-base text-muted-foreground italic">
       Magi currently does not support the authentication flows available on this homeserver. Feel free to try a
       different one
     </p>
