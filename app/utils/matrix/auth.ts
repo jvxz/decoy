@@ -35,7 +35,7 @@ export async function loginUser(req: LoginRequest) {
     baseUrl: homeserver,
   })
 
-  const [loginError, loginRes] = await attemptAsync<LoginResponse, MatrixError>(() =>
+  const [loginError, loginRes] = await attemptAsync<LoginResponse, Error>(() =>
     tempClient.loginRequest({
       ...req,
       refresh_token: true,
@@ -43,7 +43,12 @@ export async function loginUser(req: LoginRequest) {
   )
 
   if (loginError) {
-    return loginError
+    return loginError instanceof MatrixError
+      ? loginError
+      : new MatrixError({
+          errcode: MatrixErrorCode.M_UNKNOWN,
+          error: loginError.message,
+        })
   }
 
   const authPayload: AuthPayload = {
