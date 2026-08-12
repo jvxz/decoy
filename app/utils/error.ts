@@ -42,6 +42,7 @@ export enum MatrixErrorCode {
 export enum ErrorCode {
   InvalidUrl = 'INVALID_URL',
   InvalidHomeserver = 'INVALID_HOMESERVER',
+  Unknown = 'UNKNOWN',
 }
 
 export interface $ErrorOptions {
