@@ -1,7 +1,4 @@
-import type { ICreateClientOpts, LoginResponse, MatrixClient, LoginRequest as MatrixLoginRequest } from 'matrix-js-sdk'
-import type { MatrixError } from 'matrix-js-sdk'
-
-import { createClient } from 'matrix-js-sdk'
+import type { ICreateClientOpts, MatrixClient, LoginRequest as MatrixLoginRequest } from 'matrix-js-sdk'
 
 export type AuthPayload = Pick<
   ICreateClientOpts,
@@ -32,42 +29,8 @@ export function useAuth() {
   const { client } = useMatrixClient()
   const { attemptAction } = useInteractiveAuth()
 
-  const setAuthData = (authPayload: AuthPayload) => idb.setItem<AuthPayload>('auth', authPayload)
-
   const login = useMutation({
-    mutationFn: async (req: LoginRequest) => {
-      const homeserver =
-        req.type === 'm.login.password'
-          ? await resolveHomeserverBaseUrl(normalizeHomeserverUrl(req.baseUrl))
-          : req.baseUrl
-
-      const tempClient = createClient({
-        baseUrl: homeserver,
-      })
-
-      const [loginError, loginRes] = await attemptAsync<LoginResponse, MatrixError>(() =>
-        tempClient.loginRequest({
-          ...req,
-          refresh_token: true,
-        }),
-      )
-
-      if (loginError) {
-        return loginError
-      }
-
-      const authPayload: AuthPayload = {
-        accessToken: loginRes.access_token,
-        baseUrl: homeserver,
-        deviceId: loginRes.device_id,
-        expiresAt: loginRes.expires_in_ms ? Date.now() + loginRes.expires_in_ms : undefined,
-        refreshToken: loginRes.refresh_token,
-        userId: loginRes.user_id,
-      }
-      await setAuthData(authPayload)
-
-      return authPayload
-    },
+    mutationFn: loginUser,
     mutationKey: $mk.login(),
   })
 
@@ -109,7 +72,7 @@ export function useAuth() {
         userId: res.user_id,
       }
 
-      await setAuthData(payload)
+      await idb.setItem<AuthPayload>('auth', payload)
 
       return payload
     },
@@ -122,6 +85,5 @@ export function useAuth() {
     login,
     logout,
     register,
-    setAuthData,
   }
 }
