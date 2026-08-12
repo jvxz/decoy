@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import { createClient } from 'matrix-js-sdk'
-
 import { injectAuthLayoutContext } from '~/layouts/auth.vue'
 
 const { editableInput: homeserverUrl, isLoggingIn, isSSONavigating } = injectAuthLayoutContext()
@@ -10,15 +8,7 @@ const requestUrl = useRequestURL()
 const redirectUrl = computed(() => new URL(router.resolve('/login/sso').href, requestUrl.origin).href)
 const resolvedHomeserverBaseUrl = useResolveHomeserverBaseUrl(homeserverUrl)
 
-const { data: ssoLoginUrl } = useQuery({
-  queryFn: () => {
-    if (!resolvedHomeserverBaseUrl.value) return
-    const client = createClient({ baseUrl: resolvedHomeserverBaseUrl.value })
-    return client.getSsoLoginUrl(redirectUrl.value)
-  },
-  queryKey: $qk.homeserverSSOUrl(homeserverUrl),
-  watch: [redirectUrl],
-})
+const ssoLoginUrl = useSsoUrl(homeserverUrl, redirectUrl)
 
 const handleClick = async () => {
   if (isLoggingIn.value) return
