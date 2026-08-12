@@ -57,7 +57,7 @@ watch(
 )
 
 async function handleSubmit() {
-  if (r$.$invalid) return
+  if (r$.$invalid || isRegistering.value || isLoggingIn.value) return
 
   clearFormError()
 
