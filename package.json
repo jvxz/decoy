@@ -70,6 +70,7 @@
     "nuxt-twemoji": "4.0.6",
     "nuxt-vitalizer": "2.0.0",
     "quick-lru": "^7.3.0",
+    "rangi": "^2.2.0",
     "reka-ui": "^2.10.3",
     "tailwind-merge": "^3.6.0",
     "tailwind-variants": "^3.3.1",
