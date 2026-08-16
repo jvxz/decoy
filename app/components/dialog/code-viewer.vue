@@ -14,7 +14,7 @@ const delegated = reactiveOmit(props, ['open', 'lang', 'code'])
 
 <template>
   <UDialogRoot v-bind="delegated" v-model:open="open">
-    <UDialogContent class="p-0 border-0 sm:max-w-52vw! sm:max-h-75%! gap-0 w-full">
+    <UDialogContent class="p-0 border-0 gap-0 w-full sm:max-h-75%! sm:max-w-52vw!">
       <!-- <UDialogHeader>
         <UDialogTitle> {{ label }} </UDialogTitle>
         <VisuallyHidden>

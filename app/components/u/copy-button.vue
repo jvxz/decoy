@@ -43,9 +43,9 @@ const delegated = reactiveOmit(props, ['class', 'value'])
     :title="$attrs.title ?? 'Click to copy'"
     :aria-label="copied ? 'Copied' : 'Copy'"
     :disabled="copied"
-    @click="copyValue(toValue(props.value) ?? '')"
     data-slot="copy-button"
     :class="cn(copied && !disabled && 'disabled:opacity-100', props.class)"
+    @click="copyValue(toValue(props.value) ?? '')"
   >
     <AnimatePresence :initial="false" mode="sync">
       <motion.div
@@ -54,7 +54,7 @@ const delegated = reactiveOmit(props, ['class', 'value'])
         :animate="animate"
         :exit="exit"
         :transition="transition"
-        class="absolute size-fit aspect-square"
+        class="size-fit aspect-square absolute"
       >
         <Icon name="tabler:check" class="text-foreground" />
       </motion.div>
@@ -64,7 +64,7 @@ const delegated = reactiveOmit(props, ['class', 'value'])
         :animate="animate"
         :exit="exit"
         :transition="transition"
-        class="absolute size-fit aspect-square"
+        class="size-fit aspect-square absolute"
       >
         <Icon name="tabler:copy" />
       </motion.div>

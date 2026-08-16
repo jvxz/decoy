@@ -43,7 +43,6 @@ const { isYOverflowed } = useElementOverflow(codeRoot)
 
 <template>
   <UCard
-    @dblclick="console.log(JSON.stringify(input))"
     v-bind="delegated"
     data-slot="codeblock-root"
     :class="cn('p-0 bg-surface gap-0 shadow-none text-sm overflow-clip', props.class, ui?.root)"
@@ -51,6 +50,7 @@ const { isYOverflowed } = useElementOverflow(codeRoot)
       '--_padding': `calc(var(--spacing) * ${props.padding})`,
       '--_numbers-display': props.numbers ? '' : 'none',
     }"
+    @dblclick="console.log(JSON.stringify(input))"
   >
     <header
       v-if="header"
@@ -60,13 +60,13 @@ const { isYOverflowed } = useElementOverflow(codeRoot)
     >
       <span class="ps-1 select-none">{{ resolvedLang }}</span>
 
-      <div class="flex items-center gap-px">
+      <div class="flex gap-px items-center">
         <UButton
           v-if="dialog"
-          @click="openDialog('codeViewer', { code: formattedInput, lang: resolvedLang })"
           title="View in dialog"
           size="icon-xs"
           variant="ghost"
+          @click="openDialog('codeViewer', { code: formattedInput, lang: resolvedLang })"
         >
           <Icon name="tabler:code" />
         </UButton>
@@ -95,7 +95,7 @@ const { isYOverflowed } = useElementOverflow(codeRoot)
         "
       />
 
-      <div ref="code" v-html="code" class="contents" />
+      <div ref="code" class="contents" v-html="code" />
     </div>
   </UCard>
 </template>
