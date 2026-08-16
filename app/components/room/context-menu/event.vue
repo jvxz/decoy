@@ -62,7 +62,7 @@ const firstFourRecentReactions = computed(() => sortedRecentReactions.value.slic
 
     <UContextMenuItem
       v-if="$settings.value.advanced.developerMode"
-      @click="openDialog('codeViewer', { lang: 'json', code: JSON.stringify(props.event.getContent(), null, 2) })"
+      @select="openDialog('codeViewer', { lang: 'json', code: JSON.stringify(props.event.getContent(), null, 2) })"
     >
       View message source
     </UContextMenuItem>
