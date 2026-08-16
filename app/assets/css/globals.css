@@ -45,6 +45,8 @@
   --muted-foreground: var(--neutral-200);
   --accent-foreground: var(--neutral-50);
 
+  --codeblock: var(--neutral-950);
+
   --success: oklch(79% 0.21 147);
 
   --warn: oklch(73% 0.13 70);
