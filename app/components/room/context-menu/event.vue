@@ -5,6 +5,8 @@ import { ContextMenuSubContent } from '#components'
 
 const props = defineProps<ContextMenuRegions['event']>()
 
+const { openDialog } = useGlobalDialog()
+
 const { openReactionViewer } = useRoomEventReactionsViewer()
 const { close } = useContextMenuRegion('event')
 
@@ -56,6 +58,13 @@ const firstFourRecentReactions = computed(() => sortedRecentReactions.value.slic
     </UContextMenuSub>
     <UContextMenuItem :disabled="!reactions || !reactions.size" @select="openReactionViewer(roomId, event)">
       View reactions
+    </UContextMenuItem>
+
+    <UContextMenuItem
+      v-if="$settings.value.advanced.developerMode"
+      @click="openDialog('codeViewer', { lang: 'json', code: JSON.stringify(props.event.getContent(), null, 2) })"
+    >
+      View message source
     </UContextMenuItem>
   </template>
 </template>
