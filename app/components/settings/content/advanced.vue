@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 const { client } = useMatrixClient()
+const settings = useSettings()
 const { notify, notifyError } = useNotifications()
 
 const open = ref(false)
@@ -74,5 +75,11 @@ const { executeImmediate: resync, isLoading: isResyncing } = useAsyncState(
         </UAlertDialogTrigger>
       </UAlertDialogRoot>
     </SettingsFormPrimitive>
+
+    <SettingsFormSwitch
+      v-model:model-value="settings.advanced.developerMode"
+      :label="SETTINGS_ITEM_METADATA.advanced.developerMode.title"
+      :description="SETTINGS_ITEM_METADATA.advanced.developerMode.description"
+    />
   </SettingsContentLayout>
 </template>

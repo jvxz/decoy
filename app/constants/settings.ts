@@ -20,6 +20,7 @@ export interface Settings {
   }
   advanced: {
     resync: undefined
+    developerMode: boolean
   }
   messaging: {
     typingEvents: boolean
@@ -33,6 +34,7 @@ export const DEFAULT_SETTINGS: EnforcedSettingsKeys<Settings> = {
     uiAnimations: true,
   },
   advanced: {
+    developerMode: false,
     resync: undefined,
   },
   appearance: {
@@ -87,6 +89,10 @@ export const SETTINGS_ITEM_METADATA: SettingsItemMetadata = {
     },
   },
   advanced: {
+    developerMode: {
+      description: 'Enable developer mode',
+      title: 'Developer mode',
+    },
     resync: {
       description:
         'Delete all cached data in Magi and fetch fresh data from the homeserver. This may fix some issues if you are having issues with state in the app.',
