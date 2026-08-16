@@ -45,6 +45,8 @@
   --muted-foreground: var(--neutral-200);
   --accent-foreground: var(--neutral-50);
 
+  --codeblock: var(--neutral-950);
+
   --success: oklch(79% 0.21 147);
 
   --warn: oklch(73% 0.13 70);
@@ -86,7 +88,7 @@ html {
 }
 
 body {
-  @apply bg-background text-foreground font-sans text-pretty min-h-screen underline-offset-2 font-normal tracking-normal select-none;
+  @apply bg-background text-foreground font-sans text-pretty min-h-screen underline-offset-2 font-normal tracking-normal;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   letter-spacing: 0.0125em;
