@@ -101,6 +101,7 @@ export default defineConfig({
       background: 'var(--background)',
       border: 'var(--border)',
       'border-strong': 'var(--border-strong)',
+      codeblock: 'var(--codeblock)',
       danger: 'var(--danger)',
       'danger-foreground': 'var(--danger-foreground)',
       foreground: 'var(--foreground)',

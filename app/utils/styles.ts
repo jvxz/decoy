@@ -16,6 +16,7 @@ export const interactiveBase = tv({
       default: 'h-8 px-2.5 py-0.75 text-sm',
       icon: 'aspect-square size-8',
       'icon-sm': 'aspect-square size-7 text-xs',
+      'icon-xs': 'aspect-square size-6 text-xs',
       lg: 'h-10 px-5 text-base text-base',
       sm: 'h-7 px-2.5 py-1 text-xs',
     },

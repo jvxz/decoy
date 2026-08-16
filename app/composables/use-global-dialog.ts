@@ -1,4 +1,5 @@
 import type { Room } from 'matrix-js-sdk'
+import type { ShjLanguage } from 'rangi'
 
 import type { MatrixAvatarProps } from '~/components/matrix/avatar.vue'
 
@@ -8,6 +9,10 @@ export interface GlobalDialogMap {
     room: Room
   }
   avatar: Pick<MatrixAvatarProps, 'user' | 'room' | 'src'> & { label: string }
+  codeViewer: {
+    code: string
+    lang?: ShjLanguage | (string & {})
+  }
 }
 export type GlobalDialog = keyof GlobalDialogMap
 
