@@ -50,7 +50,6 @@ const { isYOverflowed } = useElementOverflow(codeRoot)
       '--_padding': `calc(var(--spacing) * ${props.padding})`,
       '--_numbers-display': props.numbers ? '' : 'none',
     }"
-    @dblclick="console.log(JSON.stringify(input))"
   >
     <header
       v-if="header"
