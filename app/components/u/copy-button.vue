@@ -1,11 +1,20 @@
 <script lang="ts" setup>
 import type { Transition } from 'motion-v'
+import type { HTMLAttributes } from 'vue'
 
 import { motion } from 'motion-v'
 
-const props = defineProps<{
+import type { ButtonProps } from './button.vue'
+
+export interface UCopyButtonProps extends ButtonProps {
+  class?: HTMLAttributes['class']
   value: MaybeRefOrGetter<string | undefined>
-}>()
+}
+
+const props = withDefaults(defineProps<UCopyButtonProps>(), {
+  size: 'icon',
+  variant: 'ghost',
+})
 
 const animate = { opacity: 1, scale: 1 }
 const exit = { opacity: 0, scale: 0.5 }
@@ -24,17 +33,19 @@ function copyValue(value: string) {
   copied.value = true
   start()
 }
+
+const delegated = reactiveOmit(props, ['class', 'value'])
 </script>
 
 <template>
   <UButton
-    v-bind="$attrs"
-    variant="ghost"
-    class="size-7"
-    size="icon"
+    v-bind="delegated"
+    :title="$attrs.title ?? 'Click to copy'"
     :aria-label="copied ? 'Copied' : 'Copy'"
     :disabled="copied"
     @click="copyValue(toValue(props.value) ?? '')"
+    data-slot="copy-button"
+    :class="cn(copied && !disabled && 'disabled:opacity-100', props.class)"
   >
     <AnimatePresence :initial="false" mode="sync">
       <motion.div
@@ -43,9 +54,9 @@ function copyValue(value: string) {
         :animate="animate"
         :exit="exit"
         :transition="transition"
-        class="h-5 absolute"
+        class="absolute size-fit aspect-square"
       >
-        <Icon name="tabler:check" class="!size-4" />
+        <Icon name="tabler:check" class="text-foreground" />
       </motion.div>
       <motion.div
         v-else
@@ -53,9 +64,9 @@ function copyValue(value: string) {
         :animate="animate"
         :exit="exit"
         :transition="transition"
-        class="h-5 absolute"
+        class="absolute size-fit aspect-square"
       >
-        <Icon name="tabler:copy" class="!size-4" />
+        <Icon name="tabler:copy" />
       </motion.div>
     </AnimatePresence>
   </UButton>
