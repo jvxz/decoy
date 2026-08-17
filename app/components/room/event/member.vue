@@ -1,22 +1,16 @@
 <script lang="ts" setup>
-import type { MatrixEvent } from 'matrix-js-sdk'
-
 import { EventType } from 'matrix-js-sdk'
 
-import type { RoomEventProps } from '../event.vue'
+import { injectEventListItemContext } from './generic.vue'
 
-export interface RoomMemberEventProps extends Pick<RoomEventProps, 'grouped'> {
-  event: MatrixEvent
-}
-
-const props = defineProps<RoomMemberEventProps>()
+const { event } = injectEventListItemContext()
 
 assert(
-  props.event.getType() === EventType.RoomMember,
+  event.value.getType() === EventType.RoomMember,
   'Event provided in PageRoomEventMember is not a RoomMember event',
 )
 const body = computed(() => {
-  const parsed = parseMembershipEvent(props.event)
+  const parsed = parseMembershipEvent(event.value)
   if (parsed.type === 'ban') {
     return {
       icon: 'tabler:hammer',
@@ -125,9 +119,7 @@ const body = computed(() => {
 
 <template>
   <RoomEvent
-    :room="props.event.getRoomId()"
-    :event="props.event"
-    :event-type="props.event.getType()"
+    :event-type="event.getType()"
     data-event-type="member"
     class="flex gap-2 items-center"
   >

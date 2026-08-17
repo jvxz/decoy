@@ -1,22 +1,19 @@
 <script lang="ts" setup>
-import type { MatrixEvent, Room } from 'matrix-js-sdk'
 import type { PopoverContentProps } from 'reka-ui'
 
 import { MsgType } from 'matrix-js-sdk'
 
-const props = defineProps<{
-  event: MatrixEvent
-  grouped: boolean
-  room: Room
-}>()
+import { injectEventListItemContext } from './generic.vue'
 
-const { data: replyEvent, isLoading: isReplyEventLoading, isReplyEvent } = useRoomReplyEvent(props.event, props.room)
+const { event, grouped, room } = injectEventListItemContext()
 
-const userId = computed(() => props.event.getSender())
-const { content: eventContent } = useEventContent(() => props.event)
+const { data: replyEvent, isLoading: isReplyEventLoading, isReplyEvent } = useRoomReplyEvent(event.value, room.value)
+
+const userId = computed(() => event.value.getSender())
+const { content: eventContent } = useEventContent(event)
 const eventBody = computed(() => trimReplyFromBody(eventContent.value?.body))
 const eventProfile = useUserProfile(userId)
-const eventMember = useRoomMember(() => props.room.roomId, userId)
+const eventMember = useRoomMember(() => room.value.roomId, userId)
 
 const { content: replyEventContent, isRedacted: isReplyEventRedacted } = useEventContent(() => replyEvent.value)
 const replyEventBody = computed(() =>
@@ -24,11 +21,8 @@ const replyEventBody = computed(() =>
 )
 const replyEventProfile = useUserProfile(() => replyEvent.value?.getSender())
 
-const hasReactions = useRoomEventHasReactions(
-  () => props.room,
-  () => props.event,
-)
-const isDecrypting = computed(() => props.event.isBeingDecrypted())
+const hasReactions = useRoomEventHasReactions(room, event)
+const isDecrypting = computed(() => event.value.isBeingDecrypted())
 const isJumboEmoji = computed(() => {
   const body = eventBody.value?.trim()
   if (!body) return false
@@ -40,13 +34,12 @@ const isJumboEmoji = computed(() => {
 })
 
 const shouldRender = computed(() => {
-  const { event } = props
-  const content = event.getContent()
+  const content = event.value.getContent()
 
   const type = content.msgtype
 
   const isMsg = type === MsgType.Text || type === 'm.bad.encrypted'
-  const isEdit = isEditEvent(event)
+  const isEdit = isEditEvent(event.value)
 
   return (isMsg || isDecrypting.value) && !isEdit
 })
@@ -62,11 +55,7 @@ const contentProps: PopoverContentProps = {
 <template>
   <RoomEvent
     v-if="shouldRender"
-    :room="props.room"
-    :event="props.event"
-    :event-id="props.event.getId()"
-    :event-type="props.event.getType()"
-    :grouped
+    :event-type="event.getType()"
     side="right"
     class="py-0.5 w-full"
   >
@@ -137,7 +126,7 @@ const contentProps: PopoverContentProps = {
             <p v-else class="italic">Decrypting message...</p>
           </RoomEventMessageContent>
 
-          <RoomEventMessageReactions v-if="hasReactions" :room :event />
+          <RoomEventMessageReactions v-if="hasReactions" />
         </div>
       </div>
     </RoomEventMessageRoot>
