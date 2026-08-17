@@ -1,19 +1,21 @@
 <script lang="ts" setup>
-import type { EventType, MatrixEvent } from 'matrix-js-sdk'
+import type { EventType } from 'matrix-js-sdk'
 import type { PrimitiveProps } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
 
+import { injectEventListItemContext } from './event/generic.vue'
+
 export type RoomEventProps = PrimitiveProps & {
   class?: HTMLAttributes['class']
-  event?: MatrixEvent | undefined
   eventType: EventType | string
-  grouped?: boolean
-  room: MaybeRoomOrId | undefined
+  side?: string
 }
 
 withDefaults(defineProps<RoomEventProps>(), {
   as: 'div',
 })
+
+const { event, grouped, room } = injectEventListItemContext()
 </script>
 
 <template>
@@ -26,7 +28,7 @@ withDefaults(defineProps<RoomEventProps>(), {
       roomId: resolveRoomId(room),
     }"
     data-testid="event-root"
-    :data-event-id="event?.getId()"
+    :data-event-id="event.getId()"
     data-event
     :data-event-type="eventType"
     :class="
