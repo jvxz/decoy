@@ -1,15 +1,9 @@
 <script lang="ts" setup>
-import type { MatrixEvent, Room } from 'matrix-js-sdk'
+import { injectEventListItemContext } from '../generic.vue'
 
-const props = defineProps<{
-  room: Room
-  event: MatrixEvent
-}>()
+const { event, room } = injectEventListItemContext()
 
-const { reactions } = useRoomEventReactions.provide(
-  () => props.room,
-  () => props.event,
-)
+const { reactions } = useRoomEventReactions.provide(room, event)
 </script>
 
 <template>
