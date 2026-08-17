@@ -118,11 +118,7 @@ const body = computed(() => {
 </script>
 
 <template>
-  <RoomEvent
-    :event-type="event.getType()"
-    data-event-type="member"
-    class="flex gap-2 items-center"
-  >
+  <RoomEvent :event-type="event.getType()" data-event-type="member" class="flex gap-2 items-center">
     <Icon :name="body.icon" class="text-muted-foreground size-4" />
     <p class="text-sm text-muted-foreground">
       <span v-if="body.sender" class="font-medium">{{ body.sender }}</span>

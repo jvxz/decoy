@@ -53,12 +53,7 @@ const contentProps: PopoverContentProps = {
 </script>
 
 <template>
-  <RoomEvent
-    v-if="shouldRender"
-    :event-type="event.getType()"
-    side="right"
-    class="py-0.5 w-full"
-  >
+  <RoomEvent v-if="shouldRender" :event-type="event.getType()" side="right" class="py-0.5 w-full">
     <RoomEventMessageRoot class="flex flex-col gap-px">
       <div v-if="isReplyEvent" class="text-sm flex gap-1.5 items-center relative">
         <Icon name="custom:reply" class="text-muted-foreground shrink-0 h-6 w-12 translate-x-2.5 translate-y-1" />

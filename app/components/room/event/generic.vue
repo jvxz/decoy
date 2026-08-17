@@ -30,8 +30,6 @@ const type = computed(() => props.event.getType())
 <template>
   <RoomEventDateSeparator v-if="dateDiffed" :event />
 
-  <RoomEventMessage
-    v-if="type === EventType.RoomMessage || type === EventType.RoomMessageEncrypted"
-  />
+  <RoomEventMessage v-if="type === EventType.RoomMessage || type === EventType.RoomMessageEncrypted" />
   <RoomEventMember v-else-if="type === EventType.RoomMember" />
 </template>
