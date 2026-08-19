@@ -23,18 +23,19 @@ export function useRoomEvents(
     },
   })
 
-  const sync = () => {
-    const liveEvents = room.value.getLiveTimeline().getEvents()
-
+  const selectEvents = (liveEvents: MatrixEvent[] | undefined) => {
     const cloned = [...(liveEvents ?? [])]
-    if (!opts?.filter) return (events.value = cloned)
+    return opts?.filter ? filterMatrixEvents(cloned, opts.filter) : cloned
+  }
 
-    events.value = filterMatrixEvents(cloned, opts.filter)
+  const renderableCount = () => selectEvents(room.value.getLiveTimeline().getEvents()).length
+
+  const sync = () => {
+    events.value = selectEvents(room.value.getLiveTimeline().getEvents())
   }
 
   whenever(room, sync, { immediate: true })
 
-  let currentBatchSize = BATCH_SIZE
   const mutex = new Mutex()
   const {
     isPending: isScrolling,
@@ -53,14 +54,7 @@ export function useRoomEvents(
         const targetRoomId = r.roomId
 
         if (dir === Direction.Backward) {
-          const canLoadMore = await retry(scrollBack, {
-            delay: attempts => {
-              currentBatchSize = currentBatchSize + 10
-              return attempts * 50
-            },
-            retries: 6,
-            shouldRetry: err => err instanceof $Error,
-          })
+          const canLoadMore = await scrollBack()
 
           if (targetRoomId === toValue(room).roomId) isFullyLoaded.value = !canLoadMore
         }
@@ -68,7 +62,6 @@ export function useRoomEvents(
         if (targetRoomId === toValue(room).roomId) sync()
       } finally {
         mutex.release()
-        currentBatchSize = BATCH_SIZE
       }
     },
     mutationKey: $mk.scrollEvents(() => room.value?.roomId),
@@ -116,15 +109,16 @@ export function useRoomEvents(
     if (isFullyLoaded.value) return false
 
     const tl = room.value.getLiveTimeline()
-    const prevLen = tl.getEvents().length
+    const prevRenderable = renderableCount()
 
-    const canLoadMore = await client.value.paginateEventTimeline(tl, { backwards: true, limit: BATCH_SIZE })
-    const newLen = tl.getEvents().length
+    let canLoadMore = true
+    let limit = BATCH_SIZE
+    for (let attempt = 0; attempt < 7; attempt++) {
+      canLoadMore = await client.value.paginateEventTimeline(tl, { backwards: true, limit })
 
-    if (prevLen === newLen) {
-      if (!canLoadMore) return false
+      if (!canLoadMore || renderableCount() !== prevRenderable) break
 
-      throw new $Error({ message: 'previous event length equals new event length', title: 'Unexpected error' })
+      limit += 10
     }
 
     return canLoadMore
