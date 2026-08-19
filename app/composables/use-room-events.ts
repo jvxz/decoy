@@ -36,7 +36,6 @@ export function useRoomEvents(
 
   whenever(room, sync, { immediate: true })
 
-  let currentBatchSize = BATCH_SIZE
   const mutex = new Mutex()
   const {
     isPending: isScrolling,
@@ -55,14 +54,7 @@ export function useRoomEvents(
         const targetRoomId = r.roomId
 
         if (dir === Direction.Backward) {
-          const canLoadMore = await retry(scrollBack, {
-            delay: attempts => {
-              currentBatchSize = currentBatchSize + 10
-              return attempts * 50
-            },
-            retries: 6,
-            shouldRetry: err => err instanceof $Error,
-          })
+          const canLoadMore = await scrollBack()
 
           if (targetRoomId === toValue(room).roomId) isFullyLoaded.value = !canLoadMore
         }
@@ -70,7 +62,6 @@ export function useRoomEvents(
         if (targetRoomId === toValue(room).roomId) sync()
       } finally {
         mutex.release()
-        currentBatchSize = BATCH_SIZE
       }
     },
     mutationKey: $mk.scrollEvents(() => room.value?.roomId),
@@ -120,12 +111,14 @@ export function useRoomEvents(
     const tl = room.value.getLiveTimeline()
     const prevRenderable = renderableCount()
 
-    const canLoadMore = await client.value.paginateEventTimeline(tl, { backwards: true, limit: currentBatchSize })
+    let canLoadMore = true
+    let limit = BATCH_SIZE
+    for (let attempt = 0; attempt < 7; attempt++) {
+      canLoadMore = await client.value.paginateEventTimeline(tl, { backwards: true, limit })
 
-    if (renderableCount() === prevRenderable) {
-      if (!canLoadMore) return false
+      if (!canLoadMore || renderableCount() !== prevRenderable) break
 
-      throw new $Error({ message: 'pagination returned no renderable events', title: 'Unexpected error' })
+      limit += 10
     }
 
     return canLoadMore
