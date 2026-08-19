@@ -23,13 +23,15 @@ export function useRoomEvents(
     },
   })
 
-  const sync = () => {
-    const liveEvents = room.value.getLiveTimeline().getEvents()
-
+  const selectEvents = (liveEvents: MatrixEvent[] | undefined) => {
     const cloned = [...(liveEvents ?? [])]
-    if (!opts?.filter) return (events.value = cloned)
+    return opts?.filter ? filterMatrixEvents(cloned, opts.filter) : cloned
+  }
 
-    events.value = filterMatrixEvents(cloned, opts.filter)
+  const renderableCount = () => selectEvents(room.value.getLiveTimeline().getEvents()).length
+
+  const sync = () => {
+    events.value = selectEvents(room.value.getLiveTimeline().getEvents())
   }
 
   whenever(room, sync, { immediate: true })
@@ -116,15 +118,14 @@ export function useRoomEvents(
     if (isFullyLoaded.value) return false
 
     const tl = room.value.getLiveTimeline()
-    const prevLen = tl.getEvents().length
+    const prevRenderable = renderableCount()
 
-    const canLoadMore = await client.value.paginateEventTimeline(tl, { backwards: true, limit: BATCH_SIZE })
-    const newLen = tl.getEvents().length
+    const canLoadMore = await client.value.paginateEventTimeline(tl, { backwards: true, limit: currentBatchSize })
 
-    if (prevLen === newLen) {
+    if (renderableCount() === prevRenderable) {
       if (!canLoadMore) return false
 
-      throw new $Error({ message: 'previous event length equals new event length', title: 'Unexpected error' })
+      throw new $Error({ message: 'pagination returned no renderable events', title: 'Unexpected error' })
     }
 
     return canLoadMore
