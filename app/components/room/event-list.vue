@@ -1,3 +1,11 @@
+<script lang="ts">
+import type { PaginatedScrollState } from '@jamii/vue-paginated-scroll'
+
+const MAX_CACHED_ROOMS = 32
+
+const scrollStates = new Map<string, PaginatedScrollState>()
+</script>
+
 <script lang="ts" setup>
 import type { Room } from 'matrix-js-sdk'
 
@@ -23,13 +31,17 @@ const { events, getEventVersion, isFullyLoaded, scrollEventsAsync } = useRoomEve
 })
 
 const {
+  captureState,
   isPaginating,
+  reset,
+  restoreState,
   vItem,
   window: paginationWindow,
 } = usePaginatedScroll(containerRef, {
   buffer: 0.5,
   followTail: true,
   getKey: i => i.getId()!,
+  hasMore: dir => (dir === 'backward' ? !isFullyLoaded.value : true),
   maxItems: 120,
   onBeforePaginate: async dir => {
     if (dir !== 'backward') return
@@ -37,7 +49,7 @@ const {
     const atOldestLoaded = paginationWindow.value[0]?.getId() === events.value[0]?.getId()
     if (!atOldestLoaded) return
 
-    await scrollEventsAsync(Direction.Backward)
+    await scrollEventsAsync(Direction.Backward).catch(err => console.warn('[event-list] backward pagination:', err))
   },
   source: events,
   targetHeight: 5,
@@ -46,6 +58,41 @@ const {
 watchEffect(() => {
   isPaginationBusy.value = isPaginating.value.backward || isPaginating.value.forward
 })
+
+const roomId = computed(() => props.room.roomId)
+
+watch(
+  roomId,
+  (_next, prev) => {
+    if (!prev) return
+
+    const state = captureState()
+    if (!state) return
+
+    scrollStates.delete(prev)
+    scrollStates.set(prev, state)
+    if (scrollStates.size > MAX_CACHED_ROOMS) scrollStates.delete(scrollStates.keys().next().value!)
+  },
+  { flush: 'sync' },
+)
+
+let settledRoomId = roomId.value
+
+watch(
+  [roomId, events],
+  async ([id]) => {
+    const needsBootstrap = paginationWindow.value.length === 0 && events.value.length > 0
+    if (id === settledRoomId && !needsBootstrap) return
+
+    settledRoomId = id
+
+    const saved = scrollStates.get(id)
+    if (saved && (await restoreState(saved))) return
+
+    await reset()
+  },
+  { flush: 'post' },
+)
 
 const groupedEvents = useEventGrouping({
   events,
