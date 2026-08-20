@@ -110,6 +110,7 @@ export function useRoomEvents(
 
     const tl = room.value.getLiveTimeline()
     const prevRenderable = renderableCount()
+    const known = new Set(tl.getEvents().map(e => e.getId()))
 
     let canLoadMore = true
     let limit = BATCH_SIZE
@@ -120,6 +121,9 @@ export function useRoomEvents(
 
       limit += 10
     }
+
+    const added = tl.getEvents().filter(e => !known.has(e.getId()))
+    await Promise.all(added.map(e => client.value.decryptEventIfNeeded(e)))
 
     return canLoadMore
   }

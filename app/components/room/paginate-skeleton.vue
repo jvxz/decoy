@@ -2,7 +2,7 @@
 const colCounts = [2, 3, 5, 6]
 const sizes = [48, 64, 80, 96, 112, 128]
 
-const rows = Array.from({ length: 7 }, () => ({
+const rows = Array.from({ length: 2 }, () => ({
   header: sample(sizes),
   lines: Array.from({ length: sample(colCounts) }, () =>
     Array.from({ length: sample(colCounts) }, () => sample(sizes)),

@@ -1,15 +1,14 @@
 <script lang="ts">
-import type { PaginatedScrollState } from '@jamii/vue-paginated-scroll'
+import type { TimelineScrollState } from '~/composables/use-timeline-pagination'
 
 const MAX_CACHED_ROOMS = 32
 
-const scrollStates = new Map<string, PaginatedScrollState>()
+const scrollStates = new Map<string, TimelineScrollState>()
 </script>
 
 <script lang="ts" setup>
 import type { Room } from 'matrix-js-sdk'
 
-import { usePaginatedScroll } from '@jamii/vue-paginated-scroll'
 import { Direction, EventType } from 'matrix-js-sdk'
 
 const props = defineProps<{
@@ -30,33 +29,34 @@ const { events, getEventVersion, isFullyLoaded, scrollEventsAsync } = useRoomEve
   isBusy: isPaginationBusy,
 })
 
+const loadOlder = async () => {
+  await scrollEventsAsync(Direction.Backward).catch(err => console.warn('[event-list] backward pagination:', err))
+}
+
 const {
+  backSentinel,
   captureState,
+  forwardSentinel,
   isPaginating,
   reset,
   restoreState,
-  vItem,
   window: paginationWindow,
-} = usePaginatedScroll(containerRef, {
-  buffer: 0.5,
+} = useTimelinePagination(containerRef, {
   followTail: true,
-  getKey: i => i.getId()!,
-  hasMore: dir => (dir === 'backward' ? !isFullyLoaded.value : true),
-  maxItems: 120,
+  getKey: e => e.getId()!,
+  hasMore: dir => (dir === 'backward' ? !isFullyLoaded.value : false),
   onBeforePaginate: async dir => {
-    if (dir !== 'backward') return
-
-    const atOldestLoaded = paginationWindow.value[0]?.getId() === events.value[0]?.getId()
-    if (!atOldestLoaded) return
-
-    await scrollEventsAsync(Direction.Backward).catch(err => console.warn('[event-list] backward pagination:', err))
+    if (dir === 'backward') await loadOlder()
   },
   source: events,
-  targetHeight: 5,
 })
 
 watchEffect(() => {
   isPaginationBusy.value = isPaginating.value.backward || isPaginating.value.forward
+})
+
+onMounted(() => {
+  if (containerRef.value) initTimelineDebug(containerRef.value, useRoute().query.debug === '1')
 })
 
 const roomId = computed(() => props.room.roomId)
@@ -89,6 +89,8 @@ watch(
     const saved = scrollStates.get(id)
     if (saved && (await restoreState(saved))) return
 
+    if (roomId.value !== id) return
+
     await reset()
   },
   { flush: 'post' },
@@ -112,10 +114,11 @@ const groupedEvents = useEventGrouping({
 
         <RoomPaginateSkeleton v-if="!isFullyLoaded" />
 
+        <div ref="backSentinel" data-ignore />
+
         <div
           v-for="(event, idx) in groupedEvents.events"
           :key="`${event.getId() ?? idx}:${getEventVersion(event.getId() ?? '')}`"
-          v-item="event.getId()!"
           :data-index="idx"
           :data-item-id="event.getId()"
           :style="isTestMode() ? { height: `${(event as any)._size}px` } : undefined"
@@ -127,6 +130,8 @@ const groupedEvents = useEventGrouping({
             :room
           />
         </div>
+        <div ref="forwardSentinel" data-ignore />
+
         <div data-ignore class="h-12" />
       </div>
     </div>
