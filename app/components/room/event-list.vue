@@ -89,6 +89,8 @@ watch(
     const saved = scrollStates.get(id)
     if (saved && (await restoreState(saved))) return
 
+    if (roomId.value !== id) return
+
     await reset()
   },
   { flush: 'post' },

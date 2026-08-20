@@ -36,6 +36,8 @@ export function useTimelinePagination<T>(container: Ref<HTMLElement | null | und
 
   const startKey = ref<string | null>(null)
   const endKey = ref<string | null>(null)
+
+  let generation = 0
   const isPaginating = ref<Record<PaginateDirection, boolean>>({ backward: false, forward: false })
 
   const keyToIndex = computed(() => {
@@ -149,7 +151,7 @@ export function useTimelinePagination<T>(container: Ref<HTMLElement | null | und
     return index === (side === 'start' ? b.s : b.e) ? null : index
   }
 
-  type StepResult = 'busy' | 'exhausted' | 'fetched' | 'no-window' | 'revealed'
+  type StepResult = 'busy' | 'exhausted' | 'fetched' | 'no-window' | 'revealed' | 'stale'
 
   async function paginate(dir: PaginateDirection): Promise<StepResult> {
     if (isPaginating.value[dir]) {
@@ -169,6 +171,7 @@ export function useTimelinePagination<T>(container: Ref<HTMLElement | null | und
       return 'exhausted'
     }
 
+    const gen = generation
     isPaginating.value = { ...isPaginating.value, [dir]: true }
     timelineDebug.log('paginate:start', { dir, e: b.e, s: b.s, sourceLen: source.value.length })
     try {
@@ -176,6 +179,10 @@ export function useTimelinePagination<T>(container: Ref<HTMLElement | null | und
         timelineDebug.log('fetch:start', { dir })
         await onBeforePaginate(dir)
         await nextTick()
+        if (gen !== generation) {
+          timelineDebug.log('paginate:stale', { at: 'fetch', dir })
+          return 'stale'
+        }
         timelineDebug.log('fetch:end', { dir, sourceLen: source.value.length })
         return 'fetched'
       }
@@ -201,9 +208,14 @@ export function useTimelinePagination<T>(container: Ref<HTMLElement | null | und
       }
 
       await nextTick()
+      if (gen !== generation) {
+        timelineDebug.log('paginate:stale', { at: 'reveal', dir })
+        return 'stale'
+      }
       restoreAnchor(anchor, `paginate:${dir}`)
 
       await afterNextFrame()
+      if (gen !== generation) return 'stale'
       restoreAnchor(anchor, `paginate:${dir}:settle`)
 
       timelineDebug.log('paginate:end', {
@@ -240,7 +252,7 @@ export function useTimelinePagination<T>(container: Ref<HTMLElement | null | und
       const sourceBefore = source.value.length
       const result = await paginate(dir)
 
-      if (result === 'busy' || result === 'exhausted' || result === 'no-window') {
+      if (result === 'busy' || result === 'exhausted' || result === 'no-window' || result === 'stale') {
         timelineDebug.log('fill:stop', { dir, rows: rowsBefore, step, why: result })
         return
       }
@@ -299,6 +311,7 @@ export function useTimelinePagination<T>(container: Ref<HTMLElement | null | und
   }
 
   async function reset(): Promise<void> {
+    const gen = ++generation
     const items = source.value
     if (items.length === 0) {
       startKey.value = null
@@ -309,6 +322,7 @@ export function useTimelinePagination<T>(container: Ref<HTMLElement | null | und
     endKey.value = getKey(items.at(-1)!)
     startKey.value = getKey(items[Math.max(0, items.length - pageSize)]!)
     await nextTick()
+    if (gen !== generation) return
 
     const el = container.value
     if (el) {
@@ -340,9 +354,12 @@ export function useTimelinePagination<T>(container: Ref<HTMLElement | null | und
   async function restoreState(state: TimelineScrollState): Promise<boolean> {
     if (!keyToIndex.value.has(state.anchorKey)) return false
 
+    const gen = ++generation
     startKey.value = state.startKey
     endKey.value = state.endKey
     await nextTick()
+
+    if (gen !== generation) return true
 
     const el = container.value
     const row = getRow(state.anchorKey)
@@ -364,8 +381,10 @@ export function useTimelinePagination<T>(container: Ref<HTMLElement | null | und
       const atTail = isAtTail()
       timelineDebug.log('source:change', { atTail, len: source.value.length })
       if (followTail && atTail && bounds.value) {
+        const gen = generation
         endKey.value = getKey(source.value.at(-1)!)
         await nextTick()
+        if (gen !== generation) return
         const el = container.value
         if (el) {
           timelineDebug.logWrite(el.scrollTop, el.scrollHeight, 'follow-tail')
