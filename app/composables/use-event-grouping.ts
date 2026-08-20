@@ -13,11 +13,10 @@ interface Opts {
 
 export function useEventGrouping(opts: Opts) {
   const timezone = getCurrentTimezone()
+  const { events: rawEvents, eventsPaginated } = opts
 
-  const groupedEvents = computed<GroupedEvent>(() => {
-    const { events: rawEvents, eventsPaginated } = opts
-
-    let prevEvent = getPreviousEvent(rawEvents.value, eventsPaginated.value[0])
+  const groupedAll = computed<GroupedEvent>(() => {
+    let prevEvent: MatrixEvent | undefined
     let currentGroupTsCutoff = -1
     let latestDateSeen: Temporal.ZonedDateTime | undefined
 
@@ -27,9 +26,9 @@ export function useEventGrouping(opts: Opts) {
 
     const GROUP_WINDOW_MS = 15 * 60 * 1000
 
-    for (let i = 0; i < eventsPaginated.value.length; i++) {
-      const event = eventsPaginated.value[i]
-      assert(event, '`event` was undefined when looping over paginated events to group')
+    for (let i = 0; i < rawEvents.value.length; i++) {
+      const event = rawEvents.value[i]
+      assert(event, '`event` was undefined when looping over events to group')
 
       const sameSender = prevEvent && event.getSender() === prevEvent.getSender()
       const sameEventType = prevEvent && event.getType() === prevEvent.getType()
@@ -61,16 +60,19 @@ export function useEventGrouping(opts: Opts) {
     return { dateDiffed, events, grouped }
   })
 
+  const groupedEvents = computed<GroupedEvent>(() => {
+    const all = groupedAll.value
+    const firstId = eventsPaginated.value[0]?.getId()
+    const start = firstId === undefined ? -1 : all.events.findIndex(e => e.getId() === firstId)
+    if (start === -1) return { dateDiffed: [], events: [], grouped: [] }
+
+    const end = start + eventsPaginated.value.length
+    return {
+      dateDiffed: all.dateDiffed.slice(start, end),
+      events: all.events.slice(start, end),
+      grouped: all.grouped.slice(start, end),
+    }
+  })
+
   return groupedEvents
-}
-
-function getPreviousEvent(eventList: MatrixEvent[], event: MatrixEvent | undefined) {
-  if (!event) return
-
-  for (let i = 0; i < eventList.length; i++) {
-    const eventTarget = eventList[i]
-    assert(eventTarget, '`eventTarget` was undefined when getting previous event')
-
-    if (eventTarget.getId() === event.getId()) return i === 0 ? undefined : eventList.at(i - 1)
-  }
 }
