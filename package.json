@@ -30,7 +30,6 @@
     "test:watch": "vitest --watch"
   },
   "dependencies": {
-    "@jamii/vue-paginated-scroll": "^1.1.2",
     "@nuxt/fonts": "0.14.0",
     "@nuxt/icon": "2.5.0",
     "@nuxt/image": "2.1.0",
