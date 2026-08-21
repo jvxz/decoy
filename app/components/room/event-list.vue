@@ -45,18 +45,16 @@ const {
   followTail: true,
   getKey: e => e.getId()!,
   hasMore: dir => (dir === 'backward' ? !isFullyLoaded.value : false),
+  maxItems: 120,
   onBeforePaginate: async dir => {
     if (dir === 'backward') await loadOlder()
   },
+  pageSize: 20,
   source: events,
 })
 
 watchEffect(() => {
   isPaginationBusy.value = isPaginating.value.backward || isPaginating.value.forward
-})
-
-onMounted(() => {
-  if (containerRef.value) initTimelineDebug(containerRef.value, useRoute().query.debug === '1')
 })
 
 const roomId = computed(() => props.room.roomId)
