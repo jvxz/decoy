@@ -16,23 +16,17 @@ interface Options<T> {
   onBeforePaginate: (dir: PaginateDirection) => Promise<void> | void
   pageSize?: number
   maxItems?: number
-  keepViewports?: number
   followTail?: boolean
 }
 
 const ROW_ATTR = 'data-item-id'
 
+const ARM_VIEWPORTS = 0.5
+const FILL_VIEWPORTS = 3
+const PREFETCH_PAGES = 3
+
 export function useTimelinePagination<T>(container: Ref<HTMLElement | null | undefined>, opts: Options<T>) {
-  const {
-    followTail = false,
-    getKey,
-    hasMore,
-    keepViewports = 2,
-    maxItems = 160,
-    onBeforePaginate,
-    pageSize = 80,
-    source,
-  } = opts
+  const { followTail = false, getKey, hasMore, maxItems = 160, onBeforePaginate, pageSize = 80, source } = opts
 
   const startKey = ref<string | null>(null)
   const endKey = ref<string | null>(null)
@@ -106,84 +100,48 @@ export function useTimelinePagination<T>(container: Ref<HTMLElement | null | und
     return { key, viewportTop: viewportTopOf(row, el) }
   }
 
-  function restoreAnchor(anchor: Anchor | null, reason: string): void {
+  function restoreAnchor(anchor: Anchor | null): void {
     const el = container.value
     if (!el || !anchor) return
 
     const row = getRow(anchor.key)
-    if (!row) {
-      timelineDebug.log('restore:lost-anchor', { key: anchor.key, reason })
-      return
-    }
+    if (!row) return
 
     const drift = viewportTopOf(row, el) - anchor.viewportTop
     if (Math.abs(drift) < 0.5) return
 
-    const to = el.scrollTop + drift
-    timelineDebug.logWrite(el.scrollTop, to, reason)
-    el.scrollTop = to
-  }
-
-  function dropTo(side: 'end' | 'start'): number | null {
-    const el = container.value
-    const b = bounds.value
-    if (!el || !b) return null
-
-    const runway = viewportPx() * keepViewports
-    const keepFrom = el.scrollTop - runway
-    const keepTo = el.scrollTop + viewportPx() + runway
-
-    const items = source.value
-    let index = side === 'start' ? b.s : b.e
-
-    while (index !== (side === 'start' ? b.e : b.s)) {
-      const row = getRow(getKey(items[index]!))
-      if (!row) break
-
-      const top = row.offsetTop
-      const bottom = top + row.offsetHeight
-      const beyondRunway = side === 'start' ? bottom < keepFrom : top > keepTo
-      if (!beyondRunway) break
-
-      index += side === 'start' ? 1 : -1
-    }
-
-    return index === (side === 'start' ? b.s : b.e) ? null : index
+    writeScrollTop(el, el.scrollTop + drift)
   }
 
   type StepResult = 'busy' | 'exhausted' | 'fetched' | 'no-window' | 'revealed' | 'stale'
 
+  let settleAnchor: Anchor | null = null
+
   async function paginate(dir: PaginateDirection): Promise<StepResult> {
     if (isPaginating.value[dir]) {
-      timelineDebug.log('paginate:skip', { dir, why: 'in-flight' })
       return 'busy'
     }
 
     const b = bounds.value
     if (!b) {
-      timelineDebug.log('paginate:skip', { dir, why: 'no-window' })
       return 'no-window'
     }
 
     const atSourceEdge = dir === 'backward' ? b.s === 0 : b.e === source.value.length - 1
     if (atSourceEdge && !hasMore(dir)) {
-      timelineDebug.log('paginate:skip', { dir, why: 'exhausted' })
       return 'exhausted'
     }
 
     const gen = generation
     isPaginating.value = { ...isPaginating.value, [dir]: true }
-    timelineDebug.log('paginate:start', { dir, e: b.e, s: b.s, sourceLen: source.value.length })
     try {
       if (atSourceEdge) {
-        timelineDebug.log('fetch:start', { dir })
+        settleAnchor = null
         await onBeforePaginate(dir)
         await nextTick()
         if (gen !== generation) {
-          timelineDebug.log('paginate:stale', { at: 'fetch', dir })
           return 'stale'
         }
-        timelineDebug.log('fetch:end', { dir, sourceLen: source.value.length })
         return 'fetched'
       }
 
@@ -193,37 +151,25 @@ export function useTimelinePagination<T>(container: Ref<HTMLElement | null | und
       const anchor = captureAnchor(dir)
       const items = source.value
 
+      let target: { e: number; s: number }
       if (dir === 'backward') {
         const s = Math.max(0, next.s - pageSize)
-        let e = Math.max(dropTo('end') ?? next.e, s)
-        if (e - s + 1 > maxItems) e = s + maxItems - 1
-        startKey.value = getKey(items[s]!)
-        endKey.value = getKey(items[e]!)
+        target = { e: Math.min(next.e, s + maxItems - 1), s }
       } else {
         const e = Math.min(items.length - 1, next.e + pageSize)
-        let s = Math.min(dropTo('start') ?? next.s, e)
-        if (e - s + 1 > maxItems) s = e - (maxItems - 1)
-        startKey.value = getKey(items[s]!)
-        endKey.value = getKey(items[e]!)
+        target = { e, s: Math.max(next.s, e - (maxItems - 1)) }
       }
+
+      startKey.value = getKey(items[target.s]!)
+      endKey.value = getKey(items[target.e]!)
 
       await nextTick()
       if (gen !== generation) {
-        timelineDebug.log('paginate:stale', { at: 'reveal', dir })
         return 'stale'
       }
-      restoreAnchor(anchor, `paginate:${dir}`)
+      restoreAnchor(anchor)
+      settleAnchor = anchor
 
-      await afterNextFrame()
-      if (gen !== generation) return 'stale'
-      restoreAnchor(anchor, `paginate:${dir}:settle`)
-
-      timelineDebug.log('paginate:end', {
-        count: window.value.length,
-        dir,
-        e: bounds.value?.e,
-        s: bounds.value?.s,
-      })
       return 'revealed'
     } finally {
       isPaginating.value = { ...isPaginating.value, [dir]: false }
@@ -233,75 +179,145 @@ export function useTimelinePagination<T>(container: Ref<HTMLElement | null | und
   const backSentinel = ref<HTMLElement | null>(null)
   const forwardSentinel = ref<HTMLElement | null>(null)
 
-  function isArmed(dir: PaginateDirection): boolean {
+  function isArmed(dir: PaginateDirection, viewports: number): boolean {
     const el = container.value
     const sentinel = dir === 'backward' ? backSentinel.value : forwardSentinel.value
     if (!el || !sentinel) return false
 
     const view = el.getBoundingClientRect()
     const mark = sentinel.getBoundingClientRect()
-    const margin = viewportPx()
+    const margin = viewportPx() * viewports
     return dir === 'backward' ? mark.bottom > view.top - margin : mark.top < view.bottom + margin
   }
 
   async function fill(dir: PaginateDirection): Promise<void> {
+    const gen = generation
+    settleAnchor = null
     let barren = 0
 
-    for (let step = 0; step < 8 && isArmed(dir); step++) {
-      const rowsBefore = window.value.length
-      const sourceBefore = source.value.length
-      const result = await paginate(dir)
-
-      if (result === 'busy' || result === 'exhausted' || result === 'no-window' || result === 'stale') {
-        timelineDebug.log('fill:stop', { dir, rows: rowsBefore, step, why: result })
-        return
+    try {
+      const b = bounds.value
+      if (b && hasMore(dir)) {
+        const remaining = dir === 'backward' ? b.s : source.value.length - 1 - b.e
+        if (remaining < PREFETCH_PAGES * pageSize) {
+          isPaginating.value = { ...isPaginating.value, [dir]: true }
+          try {
+            await onBeforePaginate(dir)
+            await nextTick()
+          } finally {
+            isPaginating.value = { ...isPaginating.value, [dir]: false }
+          }
+          if (gen !== generation) {
+            return
+          }
+        }
       }
 
-      if (result === 'revealed') {
-        barren = 0
-        continue
-      }
+      for (let step = 0; step < 8 && isArmed(dir, FILL_VIEWPORTS); step++) {
+        const sourceBefore = source.value.length
+        const result = await paginate(dir)
 
-      if (source.value.length === sourceBefore) {
-        barren++
-        timelineDebug.log('fill:barren', { attempt: barren, dir, rows: rowsBefore })
-        if (barren >= 3) {
-          timelineDebug.log('fill:stop', { dir, rows: rowsBefore, step, why: 'barren' })
+        if (result === 'busy' || result === 'exhausted' || result === 'no-window' || result === 'stale') {
           return
         }
-      } else {
-        barren = 0
+
+        if (result === 'revealed') {
+          barren = 0
+          continue
+        }
+
+        if (source.value.length === sourceBefore) {
+          barren++
+          if (barren >= 3) {
+            return
+          }
+        } else {
+          barren = 0
+        }
+      }
+    } finally {
+      const anchor = settleAnchor
+      settleAnchor = null
+      if (anchor && gen === generation) {
+        await afterNextFrame()
+        if (gen === generation) restoreAnchor(anchor)
       }
     }
   }
 
-  let chain: Promise<void> = Promise.resolve()
-
-  function serialize(task: () => Promise<void>): Promise<void> {
-    chain = chain.then(task, task)
-    return chain
+  interface FillRequest {
+    dir: PaginateDirection
+    force: boolean
   }
 
-  let observer: IntersectionObserver | null = null
+  let activeDirection: PaginateDirection | null = null
+  let fillPromise: Promise<void> | null = null
+  let isAdjusting = false
+  let lastScrollTop = 0
+  let queuedFill: FillRequest | null = null
+  let scrollContainer: HTMLElement | null = null
 
-  function observeSentinels(): void {
-    observer?.disconnect()
-    const el = container.value
-    if (!el) return
+  function syncScrollTop(el = container.value): void {
+    if (el) lastScrollTop = el.scrollTop
+  }
 
-    observer = new IntersectionObserver(
-      entries => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue
-          const dir = entry.target === backSentinel.value ? 'backward' : 'forward'
-          timelineDebug.log('sentinel:intersect', { dir })
-          void serialize(() => fill(dir))
-        }
-      },
-      { root: el, rootMargin: `${viewportPx()}px 0px` },
-    )
-    if (backSentinel.value) observer.observe(backSentinel.value)
-    if (forwardSentinel.value) observer.observe(forwardSentinel.value)
+  function writeScrollTop(el: HTMLElement, to: number): void {
+    el.scrollTop = to
+    syncScrollTop(el)
+  }
+
+  async function drainFills(): Promise<void> {
+    while (queuedFill) {
+      const request = queuedFill
+      queuedFill = null
+      if (!request.force && request.dir !== activeDirection) continue
+
+      isAdjusting = true
+      try {
+        await fill(request.dir)
+      } finally {
+        syncScrollTop()
+        isAdjusting = false
+      }
+    }
+  }
+
+  function requestFill(dir: PaginateDirection, force = false): Promise<void> {
+    if (!force && dir !== activeDirection) return Promise.resolve()
+
+    queuedFill = { dir, force }
+    if (!fillPromise) {
+      fillPromise = drainFills().finally(() => {
+        fillPromise = null
+        if (queuedFill) void requestFill(queuedFill.dir, queuedFill.force)
+      })
+    }
+    return fillPromise
+  }
+
+  function onScroll(): void {
+    const el = scrollContainer
+    if (!el || el.scrollTop === lastScrollTop) return
+
+    const dir = el.scrollTop < lastScrollTop ? 'backward' : 'forward'
+    lastScrollTop = el.scrollTop
+    if (isAdjusting) return
+
+    activeDirection = dir
+    if (isArmed(dir, ARM_VIEWPORTS)) void requestFill(dir)
+  }
+
+  function watchScroll(): void {
+    const el = container.value ?? null
+    if (el === scrollContainer) {
+      syncScrollTop(el)
+      return
+    }
+
+    scrollContainer?.removeEventListener('scroll', onScroll)
+    scrollContainer = el
+    syncScrollTop(el)
+    scrollContainer?.addEventListener('scroll', onScroll, { passive: true })
   }
 
   function isAtTail(): boolean {
@@ -326,11 +342,10 @@ export function useTimelinePagination<T>(container: Ref<HTMLElement | null | und
 
     const el = container.value
     if (el) {
-      timelineDebug.logWrite(el.scrollTop, el.scrollHeight, 'reset:pin-bottom')
-      el.scrollTop = el.scrollHeight
+      writeScrollTop(el, el.scrollHeight)
     }
-    observeSentinels()
-    await serialize(() => fill('backward'))
+    watchScroll()
+    await requestFill('backward', true)
   }
 
   function captureState(): TimelineScrollState | null {
@@ -365,9 +380,8 @@ export function useTimelinePagination<T>(container: Ref<HTMLElement | null | und
     const row = getRow(state.anchorKey)
     if (!el || !row) return false
 
-    timelineDebug.logWrite(el.scrollTop, row.offsetTop - state.anchorOffset, 'restore-state')
-    el.scrollTop = row.offsetTop - state.anchorOffset
-    observeSentinels()
+    writeScrollTop(el, row.offsetTop - state.anchorOffset)
+    watchScroll()
     return true
   }
 
@@ -379,7 +393,6 @@ export function useTimelinePagination<T>(container: Ref<HTMLElement | null | und
         return
       }
       const atTail = isAtTail()
-      timelineDebug.log('source:change', { atTail, len: source.value.length })
       if (followTail && atTail && bounds.value) {
         const gen = generation
         endKey.value = getKey(source.value.at(-1)!)
@@ -387,14 +400,8 @@ export function useTimelinePagination<T>(container: Ref<HTMLElement | null | und
         if (gen !== generation) return
         const el = container.value
         if (el) {
-          timelineDebug.logWrite(el.scrollTop, el.scrollHeight, 'follow-tail')
-          el.scrollTop = el.scrollHeight
+          writeScrollTop(el, el.scrollHeight)
         }
-        return
-      }
-
-      for (const dir of ['backward', 'forward'] as const) {
-        if (isArmed(dir)) void serialize(() => fill(dir))
       }
     },
   )
@@ -404,7 +411,7 @@ export function useTimelinePagination<T>(container: Ref<HTMLElement | null | und
     await reset()
   })
 
-  onBeforeUnmount(() => observer?.disconnect())
+  onBeforeUnmount(() => scrollContainer?.removeEventListener('scroll', onScroll))
 
   return {
     backSentinel,
