@@ -43,8 +43,8 @@ const {
   window: paginationWindow,
 } = useTimelinePagination(containerRef, {
   followTail: true,
-  getKey: e => e.getId()!,
-  hasMore: dir => (dir === 'backward' ? !isFullyLoaded.value : false),
+  getKey: i => i.getId()!,
+  hasMore: dir => (dir === 'backward' ? !isFullyLoaded.value : true),
   maxItems: 120,
   onBeforePaginate: async dir => {
     if (dir === 'backward') await loadOlder()
