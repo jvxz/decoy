@@ -44,8 +44,7 @@ const {
 } = useTimelinePagination(containerRef, {
   followTail: true,
   getKey: i => i.getId()!,
-  hasMore: dir => (dir === 'backward' ? !isFullyLoaded.value : true),
-  maxItems: 120,
+  hasMore: dir => dir === 'backward' && !isFullyLoaded.value,
   onBeforePaginate: async dir => {
     if (dir === 'backward') await loadOlder()
   },
@@ -116,7 +115,7 @@ const groupedEvents = useEventGrouping({
 
         <div
           v-for="(event, idx) in groupedEvents.events"
-          :key="`${event.getId() ?? idx}:${getEventVersion(event.getId() ?? '')}`"
+          :key="event.getId() ?? idx"
           :data-index="idx"
           :data-item-id="event.getId()"
           :style="isTestMode() ? { height: `${(event as any)._size}px` } : undefined"

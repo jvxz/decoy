@@ -19,8 +19,7 @@ export function filterMatrixEvents(
 }
 
 export function isEditEvent(event: MatrixEvent) {
-  const relatesTo = event.getContent()['m.relates_to']
-  return relatesTo?.rel_type === 'm.replace' && !!event.getContent()['m.new_content']
+  return event.isRelation(RelationType.Replace)
 }
 
 export function checkReplyEvent(event: MatrixEvent) {

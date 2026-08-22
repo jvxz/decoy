@@ -10,7 +10,7 @@ const { event, grouped, room } = injectEventListItemContext()
 const { data: replyEvent, isLoading: isReplyEventLoading, isReplyEvent } = useRoomReplyEvent(event.value, room.value)
 
 const userId = computed(() => event.value.getSender())
-const { content: eventContent } = useEventContent(event)
+const { content: eventContent, isDecrypting } = useEventContent(event)
 const eventBody = computed(() => trimReplyFromBody(eventContent.value?.body))
 const eventProfile = useUserProfile(userId)
 const eventMember = useRoomMember(() => room.value.roomId, userId)
@@ -22,7 +22,6 @@ const replyEventBody = computed(() =>
 const replyEventProfile = useUserProfile(() => replyEvent.value?.getSender())
 
 const hasReactions = useRoomEventHasReactions(room, event)
-const isDecrypting = computed(() => event.value.isBeingDecrypted())
 const isJumboEmoji = computed(() => {
   const body = eventBody.value?.trim()
   if (!body) return false
@@ -34,9 +33,7 @@ const isJumboEmoji = computed(() => {
 })
 
 const shouldRender = computed(() => {
-  const content = event.value.getContent()
-
-  const type = content.msgtype
+  const type = eventContent.value?.msgtype
 
   const isMsg = type === MsgType.Text || type === 'm.bad.encrypted'
   const isEdit = isEditEvent(event.value)

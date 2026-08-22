@@ -2,9 +2,15 @@ import type { MatrixEvent, Room } from 'matrix-js-sdk'
 
 import { Direction } from 'matrix-js-sdk'
 
-export const BATCH_SIZE = 80
+const BATCH_SIZE = 80
 
 const roomEventsFullyLoadedSet = reactive(new Set<string>())
+const roomEventsBackfilledSet = reactive(new Set<string>())
+const eventVersions = shallowReactive(new Map<string, number>())
+
+export function getEventVersion(id: string | undefined) {
+  return id ? (eventVersions.get(id) ?? 0) : 0
+}
 
 export function useRoomEvents(
   room: Ref<Room>,
@@ -13,7 +19,6 @@ export function useRoomEvents(
   const { client } = useMatrixClient()
 
   const events = shallowRef<MatrixEvent[]>([])
-  const eventVersions = shallowReactive(new Map<string, number>())
 
   const isFullyLoaded = computed({
     get: () => roomEventsFullyLoadedSet.has(room.value.roomId),
@@ -30,21 +35,27 @@ export function useRoomEvents(
 
   const renderableCount = () => selectEvents(room.value.getLiveTimeline().getEvents()).length
 
+  const isBackfilled = computed(() => roomEventsBackfilledSet.has(room.value.roomId))
+
+  const isBootstrapping = () => !isBackfilled.value && !isFullyLoaded.value
+
   const sync = () => {
+    if (isBootstrapping()) return
     events.value = selectEvents(room.value.getLiveTimeline().getEvents())
   }
-
-  whenever(room, sync, { immediate: true })
 
   const mutex = new Mutex()
   const {
     isPending: isScrolling,
     mutate: scrollEvents,
     mutateAsync: scrollEventsAsync,
-    status: scrollEventsStatus,
   } = useMutation({
     mutationFn: async (dir: Direction) => {
-      if (mutex.isLocked) return
+      if (mutex.isLocked) {
+        await mutex.acquire()
+        mutex.release()
+        return
+      }
 
       await mutex.acquire()
       try {
@@ -54,9 +65,12 @@ export function useRoomEvents(
         const targetRoomId = r.roomId
 
         if (dir === Direction.Backward) {
-          const canLoadMore = await scrollBack()
-
-          if (targetRoomId === toValue(room).roomId) isFullyLoaded.value = !canLoadMore
+          try {
+            const canLoadMore = await scrollBack()
+            if (targetRoomId === toValue(room).roomId) isFullyLoaded.value = !canLoadMore
+          } finally {
+            roomEventsBackfilledSet.add(targetRoomId)
+          }
         }
 
         if (targetRoomId === toValue(room).roomId) sync()
@@ -67,16 +81,27 @@ export function useRoomEvents(
     mutationKey: $mk.scrollEvents(() => room.value?.roomId),
   })
 
+  watch(
+    () => room.value.roomId,
+    id => {
+      if (roomEventsBackfilledSet.has(id) || isFullyLoaded.value) {
+        sync()
+        return
+      }
+      void scrollEventsAsync(Direction.Backward)
+    },
+    { immediate: true },
+  )
+
   let missedSync = false
   const shouldSuppressSync = () => isScrolling.value || (opts?.isBusy?.value ?? false)
-  if (opts?.isBusy) {
-    watch(opts.isBusy, busy => {
-      if (!busy && missedSync) {
-        missedSync = false
-        sync()
-      }
-    })
-  }
+
+  watch(shouldSuppressSync, suppressed => {
+    if (suppressed || !missedSync) return
+
+    missedSync = false
+    sync()
+  })
 
   const hookSync = () => {
     if (!shouldSuppressSync()) {
@@ -100,10 +125,6 @@ export function useRoomEvents(
 
     eventVersions.set(id, (eventVersions.get(id) ?? 0) + 1)
   })
-
-  function getEventVersion(id: string) {
-    return eventVersions.get(id) ?? 0
-  }
 
   async function scrollBack() {
     if (isFullyLoaded.value) return false
@@ -134,6 +155,5 @@ export function useRoomEvents(
     isFullyLoaded,
     scrollEvents,
     scrollEventsAsync,
-    scrollEventsStatus,
   }
 }
