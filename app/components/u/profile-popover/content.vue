@@ -21,8 +21,7 @@ const avatarUrl = computed(() => resolveAvatarUrl(roomMember.value?.getMxcAvatar
 const parsedUserId = computed(() => parseUserId(roomMember.value?.userId))
 
 const membership = useRoomMembership(room, userId)
-const powerLevel = useRoomMemberPowerLevel(room, userId)
-const powerLevelName = computed(() => upperFirst(getPowerLevelName(powerLevel.value)))
+const { powerLevelName } = useRoomMemberPowerLevel(room, userId)
 
 const isSelf = computed(() => self.value?.userId === user.value?.userId)
 
@@ -120,8 +119,8 @@ const { openDialog } = useGlobalDialog()
             v-if="isDefined(membership) && membership === KnownMembership.Join"
             class="flex flex-wrap gap-1 *:text-xs *:font-normal *:rounded-full *:max-w-28 *:block *:truncate"
           >
-            <UBadge class="" variant="outline">
-              {{ powerLevelName }}
+            <UBadge variant="outline">
+              {{ upperFirst(powerLevelName) }}
             </UBadge>
           </div>
 
