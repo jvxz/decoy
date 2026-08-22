@@ -3,9 +3,13 @@ import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/types'
 
 import { EventStatus, EventType, KnownMembership, RelationType, RoomEvent } from 'matrix-js-sdk'
 
-export function useRoomActions(roomOrId: MaybeRefOrGetter<MaybeRoomOrId | undefined>) {
+export function useRoomActions(
+  roomOrId: MaybeRefOrGetter<MaybeRoomOrId | undefined>,
+  eventOrId?: MaybeRefOrGetter<MaybeEventOrId | undefined>,
+) {
   const room = useRoom(roomOrId)
   const roomId = useResolveRoomId(roomOrId)
+  const eventId = useResolveEventId(eventOrId)
   const { client, saveClient } = useMatrixClient()
   const { notifyError } = useNotifications()
   const settings = useSettings()
@@ -125,12 +129,29 @@ export function useRoomActions(roomOrId: MaybeRefOrGetter<MaybeRoomOrId | undefi
     mutationKey: $mk.invite(roomId),
   })
 
+  const optimisticallyRedacted = useOptimisticRedactions()
+  const redact = useMutation({
+    mutationFn: async (opts?: { reason?: string }) => {
+      const { reason } = opts ?? {}
+      if (!room.value || !eventId.value) return
+
+      return client.value.redactEvent(room.value.roomId, eventId.value, undefined, { reason })
+    },
+    mutationKey: $mk.redact(roomId, eventId),
+    onError: err => {
+      optimisticallyRedacted.remove(eventId.value!)
+      notifyError(err, 'Failed to delete message')
+    },
+    onMutate: () => optimisticallyRedacted.add(eventId.value!),
+  })
+
   return {
     invite,
     join,
     leave,
     message,
     react,
+    redact,
     typing,
   }
 }
