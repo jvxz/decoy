@@ -29,7 +29,7 @@ const firstFourRecentReactions = computed(() => sortedRecentReactions.value.slic
 
 const powerLevel = useRoomMemberPowerLevel(
   () => props.roomId,
-  () => props.event?.getSender(),
+  () => self.value?.userId,
 )
 
 const canRedact = computed(() => {
