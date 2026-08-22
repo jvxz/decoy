@@ -13,7 +13,10 @@ export function useRoomMemberPowerLevel(
   const allowed = (value: number | undefined) => (value !== undefined ? value <= powerLevel.value : false)
 
   const canRedact = computed(() => allowed(roomPowerLevels.value?.redact))
-  const canRedactSelf = computed(() => allowed(roomPowerLevels.value?.events?.[EventType.RoomRedaction]))
+  const canRedactSelf = computed(() => {
+    const threshold = roomPowerLevels.value?.events?.[EventType.RoomRedaction]
+    return threshold === undefined || threshold <= powerLevel.value
+  })
 
   return {
     canRedact,
