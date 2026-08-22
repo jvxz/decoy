@@ -9,6 +9,7 @@ const { openDialog } = useGlobalDialog()
 
 const { openReactionViewer } = useRoomEventReactionsViewer()
 const { close } = useContextMenuRegion('event')
+const { self } = useSelf()
 
 const { reactions, reactTo } = useRoomEventReactions(
   () => props.roomId,
@@ -25,6 +26,16 @@ function onEmojiPick(emoji: CompactEmoji) {
 
 const { sortedRecentReactions } = useRecentReactions()
 const firstFourRecentReactions = computed(() => sortedRecentReactions.value.slice(0, 4))
+
+const powerLevel = useRoomMemberPowerLevel(
+  () => props.roomId,
+  () => props.event?.getSender(),
+)
+
+const canRedact = computed(() => {
+  if (props.event.getSender() === self.value?.userId) return powerLevel.canRedactSelf.value
+  return powerLevel.canRedact.value
+})
 </script>
 
 <template>
@@ -61,10 +72,21 @@ const firstFourRecentReactions = computed(() => sortedRecentReactions.value.slic
     </UContextMenuItem>
 
     <UContextMenuItem
-      v-if="$settings.value.advanced.developerMode"
-      @select="openDialog('codeViewer', { lang: 'json', code: JSON.stringify(props.event, null, 2) })"
+      v-if="canRedact"
+      variant="danger"
+      @select="openDialog('deleteMessage', { eventId: event.getId()!, roomId: props.roomId })"
     >
-      View source
+      Delete message
     </UContextMenuItem>
+
+    <template v-if="$settings.value.advanced.developerMode">
+      <UContextMenuSeparator />
+
+      <UContextMenuItem
+        @select="openDialog('codeViewer', { lang: 'json', code: JSON.stringify(props.event, null, 2) })"
+      >
+        View source
+      </UContextMenuItem>
+    </template>
   </template>
 </template>
