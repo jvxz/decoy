@@ -111,6 +111,7 @@ export function useRoomEvents(
 
   useRoomHooks(() => room.value.roomId, {
     onLocalEchoUpdated: hookSync,
+    onRedaction: hookSync,
     onTimeline: hookSync,
     onTimelineRefresh: hookSync,
     onTimelineReset: hookSync,

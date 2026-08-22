@@ -28,6 +28,7 @@ export function useRoomHooks(roomInput: MaybeRefOrGetter<MaybeRoomOrId | undefin
       bindListener('onSummary')
       bindListener('onTimeline')
       bindListener('onTimelineRefresh')
+      bindListener('onRedaction')
       bindListener('onTimelineReset')
 
       onWatcherCleanup(() => disposers.forEach(d => d()))
