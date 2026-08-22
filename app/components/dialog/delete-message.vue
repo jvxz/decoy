@@ -27,13 +27,13 @@ whenever(open, () => (reason.value = ''))
         <UAlertDialogTitle> Delete message </UAlertDialogTitle>
       </UAlertDialogHeader>
 
-      <FormInput label="Reason (optional)" v-model:model-value="reason" textarea />
+      <FormInput v-model:model-value="reason" label="Reason (optional)" textarea />
 
       <UAlertDialogFooter class="items-center">
         <UAlertDialogAnnotation> Shift + click to skip this dialog </UAlertDialogAnnotation>
 
         <UAlertDialogCancel> Cancel </UAlertDialogCancel>
-        <UAlertDialogAction @click="redact.mutate({ reason })" variant="danger"> Delete </UAlertDialogAction>
+        <UAlertDialogAction variant="danger" @click="redact.mutate({ reason })"> Delete </UAlertDialogAction>
       </UAlertDialogFooter>
     </UAlertDialogContent>
   </UAlertDialogRoot>
