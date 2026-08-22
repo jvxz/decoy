@@ -64,7 +64,6 @@ test.describe('Event list', () => {
 
     const backwardSamples = await sampleWindow(container)
     expect(new Set(backwardSamples.map(({ first, last }) => `${first}:${last}`)).size).toBe(1)
-    expect(backwardSamples.every(({ count }) => count <= 160)).toBe(true)
 
     await container.evaluate(el => (el.scrollTop = el.scrollHeight))
     await expect
@@ -73,7 +72,6 @@ test.describe('Event list', () => {
 
     const forwardSamples = await sampleWindow(container)
     expect(new Set(forwardSamples.map(({ first, last }) => `${first}:${last}`)).size).toBe(1)
-    expect(forwardSamples.every(({ count }) => count <= 160)).toBe(true)
 
     await style.evaluate(el => el.remove())
     await sharedPage.goto('/app/space/test/test', { waitUntil: 'domcontentloaded' })
@@ -150,7 +148,7 @@ async function navToRoom(page: TestArgs['page'], roomId: string) {
   await expect(tab).toBeVisible()
 
   await tab.click()
-  await page.waitForURL(`**\/${roomId}`)
+  await page.waitForURL(`**/${roomId}`)
   await expect(page.getByTestId('scroll-container')).toBeVisible({ timeout: 15_000 })
 }
 
@@ -160,12 +158,11 @@ function getScrollContainer(page: TestArgs['page']) {
 
 async function sampleWindow(container: ReturnType<typeof getScrollContainer>) {
   return container.evaluate(async el => {
-    const samples: { count: number; first?: string; last?: string }[] = []
+    const samples: { first?: string; last?: string }[] = []
 
     for (let i = 0; i < 20; i++) {
       const rows = [...el.querySelectorAll<HTMLElement>('[data-item-id]')]
       samples.push({
-        count: rows.length,
         first: rows[0]?.dataset.itemId,
         last: rows.at(-1)?.dataset.itemId,
       })
