@@ -36,6 +36,16 @@ const canRedact = computed(() => {
   if (props.event.getSender() === self.value?.userId) return powerLevel.canRedactSelf.value
   return powerLevel.canRedact.value
 })
+
+const { current } = useMagicKeys()
+const { redact } = useRoomActions(
+  () => props.roomId,
+  () => props.event.getId(),
+)
+const handleDeleteMessage = () => {
+  if (current.has('shift')) redact.mutate({ reason: undefined })
+  else openDialog('deleteMessage', { eventId: props.event.getId()!, roomId: props.roomId })
+}
 </script>
 
 <template>
@@ -71,11 +81,7 @@ const canRedact = computed(() => {
       View reactions
     </UContextMenuItem>
 
-    <UContextMenuItem
-      v-if="canRedact"
-      variant="danger"
-      @select="openDialog('deleteMessage', { eventId: event.getId()!, roomId: props.roomId })"
-    >
+    <UContextMenuItem v-if="canRedact" variant="danger" @select="handleDeleteMessage">
       Delete message
     </UContextMenuItem>
 
