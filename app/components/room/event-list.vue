@@ -19,7 +19,7 @@ const containerRef = useTemplateRef('container')
 const isPaginationBusy = ref(false)
 const optimisticallyRedacted = useOptimisticRedactions()
 
-const { events, getEventVersion, isFullyLoaded, scrollEventsAsync } = useRoomEvents(toRef(props, 'room'), {
+const { events, isFullyLoaded, scrollEventsAsync } = useRoomEvents(toRef(props, 'room'), {
   filter: [
     EventType.Reaction,
     EventType.RoomRedaction,
