@@ -32,7 +32,6 @@ const roomLocationRoute = computed<RouteLocationRaw | undefined>(() => {
 
 <template>
   <UMention
-    :type="mentionType"
     :style="{
       'font-size': 'inherit',
     }"
@@ -44,6 +43,7 @@ const roomLocationRoute = computed<RouteLocationRaw | undefined>(() => {
         side: 'right',
         align: 'start',
         sideOffset: 4,
+        collisionPadding: 12,
       }"
       :user="value"
     >
