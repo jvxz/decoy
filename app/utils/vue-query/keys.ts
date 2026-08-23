@@ -41,6 +41,8 @@ export const $mk = {
   login: () => defineKey('login'),
   message: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('message', toRef(roomId)),
   react: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('react', toRef(roomId)),
+  redact: (roomId: MaybeRefOrGetter<string | undefined>, eventId: MaybeRefOrGetter<string | undefined>) =>
+    defineKey('redact', toRef(roomId), toRef(eventId)),
   register: () => defineKey('register'),
   scrollEvents: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('scrollEvents', toRef(roomId)),
 } as const

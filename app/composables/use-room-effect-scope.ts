@@ -17,6 +17,7 @@ export interface RoomHooks {
   onRoomMemberTyping: (event: MatrixEvent, member: RoomMember) => void
   onSummary: EmitterListener<RoomEvent.Summary>
   onLocalEchoUpdated: EmitterListener<RoomEvent.LocalEchoUpdated>
+  onRedaction: EmitterListener<RoomEvent.Redaction>
 }
 
 export type RoomEventHooks = {
@@ -84,6 +85,7 @@ function acquire(roomId: string) {
       const timelineRefreshHook = createEventHook<Parameters<RoomHooks['onTimelineRefresh']>>()
       const timelineResetHook = createEventHook<Parameters<RoomHooks['onTimelineReset']>>()
       const localEchoUpdated = createEventHook<Parameters<RoomHooks['onLocalEchoUpdated']>>()
+      const redactionHook = createEventHook<Parameters<RoomHooks['onRedaction']>>()
 
       const update = debounce(() => triggerRef(room), 50)
       watch(
@@ -101,6 +103,7 @@ function acquire(roomId: string) {
           room.on(RoomEvent.TimelineRefresh, timelineRefreshHook.trigger)
           room.on(RoomEvent.TimelineReset, timelineResetHook.trigger)
           room.on(RoomEvent.LocalEchoUpdated, localEchoUpdated.trigger)
+          room.on(RoomEvent.Redaction, redactionHook.trigger)
 
           onWatcherCleanup(() => {
             room.off(RoomEvent.MyMembership, update)
@@ -113,6 +116,7 @@ function acquire(roomId: string) {
             room.off(RoomEvent.TimelineRefresh, timelineRefreshHook.trigger)
             room.off(RoomEvent.TimelineReset, timelineResetHook.trigger)
             room.off(RoomEvent.LocalEchoUpdated, localEchoUpdated.trigger)
+            room.off(RoomEvent.Redaction, redactionHook.trigger)
           })
         },
         { immediate: true },
@@ -129,6 +133,7 @@ function acquire(roomId: string) {
         onCurrentStateUpdated: currentStateUpdatedHook.on,
         onLocalEchoUpdated: localEchoUpdated.on,
         onMemberUpdate: memberUpdateHook.on,
+        onRedaction: redactionHook.on,
         onRoomMemberTyping: memberTypingHook.on,
         onSummary: summaryHook.on,
         onTimeline: timelineHook.on,

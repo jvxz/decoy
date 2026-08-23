@@ -13,6 +13,10 @@ export interface GlobalDialogMap {
     code: string
     lang?: ShjLanguage | (string & {})
   }
+  deleteMessage: {
+    roomId: string
+    eventId: string
+  }
 }
 export type GlobalDialog = keyof GlobalDialogMap
 

@@ -1,3 +1,5 @@
+import type { VariantProps } from 'tailwind-variants'
+
 // @unocss-include
 export const interactiveBase = tv({
   base: 'font-medium cursor-pointer shadow-none select-none focus-visible:ring-ring/40 focus-visible:ring-[3px] aria-invalid:border-danger shrink-0 gap-2 rounded text-base whitespace-nowrap outline-none disabled:pointer-events-none hover:disabled:cursor-not-allowed disabled:opacity-50 underline-offset-4 [&_svg]:pointer-events-none transition-transform duration-75',
@@ -84,10 +86,12 @@ export const popoverItemBase = tv({
       default: 'p-1 px-2',
     },
     variant: {
+      danger: 'text-danger bg-transparent hover:bg-transparent focus:bg-danger-hover active:bg-danger-press',
       ghost: 'text-foreground focus:bg-secondary-raised active:bg-secondary-raised-press',
     },
   },
 })
+export type PopoverItemVariants = VariantProps<typeof popoverItemBase>
 
 export const overlayStyles =
   'duration-75 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-overlay bg-overlay'
