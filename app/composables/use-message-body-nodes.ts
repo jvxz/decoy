@@ -97,7 +97,7 @@ function walkNodes(el: HTMLElement): MessageNode[] {
 
       if (!(node instanceof HTMLElement)) continue
 
-      if (node.tagName.toLowerCase() === 'code') {
+      if (node.tagName.toLowerCase() === 'code' && el.tagName.toLowerCase() === 'pre') {
         nodes.push({
           language: node.classList
             .values()
