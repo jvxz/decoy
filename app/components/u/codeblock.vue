@@ -1,11 +1,22 @@
-<script lang="ts" setup>
+<script lang="ts">
 import type { ShjLanguage } from 'rangi'
 
+import QuickLRU from 'quick-lru'
 import { codeToHtml } from 'rangi'
 import { catppuccinMocha } from 'rangi/themes'
 
 import type { UCardProps } from './card/index.vue'
 
+const highlightCache = new QuickLRU<string, string>({ maxSize: 256 })
+const highlight = (code: string, lang?: string) => {
+  const key = `${lang}\0${code}`
+  let html = highlightCache.get(key)
+  if (!html) highlightCache.set(key, (html = codeToHtml(code, { classes: true, lang, theme: catppuccinMocha })))
+  return html
+}
+</script>
+
+<script lang="ts" setup>
 export interface UCodeblockRootProps extends UCardProps {
   lang?: ShjLanguage | (string & {})
   input: string
@@ -30,9 +41,7 @@ const { openDialog } = useGlobalDialog()
 const delegated = reactiveOmit(props, 'class')
 
 const formattedInput = computed(() => props.input.trim().replace(TRAILING_NEWLINE_RE, ''))
-const code = computed(() =>
-  codeToHtml(formattedInput.value, { classes: true, lang: props.lang, theme: catppuccinMocha }),
-)
+const code = computed(() => highlight(formattedInput.value, props.lang))
 
 const codeContainer = useTemplateRef('code')
 const codeRoot = computed(() => codeContainer.value?.firstChild as HTMLElement | undefined)
@@ -101,7 +110,7 @@ const { isYOverflowed } = useElementOverflow(codeRoot)
 
 <style>
 .shj {
-  @apply font-mono whitespace-pre overflow-auto scrollbar-fancy flex-1 min-h-0;
+  @apply font-mono whitespace-pre overflow-x-auto scrollbar-fancy flex-1 min-h-0;
   padding: var(--_padding);
 }
 

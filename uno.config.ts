@@ -54,6 +54,12 @@ export default defineConfig({
       },
     ],
     [
+      'scrollbar-fancy',
+      {
+        'scrollbar-color': 'var(--border) transparent;',
+      },
+    ],
+    [
       'text-clip',
       {
         'text-box': 'trim-both cap alphabetic',
