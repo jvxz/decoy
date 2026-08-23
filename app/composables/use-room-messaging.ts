@@ -6,7 +6,7 @@ export function useRoomMessaging(roomOrId: MaybeRefOrGetter<MaybeRoomOrId | unde
   const sendTextMessage = (body: string, formattedBody: string, mentionedUserIds?: Set<string> | string[]) => {
     // strip wrapping <p> tag created by md lexer
     const unwrappedFormattedBody = formattedBody.replace(P_TAG_RE, '$1')
-    const content = ContentHelpers.makeHtmlMessage(body, unwrappedFormattedBody)
+    const content = ContentHelpers.makeHtmlMessage(body.trimEnd(), unwrappedFormattedBody.trimEnd())
 
     const mentionedUserIdsArray = Array.isArray(mentionedUserIds)
       ? mentionedUserIds
