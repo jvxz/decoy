@@ -93,7 +93,6 @@ const [DefineElement, Element] = createReusableTemplate<{
   margin-block-start: 0.5em;
 }
 
-h1,
 h2,
 h3,
 h4,
@@ -102,7 +101,7 @@ h5 {
 }
 
 h1 {
-  @apply text-4xl;
+  @apply text-4xl font-semibold;
 }
 h2 {
   @apply text-3xl;
