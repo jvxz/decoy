@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { Editor } from '@tiptap/core'
 import type { MentionNodeAttrs } from '@tiptap/extension-mention'
+import type { Node } from '@tiptap/pm/model'
 import type { SuggestionOptions, SuggestionProps } from '@tiptap/suggestion'
 import type { CompactEmoji } from 'emojibase'
 import type { RoomMember } from 'matrix-js-sdk'
@@ -9,8 +10,8 @@ import type { IHierarchyRoom } from 'matrix-js-sdk/lib/@types/spaces'
 import { Extension } from '@tiptap/core'
 import { Mention } from '@tiptap/extension-mention'
 import { Placeholder } from '@tiptap/extension-placeholder'
+import { Fragment, Slice } from '@tiptap/pm/model'
 import { useFilter } from 'reka-ui'
-import CodeBlockShiki from 'tiptap-extension-code-block-shiki'
 import { VList } from 'virtua/vue'
 
 const currentRoom = useCurrentRoom()
@@ -53,7 +54,6 @@ let command: ((props: MentionNodeAttrs) => void) | undefined
 
 const listHeight = computed(() => Math.min(filteredItems.value.length, 7) * 32)
 
-// const { message } = useRoomActions(currentRoom)
 const { sendTextMessage } = useRoomMessaging(currentRoom)
 
 function selectItem(item: SuggestionItem) {
@@ -112,20 +112,39 @@ function createSuggestion(
 }
 
 const editor = useEditor({
+  editorProps: {
+    handlePaste(view, event) {
+      const text = event.clipboardData?.getData('text/plain')
+      if (!text) return false
+
+      const { tr, schema } = view.state
+      const nodes: Node[] = []
+      const lines = text.split('\n')
+      for (let i = 0; i < lines.length; i++) {
+        if (i > 0) nodes.push(schema.nodes.hardBreak!.create())
+        if (lines[i]) nodes.push(schema.text(lines[i]!))
+      }
+      tr.replaceSelection(new Slice(Fragment.from(nodes), 0, 0))
+      view.dispatch(tr)
+      return true
+    },
+  },
   extensions: [
     TiptapStarterKit.configure({
+      blockquote: false,
       bold: false,
+      bulletList: false,
       code: false,
       codeBlock: false,
       heading: false,
+      horizontalRule: false,
       italic: false,
       link: false,
+      listItem: false,
+      orderedList: false,
       strike: false,
       trailingNode: false,
       underline: false,
-    }),
-    CodeBlockShiki.configure({
-      defaultTheme: 'github-dark-default',
     }),
     EmojiNode.configure({
       suggestion: createSuggestion(
@@ -189,9 +208,6 @@ const editor = useEditor({
           Enter: ({ editor }) => {
             if (open.value) return false
 
-            const plainBody = nodeToPlainBody(editor.state.doc).trim()
-            if (!plainBody) return true
-
             const mentionedUserIds = new Set<string>()
             editor.state.doc.descendants(node => {
               if (node.type.name === 'mention') {
@@ -200,8 +216,13 @@ const editor = useEditor({
               }
             })
 
-            const formattedBody = nodeToFormattedBody(editor.state.doc)
-            const sanitizedFormattedBody = sanitizeFormattedBody(formattedBody)
+            const plainBody = docToMarkdown(editor.state.doc, true)
+            if (!plainBody.trim()) return false
+
+            const md = docToMarkdown(editor.state.doc)
+            const html = (MARKED_INSTANCE.parse(md) as string).trimEnd()
+            const sanitizedFormattedBody = sanitizeFormattedBody(html)
+
             sendTextMessage(plainBody, sanitizedFormattedBody, mentionedUserIds)
 
             onType(true)

@@ -52,8 +52,12 @@ function inlineTokensToText(tokens: Token[]): string {
   return output
 }
 
-export function nodeToFormattedBody(node: Node) {
-  if (node.isText) return MARKED_INSTANCE.parseInline(node.text ?? '') as string
+export function nodeToFormattedBody(node: Node): string {
+  if (node.type.name === 'doc') return documentToFormattedBody(node)
+
+  if (node.isText) {
+    return MARKED_INSTANCE.parseInline(node.text ?? '') as string
+  }
 
   switch (node.type.name) {
     case 'hardBreak':
@@ -77,6 +81,63 @@ export function nodeToFormattedBody(node: Node) {
     default:
       return childrenToHtml(node)
   }
+}
+
+function documentToFormattedBody(doc: Node): string {
+  const output: string[] = []
+  let markdownLines: string[] = []
+
+  const flushMarkdown = () => {
+    if (!markdownLines.length) return
+
+    output.push(
+      MARKED_INSTANCE.parse(markdownLines.join('\n'), {
+        breaks: true,
+      }) as string,
+    )
+
+    markdownLines = []
+  }
+
+  doc.forEach(node => {
+    if (node.type.name === 'paragraph') {
+      markdownLines.push(childrenToMarkdown(node))
+      return
+    }
+
+    flushMarkdown()
+    output.push(nodeToFormattedBody(node))
+  })
+
+  flushMarkdown()
+  return output.join('')
+}
+
+function childrenToMarkdown(node: Node): string {
+  let output = ''
+
+  node.forEach(child => {
+    if (child.isText) {
+      // Important: preserve the raw Markdown markers here.
+      output += child.text ?? ''
+    } else {
+      switch (child.type.name) {
+        case 'hardBreak':
+          output += '\n'
+          break
+        case 'mention':
+          output += mentionToHtml(child)
+          break
+        case 'emoji':
+          output += emojiToHtml(child)
+          break
+        default:
+          output += childrenToMarkdown(child)
+      }
+    }
+  })
+
+  return output
 }
 
 function codeBlockToHtml(node: Node) {
