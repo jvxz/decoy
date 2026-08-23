@@ -67,7 +67,6 @@ export function useMessageBodyNodes(event: MaybeRefOrGetter<MatrixEvent>) {
     if (firstElement?.localName === 'mx-reply') firstElement.remove()
 
     const safeHtml = sanitizeFormattedBody(raw.body.innerHTML)
-
     const safe = new DOMParser().parseFromString(safeHtml, 'text/html')
 
     return walkNodes(safe.body)
@@ -110,11 +109,9 @@ function walkNodes(el: HTMLElement): MessageNode[] {
         const href = decode(node.getAttribute('href') ?? '')
         const { type, value } = resolveMentionHref(href)
         if (type !== 'unknown') {
-          const mentionSigil = type === 'user' ? '@' : type === 'roomAlias' ? '#' : '!'
-
           nodes.push({
             mentionType: type,
-            text: node.textContent?.startsWith(mentionSigil) ? node.textContent : `${mentionSigil}${node.textContent}`,
+            text: node.textContent,
             type: 'mention',
             value,
           })
