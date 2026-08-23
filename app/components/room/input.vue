@@ -212,7 +212,7 @@ const editor = useEditor({
             editor.state.doc.descendants(node => {
               if (node.type.name === 'mention') {
                 const id = node.attrs.id as string
-                if (id.startsWith('@')) mentionedUserIds.add(id)
+                if (isUserId(id)) mentionedUserIds.add(id)
               }
             })
 
