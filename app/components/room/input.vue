@@ -216,7 +216,7 @@ const editor = useEditor({
               }
             })
 
-            const plainBody = docToMarkdown(editor.state.doc, true)
+            const plainBody = nodeToPlainBody(editor.state.doc)
             if (!plainBody.trim()) return false
 
             const md = docToMarkdown(editor.state.doc)

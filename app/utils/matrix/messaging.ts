@@ -45,7 +45,7 @@ export function sanitizeFormattedBody(formattedBody: string) {
   }
 }
 
-export function docToMarkdown(doc: Node, plain = false): string {
+export function docToMarkdown(doc: Node): string {
   let out = ''
   doc.descendants((node, _pos, parent) => {
     if (parent?.type.name === 'doc') return
@@ -59,7 +59,7 @@ export function docToMarkdown(doc: Node, plain = false): string {
     }
     if (node.type.name === 'mention') {
       const { id, label } = node.attrs
-      out += plain ? `@${label}` : `[${label}](https://matrix.to/#/${encodeURIComponent(id)})`
+      out += `[${label}](https://matrix.to/#/${encodeURIComponent(id)})`
       return false
     }
     if (node.type.name === 'emoji') {
