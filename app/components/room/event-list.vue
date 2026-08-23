@@ -19,7 +19,7 @@ const containerRef = useTemplateRef('container')
 const isPaginationBusy = ref(false)
 const optimisticallyRedacted = useOptimisticRedactions()
 
-const { events, isFullyLoaded, scrollEventsAsync } = useRoomEvents(toRef(props, 'room'), {
+const { events, getEventVersion, isFullyLoaded, scrollEventsAsync } = useRoomEvents(toRef(props, 'room'), {
   filter: [
     EventType.Reaction,
     EventType.RoomRedaction,
@@ -107,6 +107,7 @@ const groupedEvents = useEventGrouping({
       ref="container"
       class="scroll-container grid h-[calc(100%-3rem)] w-full content-end absolute overflow-x-hidden overflow-y-scroll"
       data-testid="scroll-container"
+      data-slot="event-list-container"
     >
       <div class="w-full" data-testid="scroll-container-wrapper">
         <div data-ignore class="h-4.25" />

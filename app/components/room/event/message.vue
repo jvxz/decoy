@@ -11,7 +11,6 @@ const { data: replyEvent, isLoading: isReplyEventLoading, isReplyEvent } = useRo
 
 const userId = computed(() => event.value.getSender())
 const { content: eventContent, isDecrypting } = useEventContent(event)
-const eventBody = computed(() => trimReplyFromBody(eventContent.value?.body))
 const eventProfile = useUserProfile(userId)
 const eventMember = useRoomMember(() => room.value.roomId, userId)
 
@@ -22,15 +21,6 @@ const replyEventBody = computed(() =>
 const replyEventProfile = useUserProfile(() => replyEvent.value?.getSender())
 
 const hasReactions = useRoomEventHasReactions(room, event)
-const isJumboEmoji = computed(() => {
-  const body = eventBody.value?.trim()
-  if (!body) return false
-
-  if (body.replace(EMOJI_RE, '').trim() !== '') return false
-
-  const count = body.match(EMOJI_RE)?.length ?? 0
-  return count > 0 && count <= 27
-})
 
 const shouldRender = computed(() => {
   const type = eventContent.value?.msgtype
@@ -88,7 +78,7 @@ const contentProps: PopoverContentProps = {
           </UProfilePopoverTrigger>
         </UContextMenuRegionTrigger>
 
-        <div>
+        <div class="w-full">
           <RoomEventMessageContent>
             <template v-if="!grouped && isDefined(event.getTs()) && userId" #header>
               <UContextMenuRegionTrigger region="member" :value="{ member: eventMember, roomId: room.roomId }" as-child>
@@ -105,16 +95,7 @@ const contentProps: PopoverContentProps = {
               <RoomEventMessageTimestamp :datetime="event.getTs()" />
             </template>
 
-            <RenderMd
-              v-if="!isDecrypting"
-              inline
-              :content="eventBody"
-              class="whitespace-pre-wrap"
-              :class="{
-                'italic text-muted-foreground': event?.isDecryptionFailure() || !eventContent?.body,
-                'text-4xl': isJumboEmoji,
-              }"
-            />
+            <RoomEventMessageBody v-if="!isDecrypting" :event />
             <p v-else class="italic">Decrypting message...</p>
           </RoomEventMessageContent>
 
