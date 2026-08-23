@@ -3,7 +3,7 @@ import type { Component } from 'vue'
 
 import { DialogAvatar, DialogCodeViewer, DialogDeleteMessage, DialogInvite, DialogLeave } from '#components'
 
-const { open, state, dialogKey } = useGlobalDialog()
+const { dialogKey, open, state } = useGlobalDialog()
 
 const dialogs: Record<GlobalDialog, Component> = {
   avatar: DialogAvatar,
@@ -16,8 +16,8 @@ const dialogs: Record<GlobalDialog, Component> = {
 
 <template>
   <component
-    v-if="state"
     :is="dialogs[state.name]"
+    v-if="state"
     :key="`${state.name}-${dialogKey}`"
     v-model:open="open"
     v-bind="state"

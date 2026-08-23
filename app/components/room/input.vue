@@ -117,7 +117,7 @@ const editor = useEditor({
       const text = event.clipboardData?.getData('text/plain')
       if (!text) return false
 
-      const { tr, schema } = view.state
+      const { schema, tr } = view.state
       const nodes: Node[] = []
       const lines = text.split('\n')
       for (let i = 0; i < lines.length; i++) {

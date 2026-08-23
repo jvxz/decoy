@@ -58,7 +58,7 @@ export function useMessageBodyNodes(event: MaybeRefOrGetter<MatrixEvent>) {
       `invalid event type when formatting message body. was \`\${eventRef.value.getType()}\``,
     )
 
-    const { format, body, formatted_body } = eventRef.value.getContent<RoomMessageTextEventContent>()
+    const { body, format, formatted_body } = eventRef.value.getContent<RoomMessageTextEventContent>()
     if (format !== 'org.matrix.custom.html' || !formatted_body) return [{ type: 'text', value: body }]
 
     const raw = new DOMParser().parseFromString(formatted_body, 'text/html')

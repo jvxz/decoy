@@ -19,7 +19,7 @@ const delegated = reactiveOmit(props, 'class')
     :class="cn('text-muted-foreground text-sm flex items-center gap-2 h-2em', props.class)"
     data-slot="blockquote"
   >
-    <span aria-hidden="true" class="w-px h-full bg-border" />
+    <span aria-hidden="true" class="bg-border h-full w-px" />
 
     <span>
       <slot />

@@ -67,7 +67,7 @@ const [DefineElement, Element] = createReusableTemplate<{
     <UButton
       v-else-if="node.type === 'link'"
       variant="link"
-      class="text-primary px-0 mx-0 w-fit"
+      class="text-primary mx-0 px-0 w-fit"
       :style="{
         'font-size': 'inherit',
       }"
@@ -78,7 +78,7 @@ const [DefineElement, Element] = createReusableTemplate<{
 
     <RoomEventMessageBodyMention v-else-if="node.type === 'mention'" v-bind="node" />
 
-    <component v-else-if="node.type === 'element'" :is="tagComponentMap[node.tag] ?? node.tag" v-bind="node.attrs">
+    <component :is="tagComponentMap[node.tag] ?? node.tag" v-else-if="node.type === 'element'" v-bind="node.attrs">
       <Element v-for="(child, index) in node.children" :key="index" :node="child" />
     </component>
   </DefineElement>
