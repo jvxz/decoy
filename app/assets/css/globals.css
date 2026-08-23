@@ -53,6 +53,8 @@
 
   --danger: oklch(0.6 0.2 23);
   --danger-foreground: oklch(0.985 0 0);
+  --danger-hover: oklch(0.6 0.2 23 / 0.1);
+  --danger-press: oklch(0.6 0.2 23 / 0.15);
 
   --overlay: oklch(0% 0 0 / 0.5);
   /* end default palette tokens */

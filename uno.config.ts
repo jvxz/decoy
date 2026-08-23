@@ -69,8 +69,9 @@ export default defineConfig({
     [
       /^(bg|text|border)-(.+)-(hover|press)$/,
       ([, prop, name, state], { theme }) => {
+        const omit = ['danger']
         const color = (theme.colors as Record<string, any>)[name]
-        if (typeof color !== 'string') return
+        if (typeof color !== 'string' || omit.includes(name)) return
         const cssProp = prop === 'bg' ? 'background-color' : prop === 'text' ? 'color' : 'border-color'
         return { [cssProp]: `oklch(from ${color} calc(l + var(--shift-${state})) c h)` }
       },
@@ -104,6 +105,8 @@ export default defineConfig({
       codeblock: 'var(--codeblock)',
       danger: 'var(--danger)',
       'danger-foreground': 'var(--danger-foreground)',
+      'danger-hover': 'var(--danger-hover)',
+      'danger-press': 'var(--danger-press)',
       foreground: 'var(--foreground)',
       hover: 'var(--hover)',
       input: 'var(--input)',
