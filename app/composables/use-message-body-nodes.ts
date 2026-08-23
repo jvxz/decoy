@@ -107,7 +107,7 @@ function walkNodes(el: HTMLElement): MessageNode[] {
           value: node.textContent ?? '',
         })
       } else if (node.tagName.toLowerCase() === 'a') {
-        const href = decodeURIComponent(node.getAttribute('href') ?? '')
+        const href = decode(node.getAttribute('href') ?? '')
         const { type, value } = resolveMentionHref(href)
         if (type !== 'unknown') {
           const mentionSigil = type === 'user' ? '@' : type === 'roomAlias' ? '#' : '!'
