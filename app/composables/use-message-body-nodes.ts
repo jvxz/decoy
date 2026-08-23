@@ -85,7 +85,6 @@ function walkNodes(el: HTMLElement): MessageNode[] {
     const isBlock = BLOCK_TAGS.has(el.tagName.toLowerCase())
 
     for (const node of el.childNodes) {
-      console.log('node: ', node)
       if (node.nodeType === Node.TEXT_NODE) {
         const value = node.nodeValue ?? ''
         if (isBlock && !value.trim()) continue
