@@ -59,7 +59,9 @@ export function docToMarkdown(doc: Node): string {
     }
     if (node.type.name === 'mention') {
       const { id, label } = node.attrs
-      out += `[${label}](https://matrix.to/#/${encodeURIComponent(id)})`
+
+      out += `[${isUserId(id) ? `@${label}` : `#${label}`}](https://matrix.to/#/${encodeURIComponent(id)})`
+
       return false
     }
     if (node.type.name === 'emoji') {

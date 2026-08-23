@@ -12,8 +12,7 @@ export function nodeToPlainBody(node: Node): string {
       return '\n'
     case 'mention': {
       const attrs = node.attrs as MentionNodeAttrs
-      const prefix = String(attrs.id).startsWith('!') ? '#' : '@'
-      return `${prefix}${attrs.label ?? ''}`
+      return `${attrs.id ?? ''}`
     }
     case 'emoji':
       return (node.attrs as { unicode: string }).unicode
@@ -148,8 +147,7 @@ function codeBlockToHtml(node: Node) {
 
 function mentionToHtml(node: Node) {
   const attrs = node.attrs as MentionNodeAttrs
-  const prefix = String(attrs.id).startsWith('!') ? '#' : '@'
-  return `<a href="https://matrix.to/#/${encodeURIComponent(String(attrs.id))}">${prefix}${escape(attrs.label ?? '')}</a>`
+  return `<a href="https://matrix.to/#/${encodeURIComponent(String(attrs.id))}">${escape(attrs.label ?? '')}</a>`
 }
 
 function emojiToHtml(node: Node) {
