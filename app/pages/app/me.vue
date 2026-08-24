@@ -10,7 +10,7 @@ definePageMeta({
       return navigateTo('/app/me/home')
     }
 
-    if (lastRoute && !from.path.startsWith('/app/me') && to.path !== lastRoute) {
+    if (to.name === 'me' && lastRoute && !from.path.startsWith('/app/me') && to.path !== lastRoute) {
       return navigateTo(lastRoute)
     }
 
