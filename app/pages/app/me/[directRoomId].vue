@@ -12,15 +12,22 @@ definePageMeta({
 })
 
 const route = useRoute()
-const room = useRoom(() => route.params.directRoomId)
+const roomId = computed(() => route.params.directRoomId)
 
-defineAppLabel({ label: () => (room.value ? resolveRoomName(room.value) : route.params.directRoomId) })
+const room = useRoom(roomId)
+const { data: summary } = useRoomSummary(roomId)
+
+const resolvedName = computed(() =>
+  room.value ? resolveRoomName(room.value) : summary.value ? summary.value.name : roomId.value,
+)
+
+defineAppLabel({ label: resolvedName })
 </script>
 
 <template>
   <LayoutAppSlot name="page-header">
     <LayoutAppPageHeader>
-      <span> {{ room ? resolveRoomName(room) : 'Unknown room' }}</span>
+      <span> {{ resolvedName }}</span>
     </LayoutAppPageHeader>
   </LayoutAppSlot>
 
