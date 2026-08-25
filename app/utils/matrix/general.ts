@@ -35,7 +35,6 @@ export async function getMatrixToUrl(
 
   if (type === 'roomAlias' || type === 'roomId' || type === 'event') {
     if (type === 'roomId') {
-      assert(isRoomId(id), 'attempted to create `matrix.to` URL for room ID, but ID is not a valid room ID')
       const room = client.getRoom(id)
 
       if (room) {
