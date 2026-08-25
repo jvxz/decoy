@@ -12,19 +12,20 @@ export interface MatrixToUrl {
   via?: string[]
 }
 export function parseMatrixToUrl(url: string): MatrixToUrl {
-  const { pathname } = parseURL(url)
-  const type = pathname.includes('/!')
+  const unhashed = url.replace('/#/', '/')
+  const parsed = parseURL(unhashed)
+  const type = parsed.pathname.includes('/!')
     ? 'roomId'
-    : pathname.includes('/@')
+    : parsed.pathname.includes('/@')
       ? 'userId'
-      : pathname.includes('/#')
+      : isRoomAlias(parsed.hash)
         ? 'roomAlias'
-        : pathname.includes('/$')
+        : parsed.hash.includes('/$')
           ? 'event'
           : 'unknown'
 
-  const query = parseQuery(url)
-  const via = Array.isArray(query.via) ? query.via : [query.via ?? '']
+  const query = parseQuery(parsed.search || parsed.hash.split('?')[1] || '')
+  const via = toArray(query.via ?? [])
   const action = (Array.isArray(query.action) ? query.action[0] : query.action) as 'join' | 'chat' | undefined
 
   return {

@@ -2,3 +2,5 @@ export const A_TO_Z_RE = /[a-z]/i
 export const ALPHANUMERIC_RE = /^[a-z0-9]+$/
 export const WHITESPACE_RE = /\s+/
 export const TRAILING_NEWLINE_RE = /\n$/
+
+export const MATRIX_ROOM_ALIAS_RE = /^#[^\0:\uD800-\uDFFF]+:(?:\[[0-9A-F:.]{2,45}\]|[0-9A-Z.-]{1,255})(?::\d{1,5})?$/i
