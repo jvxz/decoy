@@ -4,12 +4,11 @@ const props = withDefaults(defineProps<{ withMembersList?: boolean; room: MaybeR
 })
 const roomId = useResolveRoomId(() => props.room)
 const room = useRoom(() => props.room)
-const { data: summary } = useRoomSummary(() => props.room)
 const isJoined = useRoomIsJoined(room)
 </script>
 
 <template>
-  <RoomInstancePreview v-if="!room && !isJoined && roomId" :summary :room-id />
+  <RoomInstancePreview v-if="!room && !isJoined && roomId" :room-id />
 
   <template v-else-if="room">
     <div v-if="isJoined" class="flex flex-1 size-full">
