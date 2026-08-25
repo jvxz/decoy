@@ -16,7 +16,7 @@ export function useRoomSummary(
     queryKey: $qk.roomSummary(roomId),
     refetchOnWindowFocus: true,
     retry: (count, err) => {
-      if (isMatrixError(err)) return err.errcode !== MatrixErrorCode.M_NOT_FOUND
+      if (isMatrixError(err) && err.errcode === MatrixErrorCode.M_NOT_FOUND) return false
 
       return count <= 4
     },
