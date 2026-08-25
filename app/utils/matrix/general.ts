@@ -33,3 +33,10 @@ export function parseMatrixToUrl(url: string): MatrixToUrl {
     via,
   }
 }
+
+export function resolveViaArray(roomId: string, viaServers?: (string | undefined)[] | string) {
+  const { serverName } = parseRoomId(roomId) ?? {}
+  const via = toArray(viaServers ?? [])
+  const res = compact(uniq([...via, ...(serverName ? [serverName] : [])]))
+  return res.length ? res : undefined
+}
