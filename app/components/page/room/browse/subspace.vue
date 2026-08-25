@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import type { IHierarchyRoom } from 'matrix-js-sdk/lib/@types/spaces'
+import type { HierarchyRoom } from 'matrix-js-sdk'
 
 const props = defineProps<{
-  space: IHierarchyRoom
+  space: HierarchyRoom
   open: boolean
   count: number | undefined
 }>()
