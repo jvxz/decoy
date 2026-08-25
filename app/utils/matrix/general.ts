@@ -1,3 +1,5 @@
+import type { MatrixClient } from 'matrix-js-sdk'
+
 export function getMatrixIdType(id: string | undefined): 'user' | 'room' | 'unknown' {
   if (!id) return 'unknown'
 
@@ -11,6 +13,51 @@ export interface MatrixToUrl {
   action?: 'join' | 'chat'
   via?: string[]
 }
+
+export async function getMatrixToUrl(
+  client: MatrixClient,
+  type: MatrixToUrl['type'],
+  id: string,
+  opts?: {
+    viaServers?: string[] | false
+    eventId?: string
+  },
+) {
+  const { eventId, viaServers } = opts ?? {}
+
+  const url = parseURL(MATRIX_TO_URL)
+
+  if (type === 'unknown') return url.toString()
+
+  if (type === 'userId') {
+    url.pathname = `/${id}`
+  }
+
+  if (type === 'roomAlias' || type === 'roomId' || type === 'event') {
+    if (type === 'roomId') {
+      assert(isRoomId(id), 'attempted to create `matrix.to` URL for room ID, but ID is not a valid room ID')
+      const room = client.getRoom(id)
+
+      if (room) {
+        const via = viaServers === false ? [] : (viaServers ?? (await getViaServers(room)))
+        if (via.length) {
+          url.search = stringifyQuery({ via })
+        }
+      }
+    }
+
+    url.pathname = `/${id}`
+
+    if (type === 'event') {
+      assert(eventId, 'attempted to create `matrix.to` URL for event, but `eventId` was `undefined`')
+      url.pathname += `/${eventId}`
+    }
+  }
+
+  url.pathname = `/#${url.pathname}`
+  return stringifyParsedURL(url)
+}
+
 export function parseMatrixToUrl(url: string): MatrixToUrl {
   const unhashed = url.replace('/#/', '/')
   const parsed = parseURL(unhashed)

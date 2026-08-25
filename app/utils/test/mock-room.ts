@@ -1,11 +1,22 @@
+import type { Membership } from 'matrix-js-sdk'
+
 import { KnownMembership, MatrixEvent, Room, RoomMember } from 'matrix-js-sdk'
+import { generateFakeUserId } from '~~/test/nuxt/utils/matrix/credentials'
 
 const DEFAULT_SENDER = '@test:localhost'
 const DEFAULT_START_TS = Date.UTC(2026, 0, 1)
 
 export interface MockRoom {
   room: Room
+  members: Map<string, RoomMember>
   pushMessage: (opts?: PushMessageOptions) => MatrixEvent
+  addMember: (
+    userId: string,
+    opts?: Partial<{
+      membership: KnownMembership
+      powerLevel: number
+    }>,
+  ) => void
   pushReaction: (target: MatrixEvent, key: string, opts?: PushReactionOptions) => MatrixEvent
   redact: (event: MatrixEvent) => void
   setMemberTyping: (userId: string, typing: boolean) => RoomMember
@@ -27,10 +38,12 @@ interface PushReactionOptions {
 interface CreateMockRoomOptions {
   id: string
   seedMessages?: number
+  seedMembers?: number
+  alias?: string
 }
 
 export function createMockRoom(opts: CreateMockRoomOptions): MockRoom {
-  const { id, seedMessages = 0 } = opts
+  const { id, seedMessages = 0, seedMembers = 0, alias } = opts
 
   const events: MatrixEvent[] = []
   const annotationsByTarget = new Map<string, Map<string, Set<MatrixEvent>>>()
@@ -55,7 +68,9 @@ export function createMockRoom(opts: CreateMockRoomOptions): MockRoom {
 
   const room = {
     findEventById: (eventId: string) => events.find(e => e.getId() === eventId),
-    getJoinedMembers: () => [],
+    getCanonicalAlias: () => alias,
+    getDirectionalContent: () => {},
+    getJoinedMembers: () => members.values().toArray(),
     getLiveTimeline: () => ({
       getEvents: () => events,
       getPaginationToken: () => 'token',
@@ -144,12 +159,54 @@ export function createMockRoom(opts: CreateMockRoomOptions): MockRoom {
     ;(event as unknown as { isRedacted: () => boolean }).isRedacted = () => true
   }
 
+  const addMember: MockRoom['addMember'] = (userId, opts = {}) => {
+    const { membership, powerLevel } = opts
+
+    const roomMember = new RoomMember(room.roomId, userId)
+    roomMember.membership = membership ?? KnownMembership.Join
+
+    roomMember.powerLevel = powerLevel ?? 0
+
+    members.set(userId, roomMember)
+  }
+
   for (let i = 0; i < seedMessages; i++) {
     const eventId = i === 0 ? 'oldest-event' : i === seedMessages - 1 ? 'newest-event' : undefined
     pushMessage({ eventId })
   }
 
-  return { pushMessage, pushReaction, redact, room, setMemberTyping }
+  for (let i = 0; i < seedMembers; i++) {
+    addMember(generateFakeUserId())
+  }
+
+  return { addMember, members, pushMessage, pushReaction, redact, room, setMemberTyping }
+}
+
+interface MkMembershipEventOpts {
+  roomId: string
+  userId: string
+  membership?: Membership
+  displayname?: string
+  avatarUrl?: string
+  ts?: number
+  eventId?: string
+}
+
+export function mkMembershipEvent(opts: MkMembershipEventOpts): MatrixEvent {
+  const { roomId, userId, membership = KnownMembership.Join, displayname, avatarUrl, ts, eventId } = opts
+
+  return mkStubEvent({
+    content: {
+      membership,
+      ...(displayname && { displayname }),
+      ...(avatarUrl && { avatar_url: avatarUrl }),
+    },
+    eventId: eventId ?? `$membership-${userId}-${Date.now()}`,
+    roomId,
+    sender: userId,
+    ts: ts ?? Date.now(),
+    type: 'm.room.member',
+  })
 }
 
 interface StubEventInput {
