@@ -1,12 +1,17 @@
-export function useRoomSummary(roomOrId: MaybeRefOrGetter<MaybeRoomOrId | undefined>) {
+export function useRoomSummary(
+  roomOrId: MaybeRefOrGetter<MaybeRoomOrId | undefined>,
+  via?: MaybeRefOrGetter<string[] | undefined>,
+) {
   const roomId = useResolveRoomId(roomOrId)
+  const viaRef = toRef(via)
   const { client } = useMatrixClient()
 
   return useQuery({
     queryFn: () => {
       if (!roomId.value) return null
-      const { serverName } = parseRoomId(roomId.value) ?? {}
-      return client.value.getRoomSummary(roomId.value, serverName ? [serverName] : [])
+
+      const via = resolveViaArray(roomId.value, viaRef.value)
+      return client.value.getRoomSummary(roomId.value, via)
     },
     queryKey: $qk.roomSummary(roomId),
     refetchOnWindowFocus: true,
