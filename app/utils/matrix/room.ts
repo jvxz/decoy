@@ -28,6 +28,10 @@ export interface RoomsWithBatchToken {
   rooms: IHierarchyRoom[]
 }
 
+export async function joinRoom(client: MatrixClient, roomId: string, via?: string[], inviteSignUrl?: string) {
+  return client.joinRoom(roomId, { inviteSignUrl, viaServers: via && via.length ? via : undefined })
+}
+
 export function getRoom(client: MatrixClient, roomId: Room['roomId'], allowedIds?: MaybeReadonlySet<Room['roomId']>) {
   if (!allowedIds) return client.getRoom(roomId)
 
