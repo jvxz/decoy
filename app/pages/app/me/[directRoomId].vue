@@ -16,7 +16,7 @@ const roomId = computed(() => route.params.directRoomId)
 
 const room = useRoom(roomId)
 const params = useKnownSearchParams()
-const { data: summary } = useRoomSummary(roomId, toArray(params.value.via ?? ''))
+const { data: summary } = useRoomSummary(roomId, () => toArray(params.value.via ?? ''))
 
 const resolvedName = computed(() =>
   room.value ? resolveRoomName(room.value) : summary.value ? summary.value.name : roomId.value,
