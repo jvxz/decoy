@@ -60,15 +60,16 @@ export async function getMatrixToUrl(
 export function parseMatrixToUrl(url: string): MatrixToUrl {
   const unhashed = url.replace('/#/', '/')
   const parsed = parseURL(unhashed)
-  const type = parsed.pathname.includes('/!')
-    ? 'roomId'
-    : parsed.pathname.includes('/@')
-      ? 'userId'
-      : isRoomAlias(parsed.hash)
-        ? 'roomAlias'
-        : parsed.hash.includes('/$')
-          ? 'event'
-          : 'unknown'
+  const type =
+    parsed.pathname.includes('/$') || parsed.hash.includes('/$')
+      ? 'event'
+      : parsed.pathname.includes('/!')
+        ? 'roomId'
+        : parsed.pathname.includes('/@')
+          ? 'userId'
+          : isRoomAlias(parsed.hash)
+            ? 'roomAlias'
+            : 'unknown'
 
   const query = parseQuery(parsed.search || parsed.hash.split('?')[1] || '')
   const via = toArray(query.via ?? [])
