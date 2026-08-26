@@ -13,7 +13,7 @@ export function useRoomSummary(
       const via = resolveViaArray(roomId.value, viaRef.value)
       return client.value.getRoomSummary(roomId.value, via)
     },
-    queryKey: $qk.roomSummary(roomId),
+    queryKey: $qk.roomSummary(roomId, viaRef),
     refetchOnWindowFocus: true,
     retry: (count, err) => {
       if (
