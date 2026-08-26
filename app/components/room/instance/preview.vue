@@ -3,7 +3,9 @@ import { JoinRule } from 'matrix-js-sdk'
 
 const props = defineProps<{ roomId: string }>()
 
-const { data: summary, isLoading: isSummaryLoading } = useRoomSummary(() => props.roomId)
+const params = useKnownSearchParams()
+const via = computed(() => toArray(params.value.via ?? []))
+const { data: summary, isLoading: isSummaryLoading } = useRoomSummary(() => props.roomId, via)
 
 const name = computed(() => summary.value?.name ?? props.roomId)
 const avatarSrc = useResolveAvatarUrl(() => summary.value?.avatar_url)
@@ -15,11 +17,6 @@ const canAttemptJoin = computed(
 )
 
 const { join } = useRoomActions(() => props.roomId)
-const params = useKnownSearchParams()
-const via = computed(() => {
-  if (!params.value.via) return
-  return Array.isArray(params.value.via) ? params.value.via.map(v => v) : [params.value.via]
-})
 </script>
 
 <template>
