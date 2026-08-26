@@ -96,14 +96,15 @@ function walkNodes(el: HTMLElement): MessageNode[] {
 
       if (!(node instanceof HTMLElement)) continue
 
-      if (node.tagName.toLowerCase() === 'code' && el.tagName.toLowerCase() === 'pre') {
+      if (node.tagName.toLowerCase() === 'pre') {
+        const code = node.querySelector('code')
         nodes.push({
-          language: node.classList
+          language: code?.classList
             .values()
             .find(cls => cls.startsWith('language-'))
             ?.replace('language-', ''),
           type: 'codeblock',
-          value: node.textContent ?? '',
+          value: (code ?? node).textContent ?? '',
         })
       } else if (node.tagName.toLowerCase() === 'a') {
         const href = decode(node.getAttribute('href') ?? '')
