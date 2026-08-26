@@ -22,7 +22,8 @@ export const $qk = {
     defineKey('publicRooms', toRef(server), toRef(query)),
   roomReplyEvent: (replyEventId: MaybeRefOrGetter<string | undefined>, roomId: MaybeRefOrGetter<string>) =>
     defineKey('roomReplyEvent', toRef(replyEventId), toRef(roomId)),
-  roomSummary: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('roomSummary', toRef(roomId)),
+  roomSummary: (roomId: MaybeRefOrGetter<string | undefined>, via: MaybeRefOrGetter<string[] | undefined>) =>
+    defineKey('roomSummary', toRef(roomId), toRef(via)),
   spaceSubspaces: (spaceId: MaybeRefOrGetter<string>) => defineKey('spaceSubspaces', toRef(spaceId)),
 } as const
 

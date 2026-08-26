@@ -1,4 +1,4 @@
-import type { MatrixEvent, Room, RoomMember } from 'matrix-js-sdk'
+import type { HierarchyRoom, MatrixEvent, Room, RoomMember } from 'matrix-js-sdk'
 
 export interface ContextMenuRegions {
   member: {
@@ -31,6 +31,9 @@ export interface ContextMenuRegions {
   }
   asideRoom: {
     room: Room
+  }
+  browseRoom: {
+    room: HierarchyRoom
   }
 }
 

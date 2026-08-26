@@ -1,5 +1,6 @@
 import type { InviteOpts, MatrixEvent, Room } from 'matrix-js-sdk'
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/types'
+import type { LocationQueryValue } from 'vue-router'
 
 import { EventStatus, EventType, KnownMembership, RelationType, RoomEvent } from 'matrix-js-sdk'
 
@@ -91,12 +92,17 @@ export function useRoomActions(
   })
 
   const join = useMutation({
-    mutationFn: async () => {
-      const currentRoom = room.value
-      if (!currentRoom?.roomId) return
+    mutationFn: async (opts: { via?: string[] | LocationQueryValue[] } | void) => {
+      if (!roomId.value) return
+      const { via: viaServers } = opts ?? {}
 
-      const res = await client.value.joinRoom(currentRoom.roomId)
-      currentRoom.updateMyMembership(KnownMembership.Join)
+      const via = resolveViaArray(
+        roomId.value,
+        viaServers?.map(v => v?.toString()),
+      )
+
+      const res = await joinRoom(client.value, roomId.value, via)
+      res.updateMyMembership(KnownMembership.Join)
       await saveClient()
 
       return res

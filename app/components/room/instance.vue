@@ -1,18 +1,22 @@
 <script lang="ts" setup>
+import { KnownMembership } from 'matrix-js-sdk'
+
 const props = withDefaults(defineProps<{ withMembersList?: boolean; room: MaybeRoomOrId | undefined }>(), {
   withMembersList: true,
 })
+
+const matrixStatus = useMatrixStatus()
 const roomId = useResolveRoomId(() => props.room)
 const room = useRoom(() => props.room)
-const { data: summary } = useRoomSummary(() => props.room)
-const isJoined = useRoomIsJoined(room)
+const { self } = useSelf()
+const membership = useRoomMembership(roomId, () => self.value?.userId)
 </script>
 
 <template>
-  <RoomInstancePreview v-if="!room && !isJoined && roomId" :summary :room-id />
+  <RoomInstancePreview v-if="matrixStatus.isDataSynced && roomId && membership !== KnownMembership.Join" :room-id />
 
   <template v-else-if="room">
-    <div v-if="isJoined" class="flex flex-1 size-full">
+    <div v-if="membership === KnownMembership.Join" class="flex flex-1 size-full">
       <div class="flex flex-col size-full relative">
         <RoomEventList :room />
         <RoomInput />

@@ -13,18 +13,22 @@ export function getEventVersion(id: string | undefined) {
 }
 
 export function useRoomEvents(
-  room: Ref<Room>,
+  room: Ref<Room | undefined>,
   opts?: { isBusy?: Ref<boolean>; filter?: FilterMatrixEventPredicate | FilterMatrixEventPredicate[] },
 ) {
   const { client } = useMatrixClient()
 
   const events = shallowRef<MatrixEvent[]>([])
 
+  const roomId = computed(() => room.value?.roomId)
+
   const isFullyLoaded = computed({
-    get: () => roomEventsFullyLoadedSet.has(room.value.roomId),
+    get: () => (roomId.value ? roomEventsFullyLoadedSet.has(roomId.value) : false),
     set: (v: boolean) => {
-      if (v) roomEventsFullyLoadedSet.add(room.value.roomId)
-      else roomEventsFullyLoadedSet.delete(room.value.roomId)
+      if (!roomId.value) return false
+
+      if (v) roomEventsFullyLoadedSet.add(roomId.value)
+      else roomEventsFullyLoadedSet.delete(roomId.value)
     },
   })
 
@@ -33,15 +37,15 @@ export function useRoomEvents(
     return opts?.filter ? filterMatrixEvents(cloned, opts.filter) : cloned
   }
 
-  const renderableCount = () => selectEvents(room.value.getLiveTimeline().getEvents()).length
+  const renderableCount = () => selectEvents(room.value?.getLiveTimeline().getEvents()).length
 
-  const isBackfilled = computed(() => roomEventsBackfilledSet.has(room.value.roomId))
+  const isBackfilled = computed(() => (roomId.value ? roomEventsBackfilledSet.has(roomId.value) : false))
 
   const isBootstrapping = () => !isBackfilled.value && !isFullyLoaded.value
 
   const sync = () => {
     if (isBootstrapping()) return
-    events.value = selectEvents(room.value.getLiveTimeline().getEvents())
+    events.value = selectEvents(room.value?.getLiveTimeline().getEvents())
   }
 
   const mutex = new Mutex()
@@ -67,13 +71,13 @@ export function useRoomEvents(
         if (dir === Direction.Backward) {
           try {
             const canLoadMore = await scrollBack()
-            if (targetRoomId === toValue(room).roomId) isFullyLoaded.value = !canLoadMore
+            if (targetRoomId === roomId.value) isFullyLoaded.value = !canLoadMore
           } finally {
             roomEventsBackfilledSet.add(targetRoomId)
           }
         }
 
-        if (targetRoomId === toValue(room).roomId) sync()
+        if (targetRoomId === roomId.value) sync()
       } finally {
         mutex.release()
       }
@@ -82,8 +86,10 @@ export function useRoomEvents(
   })
 
   watch(
-    () => room.value.roomId,
+    roomId,
     id => {
+      if (!id) return
+
       if (roomEventsBackfilledSet.has(id) || isFullyLoaded.value) {
         sync()
         return
@@ -109,7 +115,7 @@ export function useRoomEvents(
     } else missedSync = true
   }
 
-  useRoomHooks(() => room.value.roomId, {
+  useRoomHooks(roomId, {
     onLocalEchoUpdated: hookSync,
     onRedaction: hookSync,
     onTimeline: hookSync,
@@ -119,7 +125,7 @@ export function useRoomEvents(
 
   const { onDecrypted } = useMatrixHooks()
   onDecrypted(event => {
-    if (room.value.roomId !== event.getRoomId()) return
+    if (roomId.value !== event.getRoomId()) return
 
     const id = event.getId()
     if (!id) return
@@ -128,9 +134,10 @@ export function useRoomEvents(
   })
 
   async function scrollBack() {
-    if (isFullyLoaded.value) return false
+    if (isFullyLoaded.value || !room.value) return false
 
     const tl = room.value.getLiveTimeline()
+
     const prevRenderable = renderableCount()
     const known = new Set(tl.getEvents().map(e => e.getId()))
 

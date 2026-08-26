@@ -11,6 +11,7 @@ export const appMeta = {
 }
 
 export const MATRIX_BASE_URL = 'https://matrix-client.matrix.org'
+export const MATRIX_TO_URL = 'https://matrix.to'
 
 export const IMG_PLACEHOLDER_URL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 
