@@ -1,5 +1,6 @@
 import type { Node } from '@tiptap/pm/model'
 import type { UponSanitizeAttributeHook } from 'dompurify'
+import type { MatrixClient } from 'matrix-js-sdk'
 
 import DOMPurify from 'dompurify'
 
@@ -45,7 +46,7 @@ export function sanitizeFormattedBody(formattedBody: string) {
   }
 }
 
-export function docToMarkdown(doc: Node): string {
+export function docToMarkdown(doc: Node, clientForMatrixToUrls?: MatrixClient): string {
   let out = ''
   doc.descendants((node, _pos, parent) => {
     if (parent?.type.name === 'doc') return
@@ -58,9 +59,21 @@ export function docToMarkdown(doc: Node): string {
       return false
     }
     if (node.type.name === 'mention') {
-      const { id, label } = node.attrs
+      const { id, label, via } = node.attrs
 
-      out += `[${isUserId(id) ? `@${label}` : `#${label}`}](https://matrix.to/#/${encodeURIComponent(id)})`
+      const type: MatrixToUrl['type'] = isUserId(id)
+        ? 'userId'
+        : isRoomAlias(id)
+          ? 'roomAlias'
+          : isRoomId(id)
+            ? 'roomId'
+            : 'unknown'
+
+      const matrixTo = clientForMatrixToUrls
+        ? getMatrixToUrl(clientForMatrixToUrls, type, id, { viaServers: via })
+        : `${MATRIX_TO_URL}/#/${encodeURIComponent(id)}`
+      const sigil = type === 'userId' ? '@' : '#'
+      out += `[${sigil}${label}](${matrixTo})`
 
       return false
     }

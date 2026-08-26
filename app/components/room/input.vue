@@ -23,9 +23,16 @@ const { areMembersTyping, onType } = useRoomMembersTyping.provide(currentRoom)
 
 const { contains } = useFilter({ sensitivity: 'base' })
 
+const { client } = useMatrixClient()
 const { members } = useRoomMembers(currentRoom)
 const { rooms } = useSpaceHierarchy(() => currentSpace.value?.roomId)
+
 const roomsArray = computed(() => (rooms.value ? rooms.value.values().toArray() : []))
+const viaByRoomId = computed(() => {
+  const space = rooms.value?.get(currentSpace.value?.roomId ?? '')
+  if (!space) return new Map<string, string[]>()
+  return new Map(space.children_state.filter(c => c.content.via?.length).map(c => [c.state_key, c.content.via]))
+})
 
 const { emojiData } = useEmojiData()
 
@@ -174,13 +181,25 @@ const editor = useEditor({
         },
       ),
     }),
-    Mention.configure({
+    Mention.extend({
+      addAttributes() {
+        return {
+          ...this.parent?.(),
+          via: { default: null },
+        }
+      },
+    }).configure({
       suggestions: [
         createSuggestion('#', ({ query }) =>
           roomsArray.value
             .filter(r => r.name && contains(r.name, query))
             .map(r => ({
-              commandProps: { id: r.room_id, label: r.name ?? r.room_id, room: r },
+              commandProps: {
+                id: r.room_id,
+                label: r.name ?? r.room_id,
+                room: r,
+                via: viaByRoomId.value.get(r.room_id),
+              },
               id: r.room_id,
               label: r.name ?? r.room_id,
               room: r,
@@ -190,7 +209,7 @@ const editor = useEditor({
           (members.value ?? [])
             .filter(u => [resolveUserName(u), u.userId].some(v => contains(v, query)))
             .map(u => ({
-              commandProps: { id: u.userId, label: resolveUserName(u), user: u },
+              commandProps: { id: u.userId, label: resolveUserName(u) },
               id: u.userId,
               label: resolveUserName(u),
               user: u,
@@ -219,7 +238,7 @@ const editor = useEditor({
             const plainBody = nodeToPlainBody(editor.state.doc)
             if (!plainBody.trim()) return false
 
-            const md = docToMarkdown(editor.state.doc)
+            const md = docToMarkdown(editor.state.doc, client.value)
             const html = (MARKED_INSTANCE.parse(md) as string).trimEnd()
             const sanitizedFormattedBody = sanitizeFormattedBody(html)
 
