@@ -10,7 +10,7 @@ describe('general', () => {
     const eventId = '$foobar123'
 
     const client = createMockClient()
-    const { room, addMember } = createMockRoom({
+    const { addMember, room } = createMockRoom({
       alias: roomAlias,
       id: roomId,
       seedMembers: 16,

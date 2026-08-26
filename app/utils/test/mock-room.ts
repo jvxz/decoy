@@ -43,7 +43,7 @@ interface CreateMockRoomOptions {
 }
 
 export function createMockRoom(opts: CreateMockRoomOptions): MockRoom {
-  const { id, seedMessages = 0, seedMembers = 0, alias } = opts
+  const { alias, id, seedMembers = 0, seedMessages = 0 } = opts
 
   const events: MatrixEvent[] = []
   const annotationsByTarget = new Map<string, Map<string, Set<MatrixEvent>>>()
@@ -193,7 +193,7 @@ interface MkMembershipEventOpts {
 }
 
 export function mkMembershipEvent(opts: MkMembershipEventOpts): MatrixEvent {
-  const { roomId, userId, membership = KnownMembership.Join, displayname, avatarUrl, ts, eventId } = opts
+  const { avatarUrl, displayname, eventId, membership = KnownMembership.Join, roomId, ts, userId } = opts
 
   return mkStubEvent({
     content: {

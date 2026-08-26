@@ -75,8 +75,8 @@ const via = computed(() => {
             <UButton
               variant="default"
               :is-loading="join.isPending.value"
-              @click="join.mutate({ via })"
               :disabled="isSummaryLoading || !canAttemptJoin"
+              @click="join.mutate({ via })"
             >
               <span v-if="isInvited">Accept invite</span>
               <span v-else>Join room</span>
