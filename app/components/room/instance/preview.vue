@@ -8,7 +8,11 @@ const { data: summary, isLoading: isSummaryLoading } = useRoomSummary(() => prop
 const name = computed(() => summary.value?.name ?? props.roomId)
 const avatarSrc = useResolveAvatarUrl(() => summary.value?.avatar_url)
 
-const canAttemptJoin = computed(() => (summary.value ? summary.value?.join_rule === JoinRule.Public : true))
+const { inviteIds } = useInvites()
+const isInvited = computed(() => inviteIds.value.has(props.roomId))
+const canAttemptJoin = computed(
+  () => isInvited.value || (summary.value ? summary.value?.join_rule === JoinRule.Public : true),
+)
 
 const { join } = useRoomActions(() => props.roomId)
 const params = useKnownSearchParams()
@@ -74,7 +78,8 @@ const via = computed(() => {
               @click="join.mutate({ via })"
               :disabled="isSummaryLoading || !canAttemptJoin"
             >
-              <span>Join room</span>
+              <span v-if="isInvited">Accept invite</span>
+              <span v-else>Join room</span>
             </UButton>
           </UTooltipTrigger>
 
