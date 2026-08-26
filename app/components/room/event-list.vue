@@ -19,17 +19,22 @@ const containerRef = useTemplateRef('container')
 const isPaginationBusy = ref(false)
 const optimisticallyRedacted = useOptimisticRedactions()
 
-const { events, isFullyLoaded, scrollEventsAsync } = useRoomEvents(toRef(props, 'room'), {
+const {
+  events: roomEvents,
+  isFullyLoaded,
+  scrollEventsAsync,
+} = useRoomEvents(toRef(props, 'room'), {
   filter: [
     EventType.Reaction,
     EventType.RoomRedaction,
     EventType.RoomPowerLevels,
     e => isBadEncrypted(e),
-    e => e.isRedacted() || optimisticallyRedacted.has(e.getId()!),
+    e => e.isRedacted(),
     e => isEditEvent(e),
   ],
   isBusy: isPaginationBusy,
 })
+const events = computed(() => roomEvents.value.filter(e => !optimisticallyRedacted.has(e.getId()!)))
 
 const loadOlder = async () => {
   await scrollEventsAsync(Direction.Backward).catch(err => console.warn('[event-list] backward pagination:', err))
