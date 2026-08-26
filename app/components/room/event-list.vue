@@ -12,24 +12,29 @@ import type { Room } from 'matrix-js-sdk'
 import { Direction, EventType } from 'matrix-js-sdk'
 
 const props = defineProps<{
-  room: Room
+  room: Room | undefined
 }>()
 
 const containerRef = useTemplateRef('container')
 const isPaginationBusy = ref(false)
 const optimisticallyRedacted = useOptimisticRedactions()
 
-const { events, isFullyLoaded, scrollEventsAsync } = useRoomEvents(toRef(props, 'room'), {
+const {
+  events: roomEvents,
+  isFullyLoaded,
+  scrollEventsAsync,
+} = useRoomEvents(toRef(props, 'room'), {
   filter: [
     EventType.Reaction,
     EventType.RoomRedaction,
     EventType.RoomPowerLevels,
     e => isBadEncrypted(e),
-    e => e.isRedacted() || optimisticallyRedacted.has(e.getId()!),
+    e => e.isRedacted(),
     e => isEditEvent(e),
   ],
   isBusy: isPaginationBusy,
 })
+const events = computed(() => roomEvents.value.filter(e => !optimisticallyRedacted.has(e.getId()!)))
 
 const loadOlder = async () => {
   await scrollEventsAsync(Direction.Backward).catch(err => console.warn('[event-list] backward pagination:', err))
@@ -58,7 +63,7 @@ watchEffect(() => {
   isPaginationBusy.value = isPaginating.value.backward || isPaginating.value.forward
 })
 
-const roomId = computed(() => props.room.roomId)
+const roomId = computed(() => props.room?.roomId)
 
 watch(
   roomId,
@@ -80,6 +85,8 @@ let settledRoomId = roomId.value
 watch(
   [roomId, events],
   async ([id]) => {
+    if (!id) return
+
     const needsBootstrap = paginationWindow.value.length === 0 && events.value.length > 0
     if (id === settledRoomId && !needsBootstrap) return
 
@@ -116,20 +123,22 @@ const groupedEvents = useEventGrouping({
 
         <div ref="backSentinel" data-ignore />
 
-        <div
-          v-for="(event, idx) in groupedEvents.events"
-          :key="event.getId() ?? idx"
-          :data-index="idx"
-          :data-item-id="event.getId()"
-          :style="isTestMode() ? { height: `${(event as any)._size}px` } : undefined"
-        >
-          <RoomEventGeneric
-            :event
-            :grouped="groupedEvents.grouped[idx] !== false"
-            :date-diffed="!!groupedEvents.dateDiffed[idx]"
-            :room
-          />
-        </div>
+        <template v-if="room">
+          <div
+            v-for="(event, idx) in groupedEvents.events"
+            :key="event.getId() ?? idx"
+            :data-index="idx"
+            :data-item-id="event.getId()"
+            :style="isTestMode() ? { height: `${(event as any)._size}px` } : undefined"
+          >
+            <RoomEventGeneric
+              :event
+              :grouped="groupedEvents.grouped[idx] !== false"
+              :date-diffed="!!groupedEvents.dateDiffed[idx]"
+              :room
+            />
+          </div>
+        </template>
         <div ref="forwardSentinel" data-ignore />
 
         <div data-ignore class="h-12" />

@@ -60,11 +60,13 @@ export const useInvites = createGlobalState(() => {
     return `${room.roomId}:${inviterId}`
   }
 
-  const invitesArray = computed(() => invitesMap.value.values().toArray())
+  const invitesSet = computed(() => new Set(invitesMap.value.values()))
+  const inviteIdsSet = computed(() => new Set(invitesSet.value.values().map(r => r.roomId)))
 
   return {
     handleMembershipUpdate,
     handleNotiDismiss,
-    invites: invitesArray,
+    inviteIds: inviteIdsSet,
+    invites: invitesSet,
   }
 })

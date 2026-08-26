@@ -37,45 +37,49 @@ provideIntersectionObserver(scrollEl)
 
       <UShowcaseSeparator />
 
-      <UShowcaseContent>
-        <!-- conversations -->
-        <PageRoomBrowseSection title="Rooms" :default-open="true" class="h-fit">
-          <template v-if="!isLoading">
-            <VisibleLazy v-for="room in conversationRooms.values()" :key="room.room_id" :height="72" use-injection>
-              <PageRoomBrowseCard :room :suggested="suggestedRooms.has(room.room_id)" />
-            </VisibleLazy>
-          </template>
+      <UContextMenuRegionRoot name="browseRoom">
+        <UShowcaseContent>
+          <!-- conversations -->
+          <PageRoomBrowseSection title="Rooms" :default-open="true" class="h-fit">
+            <template v-if="!isLoading">
+              <VisibleLazy v-for="room in conversationRooms.values()" :key="room.room_id" :height="72" use-injection>
+                <PageRoomBrowseCard :room :suggested="suggestedRooms.has(room.room_id)" />
+              </VisibleLazy>
+            </template>
 
-          <!-- conversation skeletons -->
-          <template v-else>
-            <VisibleLazy v-for="i in conversationCachedCount" :key="i" :height="72" use-injection>
-              <USkeleton class="h-18 w-full" />
-            </VisibleLazy>
-          </template>
-        </PageRoomBrowseSection>
-
-        <!-- subspaces -->
-        <template v-if="!isLoading">
-          <PageRoomBrowseSection
-            v-for="space in subspaces.values()"
-            :key="space.room_id"
-            v-slot="{ open }"
-            :title="space.name ?? space.room_id"
-            :avatar="space.avatar_url"
-            :description="space.topic"
-            :room-count="space.roomCount"
-            :member-count="space.num_joined_members"
-            avatar-placeholder
-          >
-            <PageRoomBrowseSubspace :space="space" :open :count="space.roomCount" />
+            <!-- conversation skeletons -->
+            <template v-else>
+              <VisibleLazy v-for="i in conversationCachedCount" :key="i" :height="72" use-injection>
+                <USkeleton class="h-18 w-full" />
+              </VisibleLazy>
+            </template>
           </PageRoomBrowseSection>
-        </template>
 
-        <!-- subspace skeletons -->
-        <template v-else>
-          <USkeleton v-for="key in subspaceCachedCount" :key class="h-12" />
-        </template>
-      </UShowcaseContent>
+          <!-- subspaces -->
+          <template v-if="!isLoading">
+            <PageRoomBrowseSection
+              v-for="space in subspaces.values()"
+              :key="space.room_id"
+              v-slot="{ open }"
+              :title="space.name ?? space.room_id"
+              :avatar="space.avatar_url"
+              :description="space.topic"
+              :room-count="space.roomCount"
+              :member-count="space.num_joined_members"
+              avatar-placeholder
+            >
+              <PageRoomBrowseSubspace :space="space" :open :count="space.roomCount" />
+            </PageRoomBrowseSection>
+          </template>
+
+          <!-- subspace skeletons -->
+          <template v-else>
+            <USkeleton v-for="key in subspaceCachedCount" :key class="h-12" />
+          </template>
+        </UShowcaseContent>
+
+        <PageRoomBrowseContextMenuContent />
+      </UContextMenuRegionRoot>
     </UShowcaseRoot>
   </div>
 </template>
