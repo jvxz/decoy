@@ -8,26 +8,10 @@ const props = defineProps<{
 }>()
 
 const { client } = useMatrixClient()
-const roomLocationRoute = computed<RouteLocationRaw | undefined>(() => {
-  if (props.mentionType === 'user') return
-
-  const instance = client.value.getRoom(props.value)
-  if (!instance) return
-
-  if (isSpace(instance))
-    return {
-      name: 'space',
-      params: {
-        spaceId: instance.roomId,
-      },
-    }
-
-  const spaceId = getRoomSpaceId(client.value, instance)
-
-  return spaceId
-    ? { name: 'space-room', params: { roomId: instance.roomId, spaceId } }
-    : { name: 'direct-room', params: { directRoomId: instance.roomId } }
-})
+const currentSpaceId = useCurrentSpaceId()
+const roomLocationRoute = computed<RouteLocationRaw | undefined>(() =>
+  getRoomRoute(client.value, props.value, currentSpaceId.value),
+)
 </script>
 
 <template>
@@ -53,7 +37,7 @@ const roomLocationRoute = computed<RouteLocationRaw | undefined>(() => {
     </UProfilePopoverTrigger>
 
     <NuxtLink v-else :to="roomLocationRoute">
-      {{ text ?? value }}
+      <span> {{ text ?? value }}</span>
     </NuxtLink>
   </UMention>
 </template>

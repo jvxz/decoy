@@ -254,16 +254,19 @@ export function getRoomParentSpaceIds(room: Room) {
     .filter((id): id is string => !!id)
 }
 
-export function getRoomSpaceId(client: MatrixClient, room: Room) {
+/**
+ * only returns spaces that are joined
+ */
+export function getRoomSpaces(client: MatrixClient, room: MaybeRoomOrId) {
+  const ids = new Set<string>()
   for (const space of client.getRooms()) {
     if (!space.isSpaceRoom()) continue
     for (const e of getStateEvents(space, EventType.SpaceChild)) {
-      if (isSpaceChild(e) && e.getStateKey() === room.roomId) return space.roomId
+      if (isSpaceChild(e) && e.getStateKey() === resolveRoomId(room)) ids.add(space.roomId)
     }
   }
-  return undefined
+  return ids
 }
-
 export function getRoomTopic(room: Room | undefined) {
   if (!room) return
 
