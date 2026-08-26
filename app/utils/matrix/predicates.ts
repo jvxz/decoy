@@ -3,7 +3,6 @@ import type { Room } from 'matrix-js-sdk'
 import { KnownMembership, MatrixError } from 'matrix-js-sdk'
 
 const USER_ID_RE = /^@[^\s:]+:\S+$/
-const ROOM_ID_RE = /^![^\s:]+:\S+$/
 
 export const isUserId = (input: unknown): input is string => isString(input) && USER_ID_RE.test(input)
 

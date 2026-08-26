@@ -387,7 +387,6 @@ export function resolveJoinRuleLabel(joinRule: JoinRule) {
   }
 }
 
-export const ROOM_ID_RE = /^!(?<localpart>[^:]+):(?<server_name>.+)$/
 export function parseRoomId(roomId: string) {
   const match = roomId.match(ROOM_ID_RE)
   if (!match) return undefined
