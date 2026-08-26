@@ -14,7 +14,7 @@ export interface MatrixToUrl {
   via?: string[]
 }
 
-export async function getMatrixToUrl(
+export function getMatrixToUrl(
   client: MatrixClient,
   type: MatrixToUrl['type'],
   id: string,
@@ -35,12 +35,16 @@ export async function getMatrixToUrl(
 
   if (type === 'roomAlias' || type === 'roomId' || type === 'event') {
     if (type === 'roomId') {
-      const room = client.getRoom(id)
+      if (Array.isArray(viaServers) && viaServers.length) {
+        url.search = stringifyQuery({ via: viaServers })
+      } else if (viaServers !== false) {
+        const room = client.getRoom(id)
 
-      if (room) {
-        const via = viaServers === false ? [] : (viaServers ?? (await getViaServers(room)))
-        if (via.length) {
-          url.search = stringifyQuery({ via })
+        if (room) {
+          const via = getViaServers(room)
+          if (via.length) {
+            url.search = stringifyQuery({ via })
+          }
         }
       }
     }
