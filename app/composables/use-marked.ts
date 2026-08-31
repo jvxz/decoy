@@ -17,11 +17,7 @@ export type MdSegment =
     }
 
 const md = MARKED_MESSAGE_INSTANCE.use({
-  async: false,
-  renderer: {
-    codespan: t => `<code class="bg-surface rounded px-1 py-0.5 font-mono text-[0.9em]">${t.text}</code>`,
-    strong: t => `<strong class="font-medium">${t.text}</strong>`,
-  },
+  breaks: true,
 })
 
 const renderCache = new QuickLRU<string, MdSegment[]>({ maxSize: 512 })
@@ -29,13 +25,13 @@ const segment = (input: string) => {
   const cached = renderCache.get(input)
   if (cached) return cached
 
-  const tokens = md.lexer(input, { breaks: true })
+  const tokens = md.lexer(input)
   const segments: MdSegment[] = []
   let buffer: Token[] = []
 
   const flush = () => {
     if (!buffer.length) return
-    segments.push({ html: DOMPurify.sanitize(md.parser(buffer, { breaks: true })), type: 'html' })
+    segments.push({ html: DOMPurify.sanitize(md.parser(buffer)), type: 'html' })
     buffer = []
   }
 
@@ -60,7 +56,7 @@ export function useMarked(input: MaybeRefOrGetter<string | undefined>, options?:
     if (!value) return []
 
     if (options?.inline) {
-      const html = DOMPurify.sanitize(md.parseInline(value, { breaks: true }) as string)
+      const html = DOMPurify.sanitize(md.parseInline(value) as string)
       return [{ html, type: 'html' }]
     }
 
