@@ -4,8 +4,10 @@ import type { RouteLocationRaw } from 'vue-router'
 export function getRoomRoute(
   client: MatrixClient,
   room: MaybeRoomOrId,
-  currentSpace?: MaybeRoomOrId,
+  opts?: { currentSpace?: MaybeRoomOrId; via?: string[] },
 ): RouteLocationRaw {
+  const { currentSpace, via = [] } = opts || {}
+
   const roomId = resolveRoomId(room)
   const instance = client.getRoom(roomId)
   if (!instance)
@@ -13,6 +15,9 @@ export function getRoomRoute(
       name: 'direct-room',
       params: {
         directRoomId: roomId,
+      },
+      query: {
+        via,
       },
     }
 
