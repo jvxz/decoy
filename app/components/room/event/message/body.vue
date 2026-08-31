@@ -127,6 +127,6 @@ ol {
 }
 
 strong {
-  @apply font-medium;
+  @apply font-bold;
 }
 </style>
