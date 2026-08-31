@@ -254,16 +254,19 @@ export function getRoomParentSpaceIds(room: Room) {
     .filter((id): id is string => !!id)
 }
 
-export function getRoomSpaceId(client: MatrixClient, room: Room) {
+/**
+ * only returns spaces that are joined
+ */
+export function getRoomSpaces(client: MatrixClient, room: MaybeRoomOrId) {
+  const ids = new Set<string>()
   for (const space of client.getRooms()) {
     if (!space.isSpaceRoom()) continue
     for (const e of getStateEvents(space, EventType.SpaceChild)) {
-      if (isSpaceChild(e) && e.getStateKey() === room.roomId) return space.roomId
+      if (isSpaceChild(e) && e.getStateKey() === resolveRoomId(room)) ids.add(space.roomId)
     }
   }
-  return undefined
+  return ids
 }
-
 export function getRoomTopic(room: Room | undefined) {
   if (!room) return
 
@@ -286,10 +289,12 @@ export function getRoomMembersTyping(room: Room) {
   return typingMembers
 }
 
-export async function getMostPowerfulRoomMember(room: Room, maxLevel?: number) {
-  await room.loadMembersIfNeeded()
-
+/**
+ * you will likely want to call this after calling `room.loadMembersIfNeeded()`
+ */
+export function getMostPowerfulRoomMember(room: Room, maxLevel?: number) {
   let mostPowerfulMember: { member: RoomMember; powerLevel: number } | undefined
+
   const members = room.getJoinedMembers()
   for (let i = 0; i < members.length; i++) {
     const member = members[i]!
@@ -306,9 +311,11 @@ export async function getMostPowerfulRoomMember(room: Room, maxLevel?: number) {
   return mostPowerfulMember
 }
 
-export async function getPopularHomeservers(room: Room) {
+/**
+ * you will likely want to call this after calling `room.loadMembersIfNeeded()`
+ */
+export function getPopularHomeservers(room: Room) {
   const homeserverPopMap = new Map<string, number>()
-  await room.loadMembersIfNeeded()
 
   const members = room.getJoinedMembers()
   for (let i = 0; i < members.length; i++) {
@@ -322,18 +329,21 @@ export async function getPopularHomeservers(room: Room) {
   return homeserverPopMap
 }
 
-export async function getViaServers(room: Room) {
+/**
+ * you will likely want to call this after calling `room.loadMembersIfNeeded()`
+ */
+export function getViaServers(room: Room) {
   const via: string[] = []
 
   let mostPowerfulMemberHomeserver: string | undefined
-  const { member: mostPowerfulMember } = (await getMostPowerfulRoomMember(room)) ?? {}
+  const { member: mostPowerfulMember } = getMostPowerfulRoomMember(room) ?? {}
   if (mostPowerfulMember) {
     const { homeserver } = parseUserId(mostPowerfulMember.userId)
     via.push(homeserver)
     mostPowerfulMemberHomeserver = homeserver
   }
 
-  const homeserverPopMap = await getPopularHomeservers(room)
+  const homeserverPopMap = getPopularHomeservers(room)
   if (mostPowerfulMemberHomeserver && homeserverPopMap.get(mostPowerfulMemberHomeserver)) {
     homeserverPopMap.delete(mostPowerfulMemberHomeserver)
   }
@@ -387,7 +397,6 @@ export function resolveJoinRuleLabel(joinRule: JoinRule) {
   }
 }
 
-export const ROOM_ID_RE = /^!(?<localpart>[^:]+):(?<server_name>.+)$/
 export function parseRoomId(roomId: string) {
   const match = roomId.match(ROOM_ID_RE)
   if (!match) return undefined
@@ -396,10 +405,6 @@ export function parseRoomId(roomId: string) {
     localpart: match.groups?.localpart,
     serverName: match.groups?.server_name,
   }
-}
-
-export function isRoomId(roomId: string) {
-  return ROOM_ID_RE.test(roomId)
 }
 
 export const isSpace = (room: Room) => room.isSpaceRoom()

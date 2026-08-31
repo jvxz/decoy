@@ -4,7 +4,7 @@ import type { ShjLanguage } from 'rangi'
 import type { MatrixAvatarProps } from '~/components/matrix/avatar.vue'
 
 export interface GlobalDialogMap {
-  invite: ContextMenuRegions['invite']
+  invite: { room: string }
   leave: {
     room: Room
   }
@@ -29,13 +29,15 @@ type GlobalDialogState = Prettify<
 >
 
 export const useGlobalDialog = createGlobalState(() => {
-  const open = shallowRef(false)
+  const open = ref(false)
   const state = shallowRef<GlobalDialogState>()
+  const dialogKey = ref(0)
 
   const openDialog = <T extends GlobalDialog>(name: T, payload: GlobalDialogMap[T]) => {
     state.value = { name, ...payload } as GlobalDialogState
+    dialogKey.value++
     open.value = true
   }
 
-  return { open, openDialog, state }
+  return { dialogKey, open, openDialog, state }
 })

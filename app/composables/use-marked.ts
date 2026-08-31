@@ -1,41 +1,65 @@
-import twemoji from '@twemoji/api'
+import type { Token, Tokens } from 'marked'
+import type { ShjLanguage } from 'rangi'
+
 import { toRef } from '@vueuse/core'
 import DOMPurify from 'dompurify'
 import QuickLRU from 'quick-lru'
 
-const md = MARKED_INSTANCE.use({
-  async: false,
-  renderer: {
-    strong: t => `<strong class="font-medium">${t.text}</strong>`,
-  },
+export type MdSegment =
+  | {
+      type: 'html'
+      html: string
+    }
+  | {
+      type: 'code'
+      lang: ShjLanguage | (string & {})
+      code: string
+    }
+
+const md = MARKED_MESSAGE_INSTANCE.use({
+  breaks: true,
 })
 
-const renderCache = new QuickLRU<string, string>({ maxSize: 512 })
+const renderCache = new QuickLRU<string, MdSegment[]>({ maxSize: 512 })
+const segment = (input: string) => {
+  const cached = renderCache.get(input)
+  if (cached) return cached
 
-const TWEMOJI_OPTIONS = { className: 'twemoji-parse', ext: '.svg', folder: 'svg' }
+  const tokens = md.lexer(input)
+  const segments: MdSegment[] = []
+  let buffer: Token[] = []
 
-function parseEmoji(html: string) {
-  if (!twemoji.test(html)) return html
+  const flush = () => {
+    if (!buffer.length) return
+    segments.push({ html: DOMPurify.sanitize(md.parser(buffer)), type: 'html' })
+    buffer = []
+  }
 
-  return html.replace(/<[^>]*>|[^<]+/g, part => (part.startsWith('<') ? part : twemoji.parse(part, TWEMOJI_OPTIONS)))
+  for (const token of tokens) {
+    if (token.type === 'code') {
+      flush()
+      const { lang, text } = token as Tokens.Code
+      segments.push({ code: text, lang: lang?.split(WHITESPACE_RE)[0] || 'plain', type: 'code' })
+    } else buffer.push(token)
+  }
+
+  flush()
+  renderCache.set(input, segments)
+  return segments
 }
 
 export function useMarked(input: MaybeRefOrGetter<string | undefined>, options?: { inline?: boolean }) {
   const inputRef = toRef(input)
 
-  return computed(() => {
-    if (!inputRef.value) return
+  return computed<MdSegment[]>(() => {
+    const value = inputRef.value
+    if (!value) return []
 
-    const cacheKey = `${options?.inline ? 'i' : 'b'}:${inputRef.value}`
-    const cached = renderCache.get(cacheKey)
-    if (cached !== undefined) return cached
+    if (options?.inline) {
+      const html = DOMPurify.sanitize(md.parseInline(value) as string)
+      return [{ html, type: 'html' }]
+    }
 
-    const html = options?.inline
-      ? md.parseInline(inputRef.value, { breaks: true })
-      : md.parse(inputRef.value, { breaks: true })
-    const sanitized = DOMPurify.sanitize(parseEmoji(html as string))
-
-    renderCache.set(cacheKey, sanitized)
-    return sanitized
+    return segment(value)
   })
 }

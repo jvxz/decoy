@@ -1,14 +1,31 @@
 <script lang="ts" setup>
+import type { HTMLAttributes } from 'vue'
+
+import type { UCodeblockRootProps } from './u/codeblock.vue'
+
 const props = defineProps<{
   content: string | undefined
   inline?: boolean
+  codeblockUi?: UCodeblockRootProps['ui']
+  class?: HTMLAttributes['class']
 }>()
 
-const md = useMarked(() => props.content, { inline: props.inline })
+const segments = useMarked(() => props.content, { inline: props.inline })
 </script>
 
 <template>
-  <div v-bind="$attrs" v-html="md" />
+  <template v-for="(s, i) in segments" :key="i">
+    <UCodeblock
+      v-if="s.type === 'code'"
+      :ui="codeblockUi"
+      :input="s.code"
+      :lang="s.lang"
+      :numbers="false"
+      :header="true"
+    />
+
+    <div v-else-if="s.type === 'html'" :class="cn('md', props.class)" v-html="s.html" />
+  </template>
 </template>
 
 <style>

@@ -13,8 +13,16 @@ const delegated = reactiveOmit(props, ['open', 'lang', 'code'])
 </script>
 
 <template>
-  <UDialogRoot v-bind="delegated" v-model:open="open">
-    <UDialogContent class="p-0 border-0 gap-0 w-full sm:max-h-75%! sm:max-w-52vw!">
+  <UDialogRoot v-bind="delegated" v-model:open="open" :modal="true">
+    <UDialogContent
+      class="p-0 border-0 gap-0 w-full sm:max-h-75%! sm:max-w-52vw!"
+      @open-auto-focus.prevent
+      @close-auto-focus="
+        (e: Event) => {
+          e.preventDefault()
+        }
+      "
+    >
       <!-- <UDialogHeader>
         <UDialogTitle> {{ label }} </UDialogTitle>
         <VisuallyHidden>

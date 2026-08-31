@@ -114,6 +114,7 @@ const groupedEvents = useEventGrouping({
       ref="container"
       class="scroll-container grid h-[calc(100%-3rem)] w-full content-end absolute overflow-x-hidden overflow-y-scroll"
       data-testid="scroll-container"
+      data-slot="event-list-container"
     >
       <div class="w-full" data-testid="scroll-container-wrapper">
         <div data-ignore class="h-4.25" />
