@@ -24,7 +24,7 @@ const segments = useMarked(() => props.content, { inline: props.inline })
       :header="true"
     />
 
-    <div v-else-if="s.type === 'html'" v-html="s.html" :class="cn('md', props.class)" />
+    <div v-else-if="s.type === 'html'" :class="cn('md', props.class)" v-html="s.html" />
   </template>
 </template>
 
