@@ -73,7 +73,10 @@ const [DefineElement, Element] = createReusableTemplate<{
       }"
       as-child
     >
-      <NuxtLink :to="node.href" external target="_blank"> {{ node.text ?? node.href }} </NuxtLink>
+      <NuxtLink :to="node.href" external target="_blank">
+        <Element v-for="(child, index) in node.children" :key="index" :node="child" />
+        <template v-if="!node.children.length">{{ node.href }}</template>
+      </NuxtLink>
     </UButton>
 
     <RoomEventMessageBodyMention v-else-if="node.type === 'mention'" v-bind="node" />

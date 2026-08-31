@@ -36,7 +36,7 @@ export type MessageNode =
   | { type: 'text'; value: string }
   | { type: 'codeblock'; value: string; language: string | undefined }
   | { type: 'mention'; mentionType: MentionType; value: string; text: string | undefined }
-  | { type: 'link'; href: string; text: string | undefined }
+  | { type: 'link'; href: string; children: MessageNode[] }
   | {
       type: 'element'
       tag: AllowedTag
@@ -118,8 +118,8 @@ function walkNodes(el: HTMLElement): MessageNode[] {
           })
         } else {
           nodes.push({
+            children: walkNodes(node),
             href,
-            text: node.textContent,
             type: 'link',
           })
         }
