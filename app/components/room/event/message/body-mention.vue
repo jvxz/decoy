@@ -9,9 +9,16 @@ const props = defineProps<{
 
 const { client } = useMatrixClient()
 const currentSpaceId = useCurrentSpaceId()
-const roomLocationRoute = computed<RouteLocationRaw | undefined>(() =>
-  getRoomRoute(client.value, props.value, currentSpaceId.value),
-)
+const roomLocationRoute = computed<RouteLocationRaw | undefined>(() => {
+  const parsedUrl = parseURL(props.value)
+  const roomId = parsedUrl.pathname
+  const { via } = parseQuery(parsedUrl.search)
+
+  return getRoomRoute(client.value, roomId, {
+    currentSpace: currentSpaceId.value,
+    via: toArray(via ?? []),
+  })
+})
 </script>
 
 <template>
