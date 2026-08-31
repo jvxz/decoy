@@ -1,13 +1,16 @@
 <script lang="ts" setup>
+import type { HTMLAttributes } from 'vue'
+
 import type { UCodeblockRootProps } from './u/codeblock.vue'
 
 const props = defineProps<{
   content: string | undefined
   inline?: boolean
   codeblockUi?: UCodeblockRootProps['ui']
+  class?: HTMLAttributes['class']
 }>()
 
-const segments = useMarked(() => props.content)
+const segments = useMarked(() => props.content, { inline: props.inline })
 </script>
 
 <template>
@@ -21,7 +24,7 @@ const segments = useMarked(() => props.content)
       :header="true"
     />
 
-    <div v-else-if="s.type === 'html'" v-html="s.html" />
+    <div v-else-if="s.type === 'html'" v-html="s.html" :class="cn('md', props.class)" />
   </template>
 </template>
 
