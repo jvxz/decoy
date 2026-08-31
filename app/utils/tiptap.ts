@@ -11,8 +11,9 @@ export function nodeToPlainBody(node: Node): string {
     case 'hardBreak':
       return '\n'
     case 'mention': {
-      const attrs = node.attrs as MentionNodeAttrs
-      return `${attrs.id ?? ''}`
+      const { id, label } = node.attrs as MentionNodeAttrs
+      if (!label || label === id) return `${id ?? ''}`
+      return `${isUserId(id) ? '@' : '#'}${label}`
     }
     case 'emoji':
       return (node.attrs as { unicode: string }).unicode
