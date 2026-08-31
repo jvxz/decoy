@@ -35,6 +35,7 @@ interface MessageNodeAttrs {
 export type MessageNode =
   | { type: 'text'; value: string }
   | { type: 'codeblock'; value: string; language: string | undefined }
+  | { type: 'codespan'; value: string }
   | { type: 'mention'; mentionType: MentionType; value: string; text: string | undefined }
   | { type: 'link'; href: string; children: MessageNode[] }
   | {
@@ -96,7 +97,12 @@ function walkNodes(el: HTMLElement): MessageNode[] {
 
       if (!(node instanceof HTMLElement)) continue
 
-      if (node.tagName.toLowerCase() === 'pre') {
+      if (node.tagName.toLowerCase() === 'code') {
+        nodes.push({
+          type: 'codespan',
+          value: node.textContent ?? '',
+        })
+      } else if (node.tagName.toLowerCase() === 'pre') {
         const code = node.querySelector('code')
         nodes.push({
           language: code?.classList

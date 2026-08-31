@@ -54,6 +54,8 @@ const [DefineElement, Element] = createReusableTemplate<{
       }"
     />
 
+    <UCodespan v-else-if="node.type === 'codespan'">{{ node.value }}</UCodespan>
+
     <UCodeblock
       v-else-if="node.type === 'codeblock'"
       :input="node.value"
