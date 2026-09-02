@@ -1,1 +1,2 @@
-export const useRoomTopic = reactify(getRoomTopic)
+export const useRoomTopic = (roomOrId: MaybeRefOrGetter<MaybeRoomOrId | undefined>) =>
+  useRoomComputed(roomOrId, getRoomTopic)
