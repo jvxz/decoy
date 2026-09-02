@@ -1,12 +1,12 @@
 export const useRoomVersions = createSharedComposable(() => {
   const versions = shallowReactive(new Map<string, number>())
   const {
-    onRoomName,
+    onRoom,
     onRoomLocalEchoUpdated,
     onRoomMyMembership,
+    onRoomName,
     onRoomReceipt,
     onRoomRedaction,
-    onRoom,
     onRoomState,
     onRoomTags,
     onRoomTimeline,
