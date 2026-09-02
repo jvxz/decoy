@@ -7,8 +7,11 @@ export function useResolveAvatarUrl(
   const { client } = useMatrixClient()
   const reducedMotion = usePreferredReducedMotion()
 
-  const resolvedUrl = computed(() =>
-    resolveAvatarUrl(
+  const resolvedUrl = computed(() => {
+    const { protocol } = parseURL(urlRef.value)
+    if (protocol !== 'mxc:') return urlRef.value
+
+    return resolveAvatarUrl(
       urlRef.value,
       merge<ResolveAvatarUrlOpts, ResolveAvatarUrlOpts>(
         {
@@ -20,8 +23,8 @@ export function useResolveAvatarUrl(
         },
         optsRef.value ?? {},
       ),
-    ),
-  )
+    )
+  })
 
   return resolvedUrl
 }

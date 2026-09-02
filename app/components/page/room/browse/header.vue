@@ -75,7 +75,7 @@ const founder = useRoomFounder(() => props.space)
           variant="link"
           class="font-normal no-underline flex gap-2 items-center data-[state=open]:underline hover:underline h-1em!"
         >
-          <MatrixAvatar :user="founder.userId" class="size-4" />
+          <MatrixRoomMemberAvatar :room="space" :member="founder.userId" class="size-4" />
           <span>{{ resolveUserName(founder) }}</span>
         </UButton>
       </UProfilePopoverTrigger>

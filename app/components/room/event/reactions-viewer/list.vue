@@ -20,7 +20,7 @@ const reactors = computed(() => getReactors(props.reaction))
     >
       <UButton variant="ghost" class="text-foreground py-2 gap-2 h-auto w-full items-center justify-start">
         <UseRoomMember v-slot="{ roomMember }" :room :user="reactor">
-          <MatrixAvatar :room-member="roomMember" class="size-6" />
+          <MatrixRoomMemberAvatar :room :member="reactor" class="size-6" />
           <p>{{ resolveUserName(roomMember) }}</p>
         </UseRoomMember>
       </UButton>

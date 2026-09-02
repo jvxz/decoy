@@ -18,7 +18,7 @@ const status = useMatrixStatus()
       class="group text-foreground ps-1 rounded-sm flex flex-1 shrink-0 gap-1 h-11 w-full cursor-pointer duration-150 items-center -mx-1.5 hover:bg-white/7.5"
     >
       <div class="p-1 shrink-0 h-11 aspect-square">
-        <MatrixAvatar
+        <MatrixUserAvatar
           :is-loading="!status.isDataSynced"
           loading="eager"
           fetchpriority="high"

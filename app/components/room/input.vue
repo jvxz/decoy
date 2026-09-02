@@ -310,9 +310,9 @@ watch(highlightedIdx, idx => vlist.value?.scrollToIndex(idx, { align: 'nearest' 
           @mouseenter="highlightedIdx = index"
           @mousedown.prevent="selectItem(item)"
         >
-          <MatrixAvatar v-if="item.user" class="h-4 w-fit" :room-member="item.user" />
-          <MatrixAvatar v-else-if="item.room" class="h-4 w-fit" :room="item.room.room_id" />
-          <Twemoji v-else :emoji="item.emoji.hexcode" />
+          <MatrixRoomMemberAvatar v-if="item.user" class="h-4 w-fit" :room="currentRoom" :member="item.user" />
+          <MatrixRoomAvatar v-else-if="item.room" class="h-4 w-fit" :room="item.room.room_id" />
+          <Twemoji v-else :emoji="item.emoji?.hexcode" />
 
           <span class="text-foreground">{{ item.label }}</span>
           <span v-if="!item.emoji" class="text-xs font-normal">{{ item.id }}</span>

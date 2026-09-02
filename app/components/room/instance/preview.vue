@@ -24,7 +24,7 @@ const { join } = useRoomActions(() => props.roomId)
     <div class="flex flex-col gap-4 max-w-md w-full">
       <!-- avatar -->
       <USkeleton v-if="isSummaryLoading" class="rounded size-16" />
-      <MatrixAvatar v-else :src="avatarSrc" :alt="name" square class="rounded size-16" :placeholder-key="roomId" />
+      <MatrixAvatar v-else :src="avatarSrc" :alt="name" square class="rounded size-16" />
 
       <div class="flex flex-col gap-1">
         <div class="flex gap-2 items-center">

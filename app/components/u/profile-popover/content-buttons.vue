@@ -11,6 +11,15 @@ const user = useUser(() => props.userId)
 const { copy, isSupported } = useClipboard()
 const copied = refAutoReset(false, 750)
 
+function viewAvatar() {
+  if (!props.userId) return
+
+  const payload = { label: resolveUserName(user.value ?? props.userId), type: 'user', user: props.userId } as const
+
+  open.value = false
+  openDialog('avatar', payload)
+}
+
 function handleCopyUserId() {
   if (!isSupported.value || !props.userId) return
 
@@ -39,13 +48,7 @@ function handleCopyUserId() {
           <Icon name="tabler:tag" /> Copy ID
         </UDropdownMenuItem>
         <UDropdownMenuItem
-          @click="
-            () => {
-              const payload = { label: resolveUserName(user ?? userId), user }
-              open = false
-              openDialog('avatar', payload)
-            }
-          "
+          @click="viewAvatar"
         >
           <Icon name="tabler:photo" /> View avatar</UDropdownMenuItem
         >
