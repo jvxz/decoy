@@ -23,7 +23,7 @@ const { openDialog } = useGlobalDialog()
         </UContextMenuItem>
         <UContextMenuItem
           v-if="payload"
-          @select="openDialog('avatar', { room: payload.room, label: resolveRoomName(payload.room) })"
+          @select="openDialog('avatar', { label: resolveRoomName(payload.room), room: payload.room, type: 'room' })"
         >
           View avatar
         </UContextMenuItem>

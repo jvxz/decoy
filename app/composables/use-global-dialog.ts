@@ -1,14 +1,15 @@
-import type { Room } from 'matrix-js-sdk'
+import type { Room, RoomMember } from 'matrix-js-sdk'
 import type { ShjLanguage } from 'rangi'
-
-import type { MatrixAvatarProps } from '~/components/matrix/avatar.vue'
 
 export interface GlobalDialogMap {
   invite: { room: string }
   leave: {
     room: Room
   }
-  avatar: Pick<MatrixAvatarProps, 'user' | 'room' | 'src'> & { label: string }
+  avatar:
+    | { label: string; type: 'room'; room: MaybeRoomOrId }
+    | { label: string; type: 'user'; user: MaybeUserOrId }
+    | { label: string; type: 'roomMember'; room: MaybeRoomOrId; member: RoomMember | string }
   codeViewer: {
     code: string
     lang?: ShjLanguage | (string & {})

@@ -22,9 +22,11 @@ const props = withDefaults(
 
 const room = useRoom(() => props.room)
 
-const avatarProps = computed(() =>
-  props.manualAvatarSrc ? { room: room.value, src: props.manualAvatarSrc } : { room: room.value },
-)
+const avatarProps = computed(() => ({
+  alt: props.room ? (isRoomId(props.room) ? props.room : props.room.name) : 'Room',
+  class: 'rounded-sm shrink-0 w-fit aspect-square',
+  square: true,
+}))
 
 const isJoined = useRoomIsJoined(room)
 
@@ -48,12 +50,12 @@ const forwarded = useForwardProps(delegated)
     "
   >
     <template v-if="withAvatar">
-      <MatrixAvatar
-        v-if="isJoined || isDirectInvite || alwaysShowAvatar"
-        v-bind="avatarProps"
+      <Img v-if="manualAvatarSrc" v-bind="avatarProps" :src="manualAvatarSrc" />
+      <MatrixRoomAvatar
+        v-else-if="isJoined || isDirectInvite || alwaysShowAvatar"
+        :room
         :direct="isDirectInvite"
-        square
-        class="rounded-sm shrink-0 w-fit aspect-square"
+        v-bind="avatarProps"
       />
       <div v-else class="border border-border-strong rounded-sm border-dashed shrink-0 w-fit aspect-square" />
     </template>

@@ -6,6 +6,7 @@ const props = defineProps<{
 }>()
 
 const src = useResolveAvatarUrl(() => props.room?.avatar_url)
+const alt = computed(() => props.room?.name ?? props.room?.room_id)
 
 const isError = useState(`exploreRoomAvatarError:${props.room?.room_id}`, () => false)
 </script>
@@ -31,6 +32,7 @@ const isError = useState(`exploreRoomAvatarError:${props.room?.room_id}`, () => 
       <MatrixAvatar
         v-if="room"
         :src
+        :alt
         class="border-5 border-surface-raised rounded-2xl bg-surface-raised flex size-16 items-center inset-0 left-4 justify-center absolute z-10 overflow-hidden -top-1/8"
         square
       />

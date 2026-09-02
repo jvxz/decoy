@@ -5,6 +5,7 @@ const props = defineProps<{
 
 const profile = useUserProfile(props.userId)
 const creator = useCurrentRoomCreator()
+const room = useCurrentRoom()
 
 const triggerRef = useTemplateRef('trigger')
 onMounted(() => {
@@ -39,7 +40,7 @@ const { user: profilePopoverUser } = useProfilePopover()
       :class="`data-[state=open]:${profilePopoverUser?.userId === props.userId ? 'bg-selected' : 'bg-transparent'}`"
     >
       <div class="shrink-0 size-6 [&>svg]:!size-full">
-        <MatrixAvatar :user="userId" class="size-full" />
+        <MatrixRoomMemberAvatar :room :member="userId" class="size-full" />
       </div>
 
       <p :title="profile?.displayname" class="truncate">

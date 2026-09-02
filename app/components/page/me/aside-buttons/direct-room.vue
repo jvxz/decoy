@@ -15,7 +15,7 @@ const room = useRoom(() => props.roomId)
           },
         }"
       >
-        <MatrixAvatar :room class="rounded-full size-8" />
+        <MatrixRoomAvatar :room class="rounded-full size-8" />
         <span class="font-medium">{{ room ? resolveRoomName(room) : 'Unknown Room' }}</span>
       </NuxtLink>
     </UAsideListButton>

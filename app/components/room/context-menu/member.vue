@@ -9,7 +9,7 @@ const { openDialog } = useGlobalDialog()
     <UContextMenuItem> Mention </UContextMenuItem>
     <UContextMenuItem> Message {{ member.name }} </UContextMenuItem>
     <UContextMenuSeparator />
-    <UContextMenuItem @select="openDialog('avatar', { label: member.name, user: member.user ?? member.userId })">
+    <UContextMenuItem @select="openDialog('avatar', { label: member.name, member, room: roomId, type: 'roomMember' })">
       View avatar
     </UContextMenuItem>
   </template>

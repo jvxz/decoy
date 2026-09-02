@@ -17,7 +17,7 @@ const rows = Array.from({ length: 2 }, () => ({
         class="group px-6 shrink-0 data-[grouped=false]:mt-4.5 context-menu-open:bg-hover data-[popover-open]:bg-hover hover:bg-hover hover:bg-transparent data-[grouped=true]:min-h-0"
       >
         <RoomEventMessageRoot>
-          <RoomEventMessageAvatar :user="undefined" ghost />
+          <RoomEventMessageAvatar ghost />
           <RoomEventMessageContent class="flex flex-col gap-1.5 translate-y-1">
             <template #header>
               <USkeleton
