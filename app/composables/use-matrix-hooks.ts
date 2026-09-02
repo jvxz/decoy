@@ -15,8 +15,17 @@ const roomMembershipEvent = createEventHook<Parameters<EmitterListener<RoomMembe
 const eventHook = createEventHook<Parameters<EmitterListener<ClientEvent.Event>>>()
 const userProfileHook = createEventHook<Parameters<EmitterListener<ClientEvent.UserProfileUpdate>>>()
 const accountDataHook = createEventHook<Parameters<EmitterListener<ClientEvent.Event>>>()
-const myMembershipHook = createEventHook<Parameters<EmitterListener<RoomEvent.MyMembership>>>()
+const roomMyMembership = createEventHook<Parameters<EmitterListener<RoomEvent.MyMembership>>>()
 const logoutHook = createEventHook<Parameters<EmitterListener<HttpApiEvent.SessionLoggedOut>>>()
+const roomTimeline = createEventHook<Parameters<EmitterListener<RoomEvent.Timeline>>>()
+const roomTimelineReset = createEventHook<Parameters<EmitterListener<RoomEvent.TimelineReset>>>()
+const nameHook = createEventHook<Parameters<EmitterListener<RoomEvent.Name>>>()
+const receiptHook = createEventHook<Parameters<EmitterListener<RoomEvent.Receipt>>>()
+const roomTagsHook = createEventHook<Parameters<EmitterListener<RoomEvent.Tags>>>()
+const roomLocalEchoUpdatedHook = createEventHook<Parameters<EmitterListener<RoomEvent.LocalEchoUpdated>>>()
+const roomRedactionHook = createEventHook<Parameters<EmitterListener<RoomEvent.Redaction>>>()
+const roomAccountDataHook = createEventHook<Parameters<EmitterListener<RoomEvent.AccountData>>>()
+const roomMembersHook = createEventHook<Parameters<EmitterListener<RoomStateEvent.Members>>>()
 export const roomMemberTypingHook = createEventHook<Parameters<EmitterListener<RoomMemberEvent.Typing>>>()
 
 export const useMatrixHooks = createSharedComposable(() => {
@@ -35,8 +44,17 @@ export const useMatrixHooks = createSharedComposable(() => {
       bindListener(MatrixEventEvent.Decrypted, decryptedHook.trigger, { current, prev })
       bindListener(ClientEvent.UserProfileUpdate, userProfileHook.trigger, { current, prev })
       bindListener(ClientEvent.AccountData, accountDataHook.trigger, { current, prev })
-      bindListener(RoomEvent.MyMembership, myMembershipHook.trigger, { current, prev })
+      bindListener(RoomEvent.MyMembership, roomMyMembership.trigger, { current, prev })
       bindListener(HttpApiEvent.SessionLoggedOut, logoutHook.trigger, { current, prev })
+      bindListener(RoomEvent.Timeline, roomTimeline.trigger, { current, prev })
+      bindListener(RoomEvent.TimelineReset, roomTimelineReset.trigger, { current, prev })
+      bindListener(RoomEvent.Name, nameHook.trigger, { current, prev })
+      bindListener(RoomEvent.Receipt, receiptHook.trigger, { current, prev })
+      bindListener(RoomEvent.Tags, roomTagsHook.trigger, { current, prev })
+      bindListener(RoomEvent.LocalEchoUpdated, roomLocalEchoUpdatedHook.trigger, { current, prev })
+      bindListener(RoomEvent.Redaction, roomRedactionHook.trigger, { current, prev })
+      bindListener(RoomEvent.AccountData, roomAccountDataHook.trigger, { current, prev })
+      bindListener(RoomStateEvent.Members, roomMembersHook.trigger, { current, prev })
     },
     { immediate: true },
   )
@@ -46,10 +64,20 @@ export const useMatrixHooks = createSharedComposable(() => {
     onDecrypted: decryptedHook.on,
     onEvent: eventHook.on,
     onLogout: logoutHook.on,
-    onMyMembership: myMembershipHook.on,
     onRoom: roomEvent.on,
+    onRoomAccountData: roomAccountDataHook.on,
+    onRoomLocalEchoUpdated: roomLocalEchoUpdatedHook.on,
     onRoomMembership: roomMembershipEvent.on,
+    onRoomMemberTyping: roomMemberTypingHook.on,
+    onRoomMembers: roomMembersHook.on,
+    onRoomMyMembership: roomMyMembership.on,
+    onRoomName: nameHook.on,
+    onRoomReceipt: receiptHook.on,
+    onRoomRedaction: roomRedactionHook.on,
     onRoomState: roomStateEvent.on,
+    onRoomTags: roomTagsHook.on,
+    onRoomTimeline: roomTimeline.on,
+    onRoomTimelineReset: roomTimelineReset.on,
     onSync: syncHook.on,
     onUserProfile: userProfileHook.on,
   }
