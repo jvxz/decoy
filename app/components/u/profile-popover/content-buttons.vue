@@ -47,11 +47,7 @@ function handleCopyUserId() {
         <UDropdownMenuItem :disabled="!isSupported || !props.userId" @click="handleCopyUserId">
           <Icon name="tabler:tag" /> Copy ID
         </UDropdownMenuItem>
-        <UDropdownMenuItem
-          @click="viewAvatar"
-        >
-          <Icon name="tabler:photo" /> View avatar</UDropdownMenuItem
-        >
+        <UDropdownMenuItem @click="viewAvatar"> <Icon name="tabler:photo" /> View avatar</UDropdownMenuItem>
       </UDropdownMenuContent>
     </UDropdownMenuRoot>
   </div>
