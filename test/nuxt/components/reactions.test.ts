@@ -6,13 +6,17 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { RoomEventReactionsViewer, UProfilePopoverRoot } from '#components'
 
 import Reactions from '../fixtures/reactions.vue'
+import { mockMatrixHooks } from '../utils/matrix/client.ts'
 import { DEFAULT_MOCK_NAMES, generateFakeHomeserver } from '../utils/matrix/credentials.ts'
 
-const { useMatrixClient, useMatrixHooks, useSelf } = vi.hoisted(() => ({
-  useMatrixClient: vi.fn(() => ({ client: shallowRef({}) })),
-  useMatrixHooks: vi.fn(() => ({ onEvent: () => {}, onRoom: () => {}, onSync: () => {}, onUserProfile: () => {} })),
-  useSelf: vi.fn(() => ({ self: shallowRef() })),
-}))
+const { matrixHooks, useMatrixClient, useMatrixHooks, useSelf } = vi.hoisted(() => {
+  return {
+    matrixHooks: mockMatrixHooks,
+    useMatrixClient: vi.fn(() => ({ client: shallowRef({}) })),
+    useMatrixHooks: vi.fn(mockMatrixHooks),
+    useSelf: vi.fn(() => ({ self: shallowRef() })),
+  }
+})
 
 mockNuxtImport('useMatrixClient', () => useMatrixClient)
 mockNuxtImport('useMatrixHooks', () => useMatrixHooks)
@@ -56,12 +60,7 @@ describe('reactions', () => {
     viewer.room.value = undefined
     viewer.event.value = undefined
 
-    useMatrixHooks.mockReturnValue({
-      onEvent: () => {},
-      onRoom: () => {},
-      onSync: () => {},
-      onUserProfile: () => {},
-    })
+    useMatrixHooks.mockReturnValue(matrixHooks())
 
     useMatrixClient.mockReturnValue({
       client: shallowRef({
