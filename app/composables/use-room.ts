@@ -3,15 +3,20 @@ import { Room } from 'matrix-js-sdk'
 
 export function useRoom(roomInput: MaybeRefOrGetter<MaybeRoomOrId | undefined>) {
   const inputRef = toRef(roomInput)
-  const roomEffectScope = useRoomEffectScope(roomInput)
-  const roomRef = shallowRef<Room>()
+  const { client } = useMatrixClient()
+  const versions = useRoomVersions()
 
-  watchEffect(() => {
-    const input = inputRef.value
-    const scoped = roomEffectScope.value?.ref.value
-    roomRef.value = scoped ?? (input instanceof Room ? markRaw(input) : undefined)
-    triggerRef(roomRef)
+  const room = computed(() => {
+    const input = toValue(inputRef)
+    if (!input) return undefined
+
+    void versions.get(resolveRoomId(input))
+
+    if (input instanceof Room) return markRaw(input)
+
+    const cachedRoom = getRoom(client.value, input)
+    return cachedRoom ? markRaw(cachedRoom) : undefined
   })
 
-  return roomRef
+  return room
 }

@@ -29,10 +29,10 @@ export function useRooms(
       )
   }
 
-  const { onMyMembership, onRoom, onSync } = useMatrixHooks()
+  const { onRoomMyMembership, onRoom, onSync } = useMatrixHooks()
   onSync(refresh)
   onRoom(refresh)
-  onMyMembership(refresh)
+  onRoomMyMembership(refresh)
 
   refresh()
   if (opts?.watch) watch(opts.watch, refresh)
