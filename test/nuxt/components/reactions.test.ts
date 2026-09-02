@@ -9,14 +9,16 @@ import Reactions from '../fixtures/reactions.vue'
 import { mockMatrixHooks } from '../utils/matrix/client.ts'
 import { DEFAULT_MOCK_NAMES, generateFakeHomeserver } from '../utils/matrix/credentials.ts'
 
-const { matrixHooks, useMatrixClient, useMatrixHooks, useSelf } = vi.hoisted(() => {
+const { useMatrixClient, useMatrixHooks, useSelf } = vi.hoisted(() => {
   return {
-    matrixHooks: mockMatrixHooks,
     useMatrixClient: vi.fn(() => ({ client: shallowRef({}) })),
-    useMatrixHooks: vi.fn(mockMatrixHooks),
+    useMatrixHooks: vi.fn(),
     useSelf: vi.fn(() => ({ self: shallowRef() })),
   }
 })
+
+const matrixHooks = mockMatrixHooks
+useMatrixHooks.mockImplementation(mockMatrixHooks)
 
 mockNuxtImport('useMatrixClient', () => useMatrixClient)
 mockNuxtImport('useMatrixHooks', () => useMatrixHooks)

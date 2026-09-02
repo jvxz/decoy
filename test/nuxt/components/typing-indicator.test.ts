@@ -9,16 +9,18 @@ import { DEFAULT_MOCK_NAMES, generateFakeHomeserver } from '../utils/matrix/cred
 
 const CURRENT_USER = DEFAULT_MOCK_NAMES[0]!
 
-const { matrixHooks, useCurrentRoom, useMatrixClient, useMatrixHooks, useRoomHooks, useSelf } = vi.hoisted(() => {
+const { useCurrentRoom, useMatrixClient, useMatrixHooks, useRoomHooks, useSelf } = vi.hoisted(() => {
   return {
-    matrixHooks: mockMatrixHooks,
     useCurrentRoom: vi.fn(() => shallowRef()),
     useMatrixClient: vi.fn(() => ({ client: shallowRef({}) })),
-    useMatrixHooks: vi.fn(mockMatrixHooks),
+    useMatrixHooks: vi.fn(),
     useRoomHooks: vi.fn(),
     useSelf: vi.fn(() => ({ self: shallowRef() })),
   }
 })
+
+const matrixHooks = mockMatrixHooks
+useMatrixHooks.mockImplementation(mockMatrixHooks)
 
 mockNuxtImport('useCurrentRoom', () => useCurrentRoom)
 mockNuxtImport('useMatrixClient', () => useMatrixClient)
