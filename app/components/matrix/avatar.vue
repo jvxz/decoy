@@ -24,6 +24,9 @@ const src = useResolveAvatarUrl(
   }),
 )
 
+const failed = ref(false)
+watch(src, () => (failed.value = false))
+
 const delegated = reactiveOmit(props, ['doPlaceholder', 'square', 'fallbackAlt', 'alt'])
 const forwarded = useForwardPropsEmits(delegated, emits)
 
@@ -32,17 +35,18 @@ const id = useId()
 
 <template>
   <Img
-    v-if="src"
+    v-if="src && !failed"
     v-bind="forwarded"
     :alt
     :src
     :class="cn('object-cover', !square && 'rounded-full', props.class)"
     :do-placeholder="false"
+    @error="failed = true"
   />
   <AvatarPlaceholder
     v-else
     :is-loading
-    :name="src ?? alt ?? id"
+    :name="alt ?? id"
     :square
     :class="cn(!square && 'rounded-full', 'size-full', props.class)"
   />
