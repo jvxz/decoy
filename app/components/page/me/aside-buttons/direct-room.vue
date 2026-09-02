@@ -1,7 +1,10 @@
 <script lang="ts" setup>
 const props = defineProps<{ roomId: string }>()
 
-const room = useRoom(() => props.roomId)
+const roomName = useRoomComputed(
+  () => props.roomId,
+  room => (room ? resolveRoomName(room) : 'Unknown Room'),
+)
 </script>
 
 <template>
@@ -15,8 +18,8 @@ const room = useRoom(() => props.roomId)
           },
         }"
       >
-        <MatrixRoomAvatar :room class="rounded-full size-8" />
-        <span class="font-medium">{{ room ? resolveRoomName(room) : 'Unknown Room' }}</span>
+        <MatrixRoomAvatar :room="roomId" class="rounded-full size-8" />
+        <span class="font-medium">{{ roomName }}</span>
       </NuxtLink>
     </UAsideListButton>
   </UContextMenuRegionTrigger>

@@ -14,12 +14,11 @@ definePageMeta({
 const route = useRoute()
 const roomId = computed(() => route.params.directRoomId)
 
-const room = useRoom(roomId)
 const params = useKnownSearchParams()
 const { data: summary } = useRoomSummary(roomId, () => toArray(params.value.via ?? ''))
 
-const resolvedName = computed(() =>
-  room.value ? resolveRoomName(room.value) : summary.value ? summary.value.name : roomId.value,
+const resolvedName = useRoomComputed(roomId, room =>
+  room ? resolveRoomName(room) : summary.value ? summary.value.name : roomId.value,
 )
 
 defineAppLabel({ label: resolvedName })
