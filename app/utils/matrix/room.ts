@@ -40,6 +40,10 @@ export function getRoom(client: MatrixClient, roomId: Room['roomId'], allowedIds
   return undefined
 }
 
+export function getRoomByAlias(client: MatrixClient, alias: string) {
+  return client.getRooms().find(room => room.getCanonicalAlias() === alias || room.getAltAliases().includes(alias))
+}
+
 export function getDirectRooms(client: MatrixClient) {
   const directsEvent = client.getAccountData(EventType.Direct) as MDirect | undefined
   const directs = directsEvent?.getContent<MDirect['event']['content']>()

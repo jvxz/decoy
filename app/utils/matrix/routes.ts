@@ -5,21 +5,25 @@ export function getRoomRoute(
   client: MatrixClient,
   room: MaybeRoomOrId,
   opts?: { currentSpace?: MaybeRoomOrId; via?: string[] },
-): RouteLocationRaw {
+): RouteLocationRaw | undefined {
   const { currentSpace, via = [] } = opts || {}
 
-  const roomId = resolveRoomId(room)
-  const instance = client.getRoom(roomId)
+  const input = resolveRoomId(room)
+  if (!input) return undefined
+
+  const instance = client.getRoom(input) ?? (isRoomAlias(input) ? getRoomByAlias(client, input) : undefined)
   if (!instance)
     return {
       name: 'direct-room',
       params: {
-        directRoomId: roomId,
+        directRoomId: input,
       },
       query: {
         via,
       },
     }
+
+  const roomId = instance.roomId
 
   if (isSpace(instance))
     return {
