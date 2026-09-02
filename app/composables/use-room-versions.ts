@@ -1,8 +1,5 @@
 export const useRoomVersions = createSharedComposable(() => {
   const versions = shallowReactive(new Map<string, number>())
-  watchEffect(() => {
-    console.log('versions: ', versions)
-  })
   const {
     onRoomName,
     onRoomLocalEchoUpdated,
