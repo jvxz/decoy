@@ -20,8 +20,12 @@ const to = computed<RouteLocationRaw>(() =>
       },
 )
 
-const room = useRoom(() => props.payload.roomId)
-const isJoined = useRoomIsJoined(() => props.payload.roomId)
+const roomId = computed(() => props.payload.roomId)
+
+const isJoined = useRoomIsJoined(roomId)
+const roomName = useRoomComputed(roomId, r => (r ? resolveRoomName(r) : 'Unknown room'))
+const memberCount = useRoomMemberCount(roomId)
+const roomTopic = useRoomTopic(roomId)
 </script>
 
 <template>
@@ -39,18 +43,15 @@ const isJoined = useRoomIsJoined(() => props.payload.roomId)
               'text-muted-foreground': !isJoined,
             }"
           >
-            <span>{{ room?.name ?? payload.roomId }}</span>
+            <span>{{ roomName }}</span>
           </URoomShowcaseCardTitle>
 
           <URoomShowcaseCardDescription>
             <template v-if="isJoined">
-              <span
-                >{{ room?.getJoinedMemberCount() }}
-                {{ handlePlural(room?.getJoinedMemberCount() ?? 0, 'members', 'member') }}</span
-              >
-              <template v-if="getRoomTopic(room)">
+              <span>{{ memberCount ?? 0 }} {{ handlePlural(memberCount ?? 0, 'members', 'member') }}</span>
+              <template v-if="roomTopic">
                 <UInlineSeparator />
-                <span> {{ getRoomTopic(room) }}</span>
+                <span> {{ roomTopic }}</span>
               </template>
             </template>
 

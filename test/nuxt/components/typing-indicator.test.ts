@@ -4,17 +4,23 @@ import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import { User } from 'matrix-js-sdk'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { mockMatrixHooks } from '../utils/matrix/client'
 import { DEFAULT_MOCK_NAMES, generateFakeHomeserver } from '../utils/matrix/credentials'
 
 const CURRENT_USER = DEFAULT_MOCK_NAMES[0]!
 
-const { useCurrentRoom, useMatrixClient, useMatrixHooks, useRoomHooks, useSelf } = vi.hoisted(() => ({
-  useCurrentRoom: vi.fn(() => shallowRef()),
-  useMatrixClient: vi.fn(() => ({ client: shallowRef({}) })),
-  useMatrixHooks: vi.fn(() => ({ onEvent: () => {}, onRoom: () => {}, onSync: () => {} })),
-  useRoomHooks: vi.fn(),
-  useSelf: vi.fn(() => ({ self: shallowRef() })),
-}))
+const { useCurrentRoom, useMatrixClient, useMatrixHooks, useRoomHooks, useSelf } = vi.hoisted(() => {
+  return {
+    useCurrentRoom: vi.fn(() => shallowRef()),
+    useMatrixClient: vi.fn(() => ({ client: shallowRef({}) })),
+    useMatrixHooks: vi.fn(),
+    useRoomHooks: vi.fn(),
+    useSelf: vi.fn(() => ({ self: shallowRef() })),
+  }
+})
+
+const matrixHooks = mockMatrixHooks
+useMatrixHooks.mockImplementation(mockMatrixHooks)
 
 mockNuxtImport('useCurrentRoom', () => useCurrentRoom)
 mockNuxtImport('useMatrixClient', () => useMatrixClient)
@@ -51,7 +57,7 @@ describe('typing indicator', () => {
       }),
     })
 
-    useMatrixHooks.mockReturnValue({ onEvent: () => {}, onRoom: () => {}, onSync: () => {} })
+    useMatrixHooks.mockReturnValue(matrixHooks())
     useSelf.mockReturnValue({ self: shallowRef({ userId: CURRENT_USER }) })
     useCurrentRoom.mockReturnValue(shallowRef(currentMockRoom.room))
   })

@@ -1,11 +1,18 @@
+import { EventType } from 'matrix-js-sdk'
+
 export function useSpaceJoinedRooms(spaceId: MaybeRefOrGetter<MaybeRoomOrId | undefined>) {
   const { client } = useMatrixClient()
+  const versions = useRoomVersions()
 
-  const room = useRoom(spaceId)
+  return useRoomComputed(spaceId, space => {
+    if (!space) return []
 
-  return computed(() => {
-    if (!room.value) return []
+    // track space child versions
+    for (const event of getStateEvents(space, EventType.SpaceChild)) {
+      const childId = event.getStateKey()
+      if (childId) void versions.get(childId)
+    }
 
-    return getJoinedRooms(client.value, room.value)
+    return getJoinedRooms(client.value, space)
   })
 }

@@ -8,17 +8,22 @@ export interface MatrixRoomAvatarProps extends Omit<MatrixAvatarProps, 'alt' | '
 
 const props = defineProps<MatrixRoomAvatarProps>()
 const { client } = useMatrixClient()
-const room = useRoom(() => props.room ?? undefined)
 
-const src = computed(() => {
-  if (!room.value) return undefined
+const src = useRoomComputed(
+  () => props.room ?? undefined,
+  r => {
+    if (!r) return
 
-  return props.direct || isDirectRoom(client.value, room.value)
-    ? getDirectRoomAvatarUrl({ client: client.value, mxc: true, room: room.value })
-    : (room.value.getMxcAvatarUrl() ?? undefined)
-})
+    return props.direct || isDirectRoom(client.value, r)
+      ? getDirectRoomAvatarUrl({ client: client.value, mxc: true, room: r })
+      : (r.getMxcAvatarUrl() ?? undefined)
+  },
+)
 
-const alt = computed(() => (room.value ? resolveRoomName(room.value) : 'Room'))
+const alt = useRoomComputed(
+  () => props.room ?? undefined,
+  r => (r ? resolveRoomName(r) : 'Room'),
+)
 
 const delegated = reactiveOmit(props, ['room', 'direct'])
 </script>
