@@ -12,6 +12,7 @@
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt --check .",
     "generate": "nuxt generate",
+    "knip": "knip",
     "knip:fix": "knip --fix",
     "lint": "pnpm oxlint && eslint --ignore-pattern AGENTS.md",
     "lint:fix": "pnpm oxlint --fix && eslint --ignore-pattern AGENTS.md --fix",
