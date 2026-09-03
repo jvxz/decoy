@@ -161,14 +161,6 @@ export default defineNuxtConfig({
     },
   },
 
-  scripts: {
-    registry: {
-      googleRecaptcha: {
-        siteKey: '6LdHpHMtAAAAABfwQ8suQAhl-Qsu50iU1M2372Zk',
-      },
-    },
-  },
-
   security: {
     headers: {
       contentSecurityPolicy: {
