@@ -2,7 +2,6 @@ import type { NuxtPage } from 'nuxt/schema'
 
 import { pwa } from './app/config/pwa'
 import { DEFAULT_COLOR_MODE } from './shared/constants/color-mode'
-import { appMeta } from './shared/utils/constants'
 
 export default defineNuxtConfig({
   app: {
@@ -35,10 +34,6 @@ export default defineNuxtConfig({
   },
 
   experimental: {
-    // when using generate, payload js assets included in sw precache manifest
-    // but missing on offline, disabling extraction it until fixed
-    payloadExtraction: false,
-    renderJsonPayloads: true,
     typedPages: true,
     typescriptPlugin: true,
   },
@@ -109,17 +104,15 @@ export default defineNuxtConfig({
 
   modules: [
     '~/modules/palettes',
+    '~/modules/vitalizer',
     '@nuxt/eslint',
     '@nuxt/fonts',
     '@nuxt/icon',
-    '@nuxt/image',
     '@unocss/nuxt',
     'nuxt-security',
     '@vueuse/nuxt',
     'reka-ui/nuxt',
-    '@nuxtjs/seo',
     '@nuxtjs/color-mode',
-    'nuxt-vitalizer',
     '@regle/nuxt',
     '@vite-pwa/nuxt',
     '@nuxt/test-utils/module',
@@ -130,22 +123,6 @@ export default defineNuxtConfig({
     '@nuxtjs/i18n',
     '@nuxt/scripts',
   ],
-
-  nitro: {
-    cloudflare: {
-      nodeCompat: true,
-    },
-
-    imports: {
-      dirs: ['./server/schema/*', './server/utils/*'],
-      presets: [
-        {
-          from: 'valibot',
-          imports: [{ as: 'v', name: '*' }],
-        },
-      ],
-    },
-  },
 
   nuxtQuery: {
     autoImports: ['useMutation', 'useQueryClient'],
@@ -170,28 +147,13 @@ export default defineNuxtConfig({
       },
     },
     '/app': { appMiddleware: 'home-redirect' },
-    '/app/**': { ssr: false },
     '/app/me': { appMiddleware: 'home-redirect' },
-    '/login/**': { ssr: false },
     '/playground': { appLayout: false },
   },
 
   runtimeConfig: {
     public: {
       showLoadTime: false,
-    },
-  },
-
-  // nuxt-schema-org currently does not support unhead v3
-  schemaOrg: {
-    enabled: false,
-  },
-
-  scripts: {
-    registry: {
-      googleRecaptcha: {
-        siteKey: '6LdHpHMtAAAAABfwQ8suQAhl-Qsu50iU1M2372Zk',
-      },
     },
   },
 
@@ -205,12 +167,11 @@ export default defineNuxtConfig({
       },
     },
     rateLimiter: false,
+    removeLoggers: false,
     sri: false,
   },
 
-  site: {
-    name: appMeta.name,
-  },
+  ssr: false,
 
   typescript: {
     tsConfig: {
@@ -222,6 +183,41 @@ export default defineNuxtConfig({
   },
 
   vite: {
+    optimizeDeps: {
+      include: [
+        '@regle/core',
+        '@regle/rules',
+        '@tanstack/vue-hotkeys',
+        '@tanstack/vue-query',
+        '@vue/devtools-core',
+        '@vue/devtools-kit',
+        'es-toolkit',
+        'es-toolkit/map',
+        'es-toolkit/string',
+        'matrix-js-sdk',
+        'mime/lite',
+        'quick-lru',
+        'rangi',
+        'rangi/themes',
+        'tailwind-variants',
+        'temporal-polyfill',
+        'workbox-window',
+        'matrix-js-sdk/lib/indexeddb-worker',
+        '@tanstack/query-persist-client-core',
+        '@tanstack/vue-virtual',
+        '@tiptap/extension-emoji',
+        '@tiptap/extension-mention',
+        '@tiptap/extension-placeholder',
+        '@tiptap/pm/model',
+        '@tiptap/pm/state',
+        'dompurify',
+        'es-toolkit/set',
+        'marked-highlight',
+        'marked',
+        'virtua/vue',
+        '@faker-js/faker',
+      ],
+    },
     worker: {
       format: 'es',
     },
