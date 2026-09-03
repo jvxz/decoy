@@ -128,22 +128,6 @@ export default defineNuxtConfig({
     '@nuxt/scripts',
   ],
 
-  nitro: {
-    cloudflare: {
-      nodeCompat: true,
-    },
-
-    imports: {
-      dirs: ['./server/schema/*', './server/utils/*'],
-      presets: [
-        {
-          from: 'valibot',
-          imports: [{ as: 'v', name: '*' }],
-        },
-      ],
-    },
-  },
-
   nuxtQuery: {
     autoImports: ['useMutation', 'useQueryClient'],
     devtools: true,
