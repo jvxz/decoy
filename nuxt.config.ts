@@ -109,6 +109,7 @@ export default defineNuxtConfig({
 
   modules: [
     '~/modules/palettes',
+    '~/modules/vitalizer',
     '@nuxt/eslint',
     '@nuxt/fonts',
     '@nuxt/icon',
@@ -119,7 +120,6 @@ export default defineNuxtConfig({
     'reka-ui/nuxt',
     '@nuxtjs/seo',
     '@nuxtjs/color-mode',
-    'nuxt-vitalizer',
     '@regle/nuxt',
     '@vite-pwa/nuxt',
     '@nuxt/test-utils/module',
