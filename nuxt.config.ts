@@ -112,7 +112,6 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@nuxt/fonts',
     '@nuxt/icon',
-    '@nuxt/image',
     '@unocss/nuxt',
     'nuxt-security',
     '@vueuse/nuxt',
