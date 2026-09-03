@@ -99,6 +99,10 @@ export default defineNuxtConfig({
         from: 'temporal-polyfill',
         imports: ['Temporal'],
       },
+      {
+        from: '@tanstack/vue-query',
+        imports: ['useMutation', 'useQueryClient'],
+      },
     ],
   },
 
@@ -116,27 +120,12 @@ export default defineNuxtConfig({
     '@regle/nuxt',
     '@vite-pwa/nuxt',
     '@nuxt/test-utils/module',
-    '@peterbud/nuxt-query',
     'motion-v/nuxt',
     'nuxt-twemoji',
     'nuxt-tiptap-editor',
     '@nuxtjs/i18n',
     '@nuxt/scripts',
   ],
-
-  nuxtQuery: {
-    autoImports: ['useMutation', 'useQueryClient'],
-    devtools: true,
-    queryClientOptions: {
-      defaultOptions: {
-        queries: {
-          refetchOnWindowFocus: true,
-          // 1 hour
-          staleTime: 1000 * 60 * 60,
-        },
-      },
-    },
-  },
 
   pwa,
 

@@ -44,9 +44,6 @@ importers:
       '@nuxtjs/i18n':
         specifier: 10.6.0
         version: 10.6.0(@vue/compiler-dom@3.6.0-rc.6)(db0@0.3.4)(esbuild@0.28.0)(eslint@10.9.1(jiti@2.7.0)(supports-color@10.2.2))(idb-keyval@6.3.0)(ioredis@5.11.1(supports-color@10.2.2))(magicast@0.5.4)(pinia@4.0.3(@vue/devtools-api@8.2.1)(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2)(vue@3.6.0-rc.6(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2)))(rolldown@1.2.4)(rollup@4.61.1)(supports-color@10.2.2)(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2)(vite@8.2.2(@types/node@25.9.5)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.6.0-rc.6(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2))(webpack@5.107.2(cssnano@8.0.2(postcss@8.5.26))(csso@5.0.5)(esbuild@0.28.0)(lightningcss@1.33.0)(postcss@8.5.26))
-      '@peterbud/nuxt-query':
-        specifier: 1.10.0
-        version: 1.10.0(magic-string@1.1.1)(magicast@0.5.4)(oxc-parser@0.141.0)(rolldown@1.2.4)(unplugin@3.3.0(esbuild@0.28.0)(rolldown@1.2.4)(rollup@4.61.1)(vite@8.2.2(@types/node@25.9.5)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(webpack@5.107.2(cssnano@8.0.2(postcss@8.5.26))(csso@5.0.5)(esbuild@0.28.0)(lightningcss@1.33.0)(postcss@8.5.26)))(vite@8.2.2(@types/node@25.9.5)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.6.0-rc.6(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2))
       '@tanstack/query-persist-client-core':
         specifier: 5.102.8
         version: 5.102.8
@@ -3181,9 +3178,6 @@ packages:
     resolution: {integrity: sha512-tmmZ3lQxAe/k/+rNnXQRawJ4NjxO2hqiOLTHvWchtGZULp4RyFeh6aU4XdOYBFe2KE1oShQTv4AblOs2iOrNnQ==}
     engines: {node: '>= 10.0.0'}
 
-  '@peterbud/nuxt-query@1.10.0':
-    resolution: {integrity: sha512-ZBBKgPDkQJoUsRGamc51eclfIv2yW5pAXsx1On3DXZsMdt0SOaAz2qc0Zhjy69yeCd/L4ZMQ05SD2UvXE0nXyg==}
-
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
@@ -3695,15 +3689,6 @@ packages:
 
   '@tanstack/vue-query@5.101.4':
     resolution: {integrity: sha512-UYjkUZhnWQIFGNb7SdgjCitAftNyYQfOIVUh6vBUQAG4SQKNMSBKeQERFDubpxLAMpIBJTaOrE8fM4c1kZcIGQ==}
-    peerDependencies:
-      '@vue/composition-api': ^1.1.2
-      vue: 3.6.0-rc.6
-    peerDependenciesMeta:
-      '@vue/composition-api':
-        optional: true
-
-  '@tanstack/vue-query@5.102.8':
-    resolution: {integrity: sha512-W3Q6Od3FbdttACuavgbICKMFgYCPobvuMiO8tIpqMP073QnREVSaO4ZPqrFqosIbFKikiQTmZhEEbYR9bPsWLA==}
     peerDependencies:
       '@vue/composition-api': ^1.1.2
       vue: 3.6.0-rc.6
@@ -12242,24 +12227,6 @@ snapshots:
       '@parcel/watcher-win32-ia32': 2.5.6
       '@parcel/watcher-win32-x64': 2.5.6
 
-  '@peterbud/nuxt-query@1.10.0(magic-string@1.1.1)(magicast@0.5.4)(oxc-parser@0.141.0)(rolldown@1.2.4)(unplugin@3.3.0(esbuild@0.28.0)(rolldown@1.2.4)(rollup@4.61.1)(vite@8.2.2(@types/node@25.9.5)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(webpack@5.107.2(cssnano@8.0.2(postcss@8.5.26))(csso@5.0.5)(esbuild@0.28.0)(lightningcss@1.33.0)(postcss@8.5.26)))(vite@8.2.2(@types/node@25.9.5)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.6.0-rc.6(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2))':
-    dependencies:
-      '@nuxt/devtools-kit': 3.4.1(magic-string@1.1.1)(magicast@0.5.4)(oxc-parser@0.141.0)(rolldown@1.2.4)(unplugin@3.3.0(esbuild@0.28.0)(rolldown@1.2.4)(rollup@4.61.1)(vite@8.2.2(@types/node@25.9.5)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(webpack@5.107.2(cssnano@8.0.2(postcss@8.5.26))(csso@5.0.5)(esbuild@0.28.0)(lightningcss@1.33.0)(postcss@8.5.26)))(vite@8.2.2(@types/node@25.9.5)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
-      '@nuxt/kit': 4.5.2(magic-string@1.1.1)(magicast@0.5.4)(oxc-parser@0.141.0)(rolldown@1.2.4)(unplugin@3.3.0(esbuild@0.28.0)(rolldown@1.2.4)(rollup@4.61.1)(vite@8.2.2(@types/node@25.9.5)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(webpack@5.107.2(cssnano@8.0.2(postcss@8.5.26))(csso@5.0.5)(esbuild@0.28.0)(lightningcss@1.33.0)(postcss@8.5.26)))
-      '@tanstack/vue-query': 5.102.8(vue@3.6.0-rc.6(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2))
-      defu: 6.1.7
-      pkg-types: 2.3.1
-      sirv: 3.0.2
-    transitivePeerDependencies:
-      - '@vue/composition-api'
-      - magic-string
-      - magicast
-      - oxc-parser
-      - rolldown
-      - unplugin
-      - vite
-      - vue
-
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
@@ -12689,14 +12656,6 @@ snapshots:
     dependencies:
       '@tanstack/match-sorter-utils': 8.19.4
       '@tanstack/query-core': 5.101.4
-      '@vue/devtools-api': 6.6.4
-      vue: 3.6.0-rc.6(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2)
-      vue-demi: 0.14.10(vue@3.6.0-rc.6(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2))
-
-  '@tanstack/vue-query@5.102.8(vue@3.6.0-rc.6(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2))':
-    dependencies:
-      '@tanstack/match-sorter-utils': 8.19.4
-      '@tanstack/query-core': 5.102.8
       '@vue/devtools-api': 6.6.4
       vue: 3.6.0-rc.6(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2)
       vue-demi: 0.14.10(vue@3.6.0-rc.6(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2))
@@ -15016,7 +14975,7 @@ snapshots:
       eslint: 10.9.1(jiti@2.7.0)(supports-color@10.2.2)
       eslint-formatting-reporter: 0.0.0(eslint@10.9.1(jiti@2.7.0)(supports-color@10.2.2))
       eslint-parser-plain: 0.1.1
-      ohash: 2.0.11
+      ohash: 2.0.12
       oxfmt: 0.35.0
       prettier: 3.8.4
       synckit: 0.11.13
