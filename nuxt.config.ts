@@ -212,6 +212,8 @@ export default defineNuxtConfig({
     name: appMeta.name,
   },
 
+  ssr: false,
+
   typescript: {
     tsConfig: {
       compilerOptions: {
