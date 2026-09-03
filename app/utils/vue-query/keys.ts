@@ -9,6 +9,7 @@ const defineKey = <const T extends readonly unknown[]>(...parts: T): T => parts
  * query key factory
  */
 export const $qk = {
+  authMetadata: () => defineKey('authMetadata'),
   cryptoDevices: (myUserId: MaybeRefOrGetter<string | undefined>) => defineKey('cryptoDevices', toRef(myUserId)),
   deviceVerificationStatus: (deviceId: MaybeRefOrGetter<IMyDevice['device_id'] | undefined>) =>
     defineKey('deviceVerificationStatus', toRef(deviceId)),
@@ -16,6 +17,8 @@ export const $qk = {
     defineKey('homeserverConfig', toRef(homeserverUrl)),
   homeserverLoginFlows: (homeserverUrl: MaybeRefOrGetter<string | undefined>) =>
     defineKey('homeserverLoginFlows', toRef(homeserverUrl)),
+  homeserverRegistrationFlows: (homeserverUrl: MaybeRefOrGetter<string | undefined>) =>
+    defineKey('homeserverRegistrationFlows', toRef(homeserverUrl)),
   homeserverSSOUrl: (homeserverUrl: MaybeRefOrGetter<string | undefined>) =>
     defineKey('homeserverSSOUrl', toRef(homeserverUrl)),
   mutualRooms: (userId: MaybeRefOrGetter<string | undefined>) => defineKey('mutualRooms', toRef(userId)),
@@ -23,7 +26,8 @@ export const $qk = {
     defineKey('publicRooms', toRef(server), toRef(query)),
   roomReplyEvent: (replyEventId: MaybeRefOrGetter<string | undefined>, roomId: MaybeRefOrGetter<string>) =>
     defineKey('roomReplyEvent', toRef(replyEventId), toRef(roomId)),
-  roomSummary: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('roomSummary', toRef(roomId)),
+  roomSummary: (roomId: MaybeRefOrGetter<string | undefined>, via: MaybeRefOrGetter<string[] | undefined>) =>
+    defineKey('roomSummary', toRef(roomId), toRef(via)),
   sessionDevices: (myUserId: MaybeRefOrGetter<string | undefined>) => defineKey('sessionDevices', toRef(myUserId)),
   spaceSubspaces: (spaceId: MaybeRefOrGetter<string>) => defineKey('spaceSubspaces', toRef(spaceId)),
 } as const
@@ -40,8 +44,12 @@ export const $mk = {
   invite: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('invite', toRef(roomId)),
   joinRoom: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('joinRoom', toRef(roomId)),
   leaveRoom: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('leaveRoom', toRef(roomId)),
+  login: () => defineKey('login'),
   message: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('message', toRef(roomId)),
   react: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('react', toRef(roomId)),
+  redact: (roomId: MaybeRefOrGetter<string | undefined>, eventId: MaybeRefOrGetter<string | undefined>) =>
+    defineKey('redact', toRef(roomId), toRef(eventId)),
+  register: () => defineKey('register'),
   scrollEvents: (roomId: MaybeRefOrGetter<string | undefined>) => defineKey('scrollEvents', toRef(roomId)),
 } as const
 

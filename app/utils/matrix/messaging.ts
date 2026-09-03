@@ -1,4 +1,6 @@
+import type { Node } from '@tiptap/pm/model'
 import type { UponSanitizeAttributeHook } from 'dompurify'
+import type { MatrixClient } from 'matrix-js-sdk'
 
 import DOMPurify from 'dompurify'
 
@@ -41,5 +43,86 @@ export function sanitizeFormattedBody(formattedBody: string) {
     })
   } finally {
     DOMPurify.removeHook('uponSanitizeAttribute')
+  }
+}
+
+export function docToMarkdown(doc: Node, clientForMatrixToUrls?: MatrixClient): string {
+  let out = ''
+  doc.descendants((node, _pos, parent) => {
+    if (parent?.type.name === 'doc') return
+    if (node.isText) {
+      out += node.text
+      return false
+    }
+    if (node.type.name === 'hardBreak') {
+      out += '\n'
+      return false
+    }
+    if (node.type.name === 'mention') {
+      const { id, label, via } = node.attrs
+
+      const type: MatrixToUrl['type'] = isUserId(id)
+        ? 'userId'
+        : isRoomAlias(id)
+          ? 'roomAlias'
+          : isRoomId(id)
+            ? 'roomId'
+            : 'unknown'
+
+      const matrixTo = clientForMatrixToUrls
+        ? getMatrixToUrl(clientForMatrixToUrls, type, id, { viaServers: via })
+        : `${MATRIX_TO_URL}/#/${encodeURIComponent(id)}`
+      const sigil = type === 'userId' ? '@' : '#'
+      out += `[${sigil}${label}](${matrixTo})`
+
+      return false
+    }
+    if (node.type.name === 'emoji') {
+      out += node.attrs.unicode
+      return false
+    }
+  })
+  return out
+}
+
+const MENTION_PREFIX = 'https://matrix.to/#/'
+export type ResolvedMention =
+  | {
+      type: 'user'
+      value: string
+    }
+  | {
+      type: 'roomAlias'
+      value: string
+    }
+  | {
+      type: 'roomId'
+      value: string
+    }
+  | {
+      type: 'unknown'
+      value: string
+    }
+export type MentionType = Exclude<ResolvedMention['type'], 'unknown'>
+
+export function resolveMentionHref(href: string): ResolvedMention {
+  if (!href.startsWith(MENTION_PREFIX))
+    return {
+      type: 'unknown',
+      value: href,
+    }
+
+  const mention = href.split(MENTION_PREFIX)[1]!
+  const type = isUserId(mention)
+    ? 'user'
+    : isRoomId(mention)
+      ? 'roomId'
+      : isRoomAlias(mention)
+        ? 'roomAlias'
+        : 'unknown'
+
+  return {
+    type,
+    value: mention,
   }
 }

@@ -13,4 +13,23 @@ describe('parsing', () => {
 
     expect.soft(types).not.toContain('unknown')
   })
+
+  it('correctly parses matrix.to urls', () => {
+    expect(parseMatrixToUrl('https://matrix.to/#/!roomid:example.com?via=example.com')).toMatchObject({
+      type: 'roomId',
+      via: ['example.com'],
+    })
+
+    expect(parseMatrixToUrl('https://matrix.to/#/@userid:matrix.org')).toMatchObject({
+      type: 'userId',
+    })
+
+    expect(parseMatrixToUrl('https://matrix.to/#/#roomalias:matrix.org')).toMatchObject({
+      type: 'roomAlias',
+    })
+
+    expect(parseMatrixToUrl('https://matrix.to/#/#roomalias:matrix.org/$eventid')).toMatchObject({
+      type: 'event',
+    })
+  })
 })

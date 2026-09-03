@@ -1,4 +1,4 @@
-import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk'
+import type { MatrixClient, MatrixEvent, RoomMember } from 'matrix-js-sdk'
 import type { IHierarchyRoom } from 'matrix-js-sdk/lib/@types/spaces'
 
 import { JoinRule } from 'matrix-js-sdk'
@@ -28,12 +28,20 @@ export interface RoomsWithBatchToken {
   rooms: IHierarchyRoom[]
 }
 
+export async function joinRoom(client: MatrixClient, roomId: string, via?: string[], inviteSignUrl?: string) {
+  return client.joinRoom(roomId, { inviteSignUrl, viaServers: via && via.length ? via : undefined })
+}
+
 export function getRoom(client: MatrixClient, roomId: Room['roomId'], allowedIds?: MaybeReadonlySet<Room['roomId']>) {
   if (!allowedIds) return client.getRoom(roomId)
 
   if (allowedIds.has(roomId)) return client.getRoom(roomId)
 
   return undefined
+}
+
+export function getRoomByAlias(client: MatrixClient, alias: string) {
+  return client.getRooms().find(room => room.getCanonicalAlias() === alias || room.getAltAliases().includes(alias))
 }
 
 export function getDirectRooms(client: MatrixClient) {
@@ -250,16 +258,19 @@ export function getRoomParentSpaceIds(room: Room) {
     .filter((id): id is string => !!id)
 }
 
-export function getRoomSpaceId(client: MatrixClient, room: Room) {
+/**
+ * only returns spaces that are joined
+ */
+export function getRoomSpaces(client: MatrixClient, room: MaybeRoomOrId) {
+  const ids = new Set<string>()
   for (const space of client.getRooms()) {
     if (!space.isSpaceRoom()) continue
     for (const e of getStateEvents(space, EventType.SpaceChild)) {
-      if (isSpaceChild(e) && e.getStateKey() === room.roomId) return space.roomId
+      if (isSpaceChild(e) && e.getStateKey() === resolveRoomId(room)) ids.add(space.roomId)
     }
   }
-  return undefined
+  return ids
 }
-
 export function getRoomTopic(room: Room | undefined) {
   if (!room) return
 
@@ -280,6 +291,76 @@ export function getRoomMembersTyping(room: Room) {
     if (member.typing) typingMembers.add(member.userId)
   }
   return typingMembers
+}
+
+/**
+ * you will likely want to call this after calling `room.loadMembersIfNeeded()`
+ */
+export function getMostPowerfulRoomMember(room: Room, maxLevel?: number) {
+  let mostPowerfulMember: { member: RoomMember; powerLevel: number } | undefined
+
+  const members = room.getJoinedMembers()
+  for (let i = 0; i < members.length; i++) {
+    const member = members[i]!
+    if (!mostPowerfulMember || member.powerLevel > mostPowerfulMember.powerLevel) {
+      mostPowerfulMember = {
+        member,
+        powerLevel: member.powerLevel,
+      }
+
+      if (isDefined(maxLevel) && member.powerLevel >= maxLevel) return mostPowerfulMember
+    }
+  }
+
+  return mostPowerfulMember
+}
+
+/**
+ * you will likely want to call this after calling `room.loadMembersIfNeeded()`
+ */
+export function getPopularHomeservers(room: Room) {
+  const homeserverPopMap = new Map<string, number>()
+
+  const members = room.getJoinedMembers()
+  for (let i = 0; i < members.length; i++) {
+    const member = members[i]!
+    const { homeserver } = parseUserId(member.userId)
+
+    const pop = homeserverPopMap.get(homeserver)
+    homeserverPopMap.set(homeserver, (pop ?? 0) + 1)
+  }
+
+  return homeserverPopMap
+}
+
+/**
+ * you will likely want to call this after calling `room.loadMembersIfNeeded()`
+ */
+export function getViaServers(room: Room) {
+  const via: string[] = []
+
+  let mostPowerfulMemberHomeserver: string | undefined
+  const { member: mostPowerfulMember } = getMostPowerfulRoomMember(room) ?? {}
+  if (mostPowerfulMember) {
+    const { homeserver } = parseUserId(mostPowerfulMember.userId)
+    via.push(homeserver)
+    mostPowerfulMemberHomeserver = homeserver
+  }
+
+  const homeserverPopMap = getPopularHomeservers(room)
+  if (mostPowerfulMemberHomeserver && homeserverPopMap.get(mostPowerfulMemberHomeserver)) {
+    homeserverPopMap.delete(mostPowerfulMemberHomeserver)
+  }
+
+  const sortedHomeservers = [...homeserverPopMap.entries()].toSorted((a, b) => b[1] - a[1])
+  for (const [homeserver] of sortedHomeservers) {
+    if (!via.includes(homeserver)) {
+      via.push(homeserver)
+      break
+    }
+  }
+
+  return via
 }
 
 export function getInSpaceRoomIds(client: MatrixClient) {
@@ -320,7 +401,6 @@ export function resolveJoinRuleLabel(joinRule: JoinRule) {
   }
 }
 
-const ROOM_ID_RE = /^!(?<localpart>[^:]+):(?<server_name>.+)$/
 export function parseRoomId(roomId: string) {
   const match = roomId.match(ROOM_ID_RE)
   if (!match) return undefined
@@ -329,10 +409,6 @@ export function parseRoomId(roomId: string) {
     localpart: match.groups?.localpart,
     serverName: match.groups?.server_name,
   }
-}
-
-export function isRoomId(roomId: string) {
-  return ROOM_ID_RE.test(roomId)
 }
 
 export const isSpace = (room: Room) => room.isSpaceRoom()

@@ -9,7 +9,7 @@ export interface AppNotificationRegions {
   invite: {
     roomId: string
   }
-  error: AppNotificationGeneric & { raw: string }
+  error: AppNotificationGeneric & { raw?: string }
 }
 
 export interface AppNotification<T extends AppNotificationName = AppNotificationName> {

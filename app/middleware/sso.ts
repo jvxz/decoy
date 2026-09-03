@@ -21,9 +21,7 @@ export default defineNuxtRouteMiddleware(async route => {
       },
     })
 
-  const { login } = useAuth()
-
-  const res = await login.executeImmediate({ baseUrl: storedBaseUrl, token: loginToken, type: 'm.login.token' })
+  const res = await loginUser({ baseUrl: storedBaseUrl, token: loginToken, type: 'm.login.token' })
   if (res instanceof MatrixError)
     return navigateTo({
       name: 'login',

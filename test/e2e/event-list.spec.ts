@@ -14,7 +14,7 @@ let sharedPage: Page | undefined
 test.describe.configure({ mode: 'serial' })
 
 test.beforeAll(async ({ browser }) => {
-  const context = await browser.newContext()
+  const context = await browser.newContext({ serviceWorkers: 'block' })
   sharedPage = await context.newPage()
 
   await setFlag(context, 'skip-auth-middleware', true)
@@ -40,6 +40,44 @@ test.afterAll(async () => {
 })
 
 test.describe('Event list', () => {
+  test('does not paginate from layout changes', async () => {
+    test.setTimeout(15_000)
+    assert(sharedPage, 'sharedPage was undefined on access')
+
+    await sharedPage.goto('/app/space/test/303', { waitUntil: 'domcontentloaded' })
+    const container = getScrollContainer(sharedPage)
+    await expect(container).toBeVisible({ timeout: 15_000 })
+
+    const style = await sharedPage.addStyleTag({
+      content: `
+        [data-testid="scroll-container"] { height: 400px !important; }
+        [data-item-id] { height: 4px !important; min-height: 0 !important; overflow: hidden !important; }
+      `,
+    })
+
+    await expect.poll(() => container.evaluate(el => el.scrollHeight > el.clientHeight)).toBe(true)
+
+    await container.evaluate(el => (el.scrollTop = 0))
+    await expect
+      .poll(() => getPaginatedEvent('backwards', sharedPage!).then(event => event.id), { timeout: 2000 })
+      .toBe('oldest-event')
+
+    const backwardSamples = await sampleWindow(container)
+    expect(new Set(backwardSamples.map(({ first, last }) => `${first}:${last}`)).size).toBe(1)
+
+    await container.evaluate(el => (el.scrollTop = el.scrollHeight))
+    await expect
+      .poll(() => getPaginatedEvent('forwards', sharedPage!).then(event => event.id), { timeout: 2000 })
+      .toBe('newest-event')
+
+    const forwardSamples = await sampleWindow(container)
+    expect(new Set(forwardSamples.map(({ first, last }) => `${first}:${last}`)).size).toBe(1)
+
+    await style.evaluate(el => el.remove())
+    await sharedPage.goto('/app/space/test/test', { waitUntil: 'domcontentloaded' })
+    await expect(getScrollContainer(sharedPage)).toBeVisible({ timeout: 15_000 })
+  })
+
   test('paginates backwards', async () => {
     assert(sharedPage, 'sharedPage was undefined on access')
 
@@ -110,12 +148,29 @@ async function navToRoom(page: TestArgs['page'], roomId: string) {
   await expect(tab).toBeVisible()
 
   await tab.click()
-  await page.waitForURL(`**\/${roomId}`)
+  await page.waitForURL(`**/${roomId}`)
   await expect(page.getByTestId('scroll-container')).toBeVisible({ timeout: 15_000 })
 }
 
 function getScrollContainer(page: TestArgs['page']) {
   return page.getByTestId('scroll-container')
+}
+
+async function sampleWindow(container: ReturnType<typeof getScrollContainer>) {
+  return container.evaluate(async el => {
+    const samples: { first?: string; last?: string }[] = []
+
+    for (let i = 0; i < 20; i++) {
+      const rows = [...el.querySelectorAll<HTMLElement>('[data-item-id]')]
+      samples.push({
+        first: rows[0]?.dataset.itemId,
+        last: rows.at(-1)?.dataset.itemId,
+      })
+      await new Promise(resolve => setTimeout(resolve, 25))
+    }
+
+    return samples
+  })
 }
 
 async function getScrollContainerEvents(page: TestArgs['page']) {

@@ -1,5 +1,7 @@
-import type { IMatrixProfile, User } from 'matrix-js-sdk'
+import type { IMatrixProfile, User, UserEventHandlerMap } from 'matrix-js-sdk'
 import type { EffectScope, ShallowRef } from 'vue'
+
+import { UserEvent } from 'matrix-js-sdk'
 
 interface Entry {
   scope: EffectScope
@@ -26,36 +28,72 @@ function acquire(key: string) {
         displayname: user.value?.rawDisplayName ?? getDisplayNameFallback(userId),
       })
 
-      if (!user.value) {
+      let writes = 0
+      function setProfile(next: IMatrixProfile) {
+        writes++
+        profile.value = next
+      }
+
+      function fetchProfile() {
+        const at = ++writes
         client.value
           .getProfileInfo(userId)
           .then(result => {
-            if (result) profile.value = result
+            if (result && writes === at) profile.value = result
           })
           .catch(() => {})
       }
 
-      onEvent(event => {
-        if (event.getType() !== 'm.room.member') return
+      const refetchProfile = useDebounceFn(fetchProfile, 500)
 
+      if (!user.value) fetchProfile()
+
+      const updateProfile: UserEventHandlerMap[UserEvent.AvatarUrl | UserEvent.DisplayName] = (_, user) => {
+        setProfile({
+          avatar_url: user.avatarUrl,
+          displayname: user.rawDisplayName ?? getDisplayNameFallback(userId),
+        })
+      }
+
+      onEvent(event => {
+        if (user.value) return
+        if (event.getType() !== 'm.room.member') return
         if (event.getStateKey() !== userId) return
 
-        const content = event.getContent()
-        profile.value = {
-          ...profile.value,
-          avatar_url: content.avatar_url,
-          displayname: content.displayname ?? getDisplayNameFallback(userId),
+        const resolved = client.value.getUser(userId)
+
+        if (!resolved) {
+          refetchProfile()
+          return
         }
+
+        user.value = resolved
+
+        setProfile({
+          avatar_url: resolved.avatarUrl,
+          displayname: resolved.rawDisplayName ?? getDisplayNameFallback(userId),
+        })
+
+        resolved.on(UserEvent.AvatarUrl, updateProfile)
+        resolved.on(UserEvent.DisplayName, updateProfile)
       })
 
       onUserProfile((updatedUserId, updatedProfile) => {
         if (updatedUserId !== userId) return
 
-        profile.value = {
+        setProfile({
           ...profile.value,
           avatar_url: updatedProfile?.avatar_url as string | undefined,
           displayname: (updatedProfile?.displayname as string | undefined) ?? getDisplayNameFallback(userId),
-        }
+        })
+      })
+
+      user.value?.on(UserEvent.AvatarUrl, updateProfile)
+      user.value?.on(UserEvent.DisplayName, updateProfile)
+
+      onScopeDispose(() => {
+        user.value?.off(UserEvent.AvatarUrl, updateProfile)
+        user.value?.off(UserEvent.DisplayName, updateProfile)
       })
 
       return profile

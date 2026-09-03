@@ -1,17 +1,15 @@
-import type { NodeViewRenderer } from '@tiptap/core'
 import type { EmojiItem } from '@tiptap/extension-emoji'
 import type { Node } from '@tiptap/pm/model'
 import type { TokenizerAndRendererExtension } from 'marked'
 import type { Token } from 'marked'
 
-import { Extension, InputRule, PasteRule } from '@tiptap/core'
+import { Extension, InputRule, mergeAttributes, PasteRule } from '@tiptap/core'
 import { Emoji } from '@tiptap/extension-emoji'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
-import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import { Marked } from 'marked'
+import { markedHighlight } from 'marked-highlight'
 import { Decoration, DecorationSet } from 'prosemirror-view'
-
-import { TiptapNodeEmoji } from '#components'
+import { highlightText } from 'rangi'
 
 const UNDERLINE_EXT_RE = /^__(?=\S)([\s\S]*?\S)__/
 const underlineExt: TokenizerAndRendererExtension = {
@@ -36,6 +34,15 @@ const underlineExt: TokenizerAndRendererExtension = {
 }
 
 export const MARKED_INSTANCE = new Marked({ async: false, extensions: [underlineExt] })
+
+export const MARKED_MESSAGE_INSTANCE = new Marked(
+  { async: false, extensions: [underlineExt] },
+  markedHighlight({
+    async: false,
+    highlight: (code, lang) => highlightText(code, { classes: true, lang }),
+    langPrefix: 'language-',
+  }),
+)
 
 const SHORTCODE_INPUT_RE = /:([\w+-]+):$/
 const SHORTCODE_PASTE_RE = /(^|\s):([\w+-]+):/g
@@ -64,7 +71,6 @@ export const EmojiNode = Emoji.extend({
       }),
     ]
   },
-  addNodeView: (): NodeViewRenderer => VueNodeViewRenderer(TiptapNodeEmoji),
   addPasteRules() {
     return [
       new PasteRule({
@@ -82,6 +88,16 @@ export const EmojiNode = Emoji.extend({
             .run()
         },
       }),
+    ]
+  },
+  renderHTML({ HTMLAttributes, node }) {
+    return [
+      'span',
+      mergeAttributes(HTMLAttributes, {
+        class: 'select-auto',
+        'data-type': this.name,
+      }),
+      node.attrs.unicode ?? '',
     ]
   },
   renderText: ({ node }) => node.attrs.unicode ?? '',

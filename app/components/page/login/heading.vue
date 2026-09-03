@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { injectLoginPageEditableStateContext } from '~/pages/login/index.vue'
+import { injectAuthLayoutContext } from '~/layouts/auth.vue'
 
-const { editableInput, editableState, error, isPending, refreshHook } = injectLoginPageEditableStateContext()
+const { editableInput, editableState, isLoading, refreshHomeserverData } = injectAuthLayoutContext()
 </script>
 
 <template>
@@ -11,10 +11,10 @@ const { editableInput, editableState, error, isPending, refreshHook } = injectLo
 
       <UButton
         v-if="editableState !== 'edit'"
-        :disabled="isPending"
+        :disabled="isLoading"
         size="icon-sm"
         variant="ghost"
-        @click="refreshHook.trigger"
+        @click="refreshHomeserverData"
       >
         <Icon name="tabler:refresh" />
       </UButton>
@@ -22,6 +22,7 @@ const { editableInput, editableState, error, isPending, refreshHook } = injectLo
       <UEditableRoot
         v-model:model-value="editableInput"
         v-model:state="editableState"
+        submit-mode="enter"
         default-value="matrix.org"
         placeholder="matrix.org"
         class="shrink min-w-0 -mb-0.75"
@@ -34,13 +35,7 @@ const { editableInput, editableState, error, isPending, refreshHook } = injectLo
     </div>
 
     <div class="group text-sm text-danger flex gap-2 h-1em items-center">
-      <USeparator class="flex-1" :class="{ 'bg-danger': !!error }" />
-
-      <template v-if="error">
-        <span>{{ error.message }}</span>
-
-        <USeparator class="flex-1" :class="{ 'bg-danger': !!error }" />
-      </template>
+      <USeparator class="flex-1" />
     </div>
   </div>
 </template>

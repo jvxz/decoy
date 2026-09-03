@@ -26,9 +26,9 @@ export const usePinnedRooms = createGlobalState(() => {
 
   return {
     isRoomPinned,
+    pinRoom,
     pinnedRoomEntries,
     pinnedRooms,
-    pinRoom,
     unpinRoom,
   }
 })

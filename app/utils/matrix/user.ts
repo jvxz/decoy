@@ -1,4 +1,4 @@
-import type { Room, RoomMember, User } from 'matrix-js-sdk'
+import type { RoomMember, User } from 'matrix-js-sdk'
 
 import { assert, merge } from 'es-toolkit'
 
@@ -85,7 +85,3 @@ export function parseUserId(userId: string | undefined) {
     name,
   }
 }
-
-export const isUserId = (input: unknown) => isString(input) && USER_ID_REG.test(input)
-
-export const isJoined = (room: Room) => room.getMyMembership() === 'join'

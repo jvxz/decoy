@@ -1,22 +1,45 @@
 <script lang="ts" setup>
+import type { RoomMember } from 'matrix-js-sdk'
 import type { DialogRootProps } from 'reka-ui'
 
-export type AvatarDialogProps = DialogRootProps & GlobalDialogMap['avatar']
+// widened from GlobalDialogMap['avatar']: defineProps merges union branches but keeps a
+// branch-only key required, so declaring the union directly warns on every other variant
+export type AvatarDialogProps = DialogRootProps & {
+  label: string
+  type: 'room' | 'user' | 'roomMember'
+  room?: MaybeRoomOrId
+  user?: MaybeUserOrId
+  member?: RoomMember | string
+}
 
 const props = withDefaults(defineProps<AvatarDialogProps>(), { modal: true })
 
 const open = defineModel<boolean>('open')
 
-const delegated = reactiveOmit(props, ['room', 'open'])
+const delegated = reactiveOmit(props, ['label', 'type', 'room', 'user', 'member'])
 const isError = ref(false)
-
 const imageUrl = ref<string>()
+
+const shared = {
+  class: 'rounded w-full',
+  imageSize: 'full',
+  onError: () => (isError.value = true),
+  onUrl: (url: string | undefined) => (imageUrl.value = url),
+  square: true,
+} as const
+
+const resolvedId = computed(() => {
+  if (props.type === 'room') return props.room && resolveRoomId(props.room)
+  if (props.type === 'user') return props.user && resolveUserId(props.user)
+  if (!props.member) return undefined
+
+  return isString(props.member) ? props.member : props.member.userId
+})
+
 const saveAvatarImage = () => {
   if (!imageUrl.value) return
-  const resolvedId = props.user ? resolveUserId(props.user) : props.room ? resolveRoomId(props.room) : undefined
-  const filename = resolvedId ? `${resolvedId}-avatar` : createGenericFilename()
 
-  saveAsImage(imageUrl.value, filename)
+  saveAsImage(imageUrl.value, resolvedId.value ? `${resolvedId.value}-avatar` : createGenericFilename())
 }
 </script>
 
@@ -30,7 +53,9 @@ const saveAvatarImage = () => {
         </VisuallyHidden>
       </UDialogHeader>
 
-      <MatrixAvatar :room :src :user square class="rounded w-full" image-size="full" @url="imageUrl = $event" />
+      <MatrixRoomAvatar v-if="type === 'room' && room" v-bind="shared" :room />
+      <MatrixUserAvatar v-else-if="type === 'user' && user" v-bind="shared" :user />
+      <MatrixRoomMemberAvatar v-else-if="room && member" v-bind="shared" :room :member />
 
       <UDialogFooter>
         <UDialogAnnotation v-if="isError" class="text-danger"> Failed to load avatar </UDialogAnnotation>

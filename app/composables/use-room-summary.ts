@@ -1,17 +1,30 @@
-export const useRoomSummary = createProvidableComposable(
-  'useRoomSummary',
-  (roomOrId: MaybeRefOrGetter<MaybeRoomOrId | undefined>) => {
-    const roomId = useResolveRoomId(roomOrId)
-    const { client } = useMatrixClient()
+export function useRoomSummary(
+  roomOrId: MaybeRefOrGetter<MaybeRoomOrId | undefined>,
+  via?: MaybeRefOrGetter<string[] | undefined>,
+) {
+  const roomId = useResolveRoomId(roomOrId)
+  const viaRef = toRef(via)
+  const { client } = useMatrixClient()
 
-    return useQuery({
-      queryFn: () => {
-        if (!roomId.value) return null
-        const { serverName } = parseRoomId(roomId.value) ?? {}
-        return client.value.getRoomSummary(roomId.value, serverName ? [serverName] : [])
-      },
-      queryKey: $qk.roomSummary(roomId),
-      refetchOnWindowFocus: true,
-    })
-  },
-)
+  return useQuery({
+    queryFn: () => {
+      if (!roomId.value) return null
+
+      const via = resolveViaArray(roomId.value, viaRef.value)
+      return client.value.getRoomSummary(roomId.value, via)
+    },
+    queryKey: $qk.roomSummary(roomId, viaRef),
+    refetchOnWindowFocus: true,
+    retry: (count, err) => {
+      if (
+        isMatrixError(err) &&
+        [MatrixErrorCode.M_NOT_FOUND, MatrixErrorCode.M_FORBIDDEN, MatrixErrorCode.M_UNKNOWN].includes(
+          err.errcode as MatrixErrorCode,
+        )
+      )
+        return false
+
+      return count <= 4
+    },
+  })
+}

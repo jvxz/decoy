@@ -9,7 +9,6 @@ import type { UInputProps } from '../u/input.vue'
 import type { FormPrimitiveProps } from './primitive.vue'
 
 export interface FormInputProps extends FormPrimitiveProps, UInputProps {
-  modelValue?: string | number
   ui?: DefineClasses<'container' | 'input'>
   type?: InputTypeHTMLAttribute
   placeholder?: string
@@ -17,7 +16,7 @@ export interface FormInputProps extends FormPrimitiveProps, UInputProps {
 }
 
 const props = defineProps<FormInputProps>()
-const modelValue = useVModel(props, 'modelValue')
+const modelValue = defineModel<string | number>('modelValue')
 
 const hasError = computed(() => (props.error && Array.isArray(props.error) ? props.error.length > 0 : !!props.error))
 const delegated = reactiveOmit(props, ['placeholder', 'modelValue'])

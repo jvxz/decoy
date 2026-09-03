@@ -12,6 +12,7 @@ const props = defineProps<
 const emits = defineEmits<DialogRootEmits>()
 
 const room = useRoom(() => props.room)
+const roomName = useRoomComputed(room, r => (r ? resolveRoomName(r) : 'room'))
 
 const { self } = useSelf()
 const { r$ } = useRegle(
@@ -72,7 +73,7 @@ const handleInvite = async () => {
   >
     <UDialogContent v-if="room" @open-auto-focus.prevent="inputEl?.$el.focus">
       <UDialogHeader :close-disabled="isInviting">
-        <UDialogTitle class="truncate"> Invite to "{{ resolveRoomName(room) }}" </UDialogTitle>
+        <UDialogTitle class="truncate"> Invite to "{{ roomName }}" </UDialogTitle>
       </UDialogHeader>
 
       <form class="flex flex-col gap-2" @submit.prevent="handleInvite">

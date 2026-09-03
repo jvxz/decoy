@@ -3,7 +3,7 @@ const props = defineProps<{ notification: AppNotification<'invite'> }>()
 
 const room = useRoom(() => props.notification.payload.roomId)
 
-const roomName = computed(() => (room.value ? resolveRoomName(room.value) : props.notification.payload.roomId))
+const roomName = useRoomComputed(room, r => (r ? resolveRoomName(r) : props.notification.payload.roomId))
 const inviter = useInviter(room)
 
 const { handleNotiDismiss } = useInvites()

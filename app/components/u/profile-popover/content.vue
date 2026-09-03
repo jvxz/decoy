@@ -21,13 +21,25 @@ const avatarUrl = computed(() => resolveAvatarUrl(roomMember.value?.getMxcAvatar
 const parsedUserId = computed(() => parseUserId(roomMember.value?.userId))
 
 const membership = useRoomMembership(room, userId)
-const powerLevel = useRoomMemberPowerLevel(room, userId)
-const powerLevelName = computed(() => upperFirst(getPowerLevelName(powerLevel.value)))
+const { powerLevelName } = useRoomMemberPowerLevel(room, userId)
 
 const isSelf = computed(() => self.value?.userId === user.value?.userId)
 
 const { copy } = useClipboard()
 const { openDialog } = useGlobalDialog()
+
+function viewAvatar() {
+  const id = userId.value
+  if (!id) return
+
+  // the popover renders the room-scoped avatar, so open the dialog on the same identity
+  const payload: GlobalDialogMap['avatar'] = room.value
+    ? { label: displayName.value, member: id, room: room.value, type: 'roomMember' }
+    : { label: displayName.value, type: 'user', user: id }
+
+  open.value = false
+  nextTick(() => openDialog('avatar', payload))
+}
 </script>
 
 <template>
@@ -47,7 +59,8 @@ const { openDialog } = useGlobalDialog()
           <div class="rounded-t flex h-full justify-end relative">
             <MatrixAvatar
               v-if="avatarUrl"
-              :user
+              :src="avatarUrl"
+              :alt="displayName"
               class="rounded-t size-full scale-150 absolute object-cover blur-xl -z-1"
             />
 
@@ -61,17 +74,15 @@ const { openDialog } = useGlobalDialog()
         </div>
 
         <div class="px-4 pb-4 pt-14 border border-border-strong rounded flex flex-1 flex-col gap-2">
-          <button
-            class="group rounded-full size-20 relative"
-            @click="
-              () => {
-                const payload = { user, label: displayName }
-                open = false
-                nextTick(() => openDialog('avatar', payload))
-              }
-            "
-          >
-            <MatrixAvatar :user class="size-20 ring-6 ring-popover" image-size="small" />
+          <button class="group rounded-full size-20 relative" @click="viewAvatar">
+            <MatrixRoomMemberAvatar
+              v-if="room && userId"
+              :room
+              :member="userId"
+              class="size-20 ring-6 ring-popover"
+              image-size="small"
+            />
+            <MatrixUserAvatar v-else :user class="size-20 ring-6 ring-popover" image-size="small" />
             <div
               class="rounded-full size-20 cursor-pointer content-[''] inset-0 absolute z-2 group-hover:bg-hover/25"
             />
@@ -120,8 +131,8 @@ const { openDialog } = useGlobalDialog()
             v-if="isDefined(membership) && membership === KnownMembership.Join"
             class="flex flex-wrap gap-1 *:text-xs *:font-normal *:rounded-full *:max-w-28 *:block *:truncate"
           >
-            <UBadge class="" variant="outline">
-              {{ powerLevelName }}
+            <UBadge variant="outline">
+              {{ upperFirst(powerLevelName) }}
             </UBadge>
           </div>
 

@@ -1,16 +1,17 @@
 import type { KnipConfig } from 'knip'
 
 const config: KnipConfig = {
-  entry: ['app/components/**/*.{vue,ts}', 'app/sw.ts'],
-  ignore: ['**/*.d.ts', 'server/utils/*.example.ts'],
+  entry: ['app/components/**/*.{vue,ts}', 'app/sw.ts', 'taze.config.ts'],
   ignoreDependencies: [
     '@iconify-json/*',
-    'vue',
-    '@vueuse/core',
-    '@regle/rules',
+    '@types/grecaptcha',
     'temporal-polyfill',
+    '@regle/core',
+    '@regle/rules',
+    '@tiptap/vue-3',
+    '@unocss/rule-utils',
+    'prosemirror-view',
     'vitest-environment-nuxt',
-    'workbox-core',
     'workbox-expiration',
     'workbox-precaching',
     'workbox-strategies',

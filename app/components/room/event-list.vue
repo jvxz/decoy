@@ -1,51 +1,106 @@
+<script lang="ts">
+import type { TimelineScrollState } from '~/composables/use-timeline-pagination'
+
+const MAX_CACHED_ROOMS = 32
+
+const scrollStates = new Map<string, TimelineScrollState>()
+</script>
+
 <script lang="ts" setup>
 import type { Room } from 'matrix-js-sdk'
 
-import { usePaginatedScroll } from '@jamii/vue-paginated-scroll'
 import { Direction, EventType } from 'matrix-js-sdk'
 
 const props = defineProps<{
-  room: Room
+  room: Room | undefined
 }>()
 
 const containerRef = useTemplateRef('container')
 const isPaginationBusy = ref(false)
+const optimisticallyRedacted = useOptimisticRedactions()
 
-const { events, getEventVersion, isFullyLoaded, scrollEventsAsync } = useRoomEvents(toRef(props, 'room'), {
+const {
+  events: roomEvents,
+  isFullyLoaded,
+  scrollEventsAsync,
+} = useRoomEvents(toRef(props, 'room'), {
   filter: [
     EventType.Reaction,
     EventType.RoomRedaction,
     EventType.RoomPowerLevels,
     e => isBadEncrypted(e),
+    e => e.isRedacted(),
     e => isEditEvent(e),
   ],
   isBusy: isPaginationBusy,
 })
+const events = computed(() => roomEvents.value.filter(e => !optimisticallyRedacted.has(e.getId()!)))
+
+const loadOlder = async () => {
+  await scrollEventsAsync(Direction.Backward).catch(err => console.warn('[event-list] backward pagination:', err))
+}
 
 const {
+  backSentinel,
+  captureState,
+  forwardSentinel,
   isPaginating,
-  vItem,
+  reset,
+  restoreState,
   window: paginationWindow,
-} = usePaginatedScroll(containerRef, {
-  buffer: 0.5,
+} = useTimelinePagination(containerRef, {
   followTail: true,
   getKey: i => i.getId()!,
-  maxItems: 120,
+  hasMore: dir => dir === 'backward' && !isFullyLoaded.value,
   onBeforePaginate: async dir => {
-    if (dir !== 'backward') return
-
-    const atOldestLoaded = paginationWindow.value[0]?.getId() === events.value[0]?.getId()
-    if (!atOldestLoaded) return
-
-    await scrollEventsAsync(Direction.Backward)
+    if (dir === 'backward') await loadOlder()
   },
+  pageSize: 20,
   source: events,
-  targetHeight: 5,
 })
 
 watchEffect(() => {
   isPaginationBusy.value = isPaginating.value.backward || isPaginating.value.forward
 })
+
+const roomId = computed(() => props.room?.roomId)
+
+watch(
+  roomId,
+  (_next, prev) => {
+    if (!prev) return
+
+    const state = captureState()
+    if (!state) return
+
+    scrollStates.delete(prev)
+    scrollStates.set(prev, state)
+    if (scrollStates.size > MAX_CACHED_ROOMS) scrollStates.delete(scrollStates.keys().next().value!)
+  },
+  { flush: 'sync' },
+)
+
+let settledRoomId = roomId.value
+
+watch(
+  [roomId, events],
+  async ([id]) => {
+    if (!id) return
+
+    const needsBootstrap = paginationWindow.value.length === 0 && events.value.length > 0
+    if (id === settledRoomId && !needsBootstrap) return
+
+    settledRoomId = id
+
+    const saved = scrollStates.get(id)
+    if (saved && (await restoreState(saved))) return
+
+    if (roomId.value !== id) return
+
+    await reset()
+  },
+  { flush: 'post' },
+)
 
 const groupedEvents = useEventGrouping({
   events,
@@ -59,27 +114,33 @@ const groupedEvents = useEventGrouping({
       ref="container"
       class="scroll-container grid h-[calc(100%-3rem)] w-full content-end absolute overflow-x-hidden overflow-y-scroll"
       data-testid="scroll-container"
+      data-slot="event-list-container"
     >
       <div class="w-full" data-testid="scroll-container-wrapper">
         <div data-ignore class="h-4.25" />
 
         <RoomPaginateSkeleton v-if="!isFullyLoaded" />
 
-        <div
-          v-for="(event, idx) in groupedEvents.events"
-          :key="`${event.getId() ?? idx}:${getEventVersion(event.getId() ?? '')}`"
-          v-item="event.getId()!"
-          :data-index="idx"
-          :data-item-id="event.getId()"
-          :style="isTestMode() ? { height: `${(event as any)._size}px` } : undefined"
-        >
-          <RoomEventGeneric
-            :event
-            :grouped="groupedEvents.grouped[idx] !== false"
-            :date-diffed="!!groupedEvents.dateDiffed[idx]"
-            :room
-          />
-        </div>
+        <div ref="backSentinel" data-ignore />
+
+        <template v-if="room">
+          <div
+            v-for="(event, idx) in groupedEvents.events"
+            :key="event.getId() ?? idx"
+            :data-index="idx"
+            :data-item-id="event.getId()"
+            :style="isTestMode() ? { height: `${(event as any)._size}px` } : undefined"
+          >
+            <RoomEventGeneric
+              :event
+              :grouped="groupedEvents.grouped[idx] !== false"
+              :date-diffed="!!groupedEvents.dateDiffed[idx]"
+              :room
+            />
+          </div>
+        </template>
+        <div ref="forwardSentinel" data-ignore />
+
         <div data-ignore class="h-12" />
       </div>
     </div>

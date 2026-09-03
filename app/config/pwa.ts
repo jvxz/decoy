@@ -40,10 +40,10 @@ export const pwa: ModuleOptions = {
       {
         handler: 'CacheFirst',
         options: {
+          cacheName: 'google-fonts-cache',
           cacheableResponse: {
             statuses: [0, 200],
           },
-          cacheName: 'google-fonts-cache',
           expiration: {
             maxAgeSeconds: 60 * 60 * 24 * 365, // <== 365 days
             maxEntries: 10,
@@ -54,10 +54,10 @@ export const pwa: ModuleOptions = {
       {
         handler: 'CacheFirst',
         options: {
+          cacheName: 'gstatic-fonts-cache',
           cacheableResponse: {
             statuses: [0, 200],
           },
-          cacheName: 'gstatic-fonts-cache',
           expiration: {
             maxAgeSeconds: 60 * 60 * 24 * 365, // <== 365 days
             maxEntries: 10,

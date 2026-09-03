@@ -3,9 +3,9 @@ export default defineNuxtPlugin({
   setup: () => {
     const { client } = useMatrixClient()
     const { handleMembershipUpdate } = useInvites()
-    const { onMyMembership, onRoom } = useMatrixHooks()
+    const { onRoom, onRoomMyMembership } = useMatrixHooks()
 
-    onMyMembership(handleMembershipUpdate)
+    onRoomMyMembership(handleMembershipUpdate)
     onRoom(roomOrId => {
       const room = isString(roomOrId) ? client.value.getRoom(roomOrId) : roomOrId
       if (!room) return

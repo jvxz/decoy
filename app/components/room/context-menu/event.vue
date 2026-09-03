@@ -5,8 +5,11 @@ import { ContextMenuSubContent } from '#components'
 
 const props = defineProps<ContextMenuRegions['event']>()
 
+const { openDialog } = useGlobalDialog()
+
 const { openReactionViewer } = useRoomEventReactionsViewer()
 const { close } = useContextMenuRegion('event')
+const { self } = useSelf()
 
 const { reactions, reactTo } = useRoomEventReactions(
   () => props.roomId,
@@ -23,6 +26,26 @@ function onEmojiPick(emoji: CompactEmoji) {
 
 const { sortedRecentReactions } = useRecentReactions()
 const firstFourRecentReactions = computed(() => sortedRecentReactions.value.slice(0, 4))
+
+const powerLevel = useRoomMemberPowerLevel(
+  () => props.roomId,
+  () => self.value?.userId,
+)
+
+const canRedact = computed(() => {
+  if (props.event.getSender() === self.value?.userId) return powerLevel.canRedactSelf.value
+  return powerLevel.canRedact.value
+})
+
+const { current } = useMagicKeys()
+const { redact } = useRoomActions(
+  () => props.roomId,
+  () => props.event.getId(),
+)
+const handleDeleteMessage = () => {
+  if (current.has('shift')) redact.mutate({ reason: undefined })
+  else openDialog('deleteMessage', { eventId: props.event.getId()!, roomId: props.roomId })
+}
 </script>
 
 <template>
@@ -57,5 +80,19 @@ const firstFourRecentReactions = computed(() => sortedRecentReactions.value.slic
     <UContextMenuItem :disabled="!reactions || !reactions.size" @select="openReactionViewer(roomId, event)">
       View reactions
     </UContextMenuItem>
+
+    <UContextMenuItem v-if="canRedact" variant="danger" @select="handleDeleteMessage">
+      Delete message
+    </UContextMenuItem>
+
+    <template v-if="$settings.value.advanced.developerMode">
+      <UContextMenuSeparator />
+
+      <UContextMenuItem
+        @select="openDialog('codeViewer', { lang: 'json', code: JSON.stringify(props.event, null, 2) })"
+      >
+        View source
+      </UContextMenuItem>
+    </template>
   </template>
 </template>

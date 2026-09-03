@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { Editor } from '@tiptap/core'
 import type { MentionNodeAttrs } from '@tiptap/extension-mention'
+import type { Node } from '@tiptap/pm/model'
 import type { SuggestionOptions, SuggestionProps } from '@tiptap/suggestion'
 import type { CompactEmoji } from 'emojibase'
 import type { RoomMember } from 'matrix-js-sdk'
@@ -9,8 +10,8 @@ import type { IHierarchyRoom } from 'matrix-js-sdk/lib/@types/spaces'
 import { Extension } from '@tiptap/core'
 import { Mention } from '@tiptap/extension-mention'
 import { Placeholder } from '@tiptap/extension-placeholder'
+import { Fragment, Slice } from '@tiptap/pm/model'
 import { useFilter } from 'reka-ui'
-import CodeBlockShiki from 'tiptap-extension-code-block-shiki'
 import { VList } from 'virtua/vue'
 
 const currentRoom = useCurrentRoom()
@@ -22,9 +23,16 @@ const { areMembersTyping, onType } = useRoomMembersTyping.provide(currentRoom)
 
 const { contains } = useFilter({ sensitivity: 'base' })
 
+const { client } = useMatrixClient()
 const { members } = useRoomMembers(currentRoom)
 const { rooms } = useSpaceHierarchy(() => currentSpace.value?.roomId)
+
 const roomsArray = computed(() => (rooms.value ? rooms.value.values().toArray() : []))
+const viaByRoomId = computed(() => {
+  const space = rooms.value?.get(currentSpace.value?.roomId ?? '')
+  if (!space) return new Map<string, string[]>()
+  return new Map(space.children_state.filter(c => c.content.via?.length).map(c => [c.state_key, c.content.via]))
+})
 
 const { emojiData } = useEmojiData()
 
@@ -53,7 +61,6 @@ let command: ((props: MentionNodeAttrs) => void) | undefined
 
 const listHeight = computed(() => Math.min(filteredItems.value.length, 7) * 32)
 
-// const { message } = useRoomActions(currentRoom)
 const { sendTextMessage } = useRoomMessaging(currentRoom)
 
 function selectItem(item: SuggestionItem) {
@@ -112,20 +119,39 @@ function createSuggestion(
 }
 
 const editor = useEditor({
+  editorProps: {
+    handlePaste(view, event) {
+      const text = event.clipboardData?.getData('text/plain')
+      if (!text) return false
+
+      const { schema, tr } = view.state
+      const nodes: Node[] = []
+      const lines = text.split('\n')
+      for (let i = 0; i < lines.length; i++) {
+        if (i > 0) nodes.push(schema.nodes.hardBreak!.create())
+        if (lines[i]) nodes.push(schema.text(lines[i]!))
+      }
+      tr.replaceSelection(new Slice(Fragment.from(nodes), 0, 0))
+      view.dispatch(tr)
+      return true
+    },
+  },
   extensions: [
     TiptapStarterKit.configure({
+      blockquote: false,
       bold: false,
+      bulletList: false,
       code: false,
       codeBlock: false,
       heading: false,
+      horizontalRule: false,
       italic: false,
       link: false,
+      listItem: false,
+      orderedList: false,
       strike: false,
       trailingNode: false,
       underline: false,
-    }),
-    CodeBlockShiki.configure({
-      defaultTheme: 'github-dark-default',
     }),
     EmojiNode.configure({
       suggestion: createSuggestion(
@@ -155,13 +181,25 @@ const editor = useEditor({
         },
       ),
     }),
-    Mention.configure({
+    Mention.extend({
+      addAttributes() {
+        return {
+          ...this.parent?.(),
+          via: { default: null },
+        }
+      },
+    }).configure({
       suggestions: [
         createSuggestion('#', ({ query }) =>
           roomsArray.value
             .filter(r => r.name && contains(r.name, query))
             .map(r => ({
-              commandProps: { id: r.room_id, label: r.name ?? r.room_id, room: r },
+              commandProps: {
+                id: r.room_id,
+                label: r.name ?? r.room_id,
+                room: r,
+                via: viaByRoomId.value.get(r.room_id),
+              },
               id: r.room_id,
               label: r.name ?? r.room_id,
               room: r,
@@ -171,7 +209,7 @@ const editor = useEditor({
           (members.value ?? [])
             .filter(u => [resolveUserName(u), u.userId].some(v => contains(v, query)))
             .map(u => ({
-              commandProps: { id: u.userId, label: resolveUserName(u), user: u },
+              commandProps: { id: u.userId, label: resolveUserName(u) },
               id: u.userId,
               label: resolveUserName(u),
               user: u,
@@ -189,19 +227,21 @@ const editor = useEditor({
           Enter: ({ editor }) => {
             if (open.value) return false
 
-            const plainBody = nodeToPlainBody(editor.state.doc).trim()
-            if (!plainBody) return true
-
             const mentionedUserIds = new Set<string>()
             editor.state.doc.descendants(node => {
               if (node.type.name === 'mention') {
                 const id = node.attrs.id as string
-                if (id.startsWith('@')) mentionedUserIds.add(id)
+                if (isUserId(id)) mentionedUserIds.add(id)
               }
             })
 
-            const formattedBody = nodeToFormattedBody(editor.state.doc)
-            const sanitizedFormattedBody = sanitizeFormattedBody(formattedBody)
+            const plainBody = nodeToPlainBody(editor.state.doc)
+            if (!plainBody.trim()) return false
+
+            const md = docToMarkdown(editor.state.doc, client.value)
+            const html = (MARKED_INSTANCE.parse(md) as string).trimEnd()
+            const sanitizedFormattedBody = sanitizeFormattedBody(html)
+
             sendTextMessage(plainBody, sanitizedFormattedBody, mentionedUserIds)
 
             onType(true)
@@ -270,9 +310,9 @@ watch(highlightedIdx, idx => vlist.value?.scrollToIndex(idx, { align: 'nearest' 
           @mouseenter="highlightedIdx = index"
           @mousedown.prevent="selectItem(item)"
         >
-          <MatrixAvatar v-if="item.user" class="h-4 w-fit" :room-member="item.user" />
-          <MatrixAvatar v-else-if="item.room" class="h-4 w-fit" :room="item.room.room_id" />
-          <Twemoji v-else :emoji="item.emoji.hexcode" />
+          <MatrixRoomMemberAvatar v-if="item.user" class="h-4 w-fit" :room="currentRoom" :member="item.user" />
+          <MatrixRoomAvatar v-else-if="item.room" class="h-4 w-fit" :room="item.room.room_id" />
+          <Twemoji v-else :emoji="item.emoji?.hexcode" />
 
           <span class="text-foreground">{{ item.label }}</span>
           <span v-if="!item.emoji" class="text-xs font-normal">{{ item.id }}</span>

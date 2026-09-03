@@ -1,9 +1,12 @@
-import type { ClientConfig, ILoginFlowsResponse, LoginFlow } from 'matrix-js-sdk'
+import type { ClientConfig, ILoginFlowsResponse, LoginFlow, UIAFlow } from 'matrix-js-sdk'
 
+import { AuthType, MatrixError } from 'matrix-js-sdk'
 import { AutoDiscovery, AutoDiscoveryAction, createClient } from 'matrix-js-sdk'
 
 export async function getHomeserverConfig(homeserver: string) {
-  return AutoDiscovery.findClientConfig(withoutProtocol(homeserver))
+  return AutoDiscovery.findClientConfig(
+    hasProtocol(homeserver, { acceptRelative: false }) ? homeserver : withoutProtocol(homeserver),
+  )
 }
 
 export function isHomeserverValid(config: ClientConfig) {
@@ -11,17 +14,40 @@ export function isHomeserverValid(config: ClientConfig) {
   return state !== AutoDiscoveryAction.FAIL_ERROR && state !== AutoDiscoveryAction.FAIL_PROMPT
 }
 
+/**
+ * @throws RegistrationDisabledError, MatrixError
+ */
+export async function getRegistrationFlows(homeserver: string) {
+  const client = createTempClient(await resolveHomeserverBaseUrl(homeserver))
+
+  const [err] = await attemptAsync(() => client.registerRequest({}))
+  if (!(err instanceof MatrixError)) throw err
+
+  const ssoFlow = getSSOFlow((await getLoginFlows(homeserver))?.flows ?? [])
+    ? [{ stages: [AuthType.Sso] } satisfies UIAFlow]
+    : []
+
+  if (err.httpStatus === 403) {
+    if (!ssoFlow.length) throw new RegistrationDisabledError()
+    return { flows: ssoFlow }
+  }
+
+  if (err.httpStatus !== 401 || !err.data?.flows) throw err
+
+  return { flows: [...err.data.flows, ...ssoFlow], params: err.data.params, session: err.data.session }
+}
+
 export async function getLoginFlows(homeserver: string) {
   const config = await getHomeserverConfig(homeserver)
+  const baseUrl = isHomeserverValid(config)
+    ? (config['m.homeserver'].base_url ?? homeserver)
+    : normalizeHomeserverUrl(homeserver)
 
-  const isValid = isHomeserverValid(config)
-  if (!isValid) return throwErr()
-
-  const client = createClient({ baseUrl: config['m.homeserver'].base_url ?? homeserver })
+  const client = createClient({ baseUrl })
 
   const [loginFlowsError, loginFlows] = await attemptAsync<ILoginFlowsResponse, Error>(() => client.loginFlows())
   if (loginFlowsError) {
-    if (loginFlowsError instanceof TypeError && loginFlowsError.message.includes('URL')) return throwErr()
+    if (loginFlowsError instanceof TypeError && loginFlowsError.message.includes('URL')) throw throwErr()
     throw loginFlowsError
   }
 
@@ -53,11 +79,15 @@ export async function resolveHomeserverBaseUrl(baseUrl: string): Promise<string>
   try {
     const homeserverConfig = await getHomeserverConfig(baseUrl)
 
-    if (homeserverConfig['m.homeserver'].state !== AutoDiscoveryAction.SUCCESS)
-      throw homeserverConfig['m.homeserver']?.error
+    if (homeserverConfig['m.homeserver'].state !== AutoDiscoveryAction.SUCCESS) return normalizeHomeserverUrl(baseUrl)
 
     return homeserverConfig['m.homeserver'].base_url ?? baseUrl
   } catch (error) {
     throw parseError(error, { fallbackMessage: 'Failed to resolve base URL' }).message
   }
+}
+
+export function normalizeHomeserverUrl(input: string) {
+  if (hasProtocol(input, { acceptRelative: false })) return input
+  return withHttps(input)
 }

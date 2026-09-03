@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-const { profile, self } = useSelf()
+const { self } = useSelf()
 const status = useMatrixStatus()
 </script>
 
@@ -18,7 +18,7 @@ const status = useMatrixStatus()
       class="group text-foreground ps-1 rounded-sm flex flex-1 shrink-0 gap-1 h-11 w-full cursor-pointer duration-150 items-center -mx-1.5 hover:bg-white/7.5"
     >
       <div class="p-1 shrink-0 h-11 aspect-square">
-        <MatrixAvatar
+        <MatrixUserAvatar
           :is-loading="!status.isDataSynced"
           loading="eager"
           fetchpriority="high"
@@ -28,8 +28,8 @@ const status = useMatrixStatus()
       </div>
 
       <div class="flex-col size-full translate-y-0.5 justify-between *:shrink-0">
-        <p v-if="status.isDataSynced && profile?.displayname" class="text-sm font-medium h-1lh w-fit self-start">
-          {{ profile.displayname }}
+        <p v-if="status.isDataSynced && self" class="text-sm font-medium h-1lh w-fit self-start">
+          {{ resolveUserName(self) }}
         </p>
         <USkeleton v-else class="text-sm shrink h-1lh w-24" />
 

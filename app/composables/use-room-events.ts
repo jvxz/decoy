@@ -2,48 +2,64 @@ import type { MatrixEvent, Room } from 'matrix-js-sdk'
 
 import { Direction } from 'matrix-js-sdk'
 
-export const BATCH_SIZE = 80
+const BATCH_SIZE = 80
 
 const roomEventsFullyLoadedSet = reactive(new Set<string>())
+const roomEventsBackfilledSet = reactive(new Set<string>())
+const eventVersions = shallowReactive(new Map<string, number>())
+
+export function getEventVersion(id: string | undefined) {
+  return id ? (eventVersions.get(id) ?? 0) : 0
+}
 
 export function useRoomEvents(
-  room: Ref<Room>,
+  room: Ref<Room | undefined>,
   opts?: { isBusy?: Ref<boolean>; filter?: FilterMatrixEventPredicate | FilterMatrixEventPredicate[] },
 ) {
   const { client } = useMatrixClient()
 
   const events = shallowRef<MatrixEvent[]>([])
-  const eventVersions = shallowReactive(new Map<string, number>())
+
+  const roomId = computed(() => room.value?.roomId)
 
   const isFullyLoaded = computed({
-    get: () => roomEventsFullyLoadedSet.has(room.value.roomId),
+    get: () => (roomId.value ? roomEventsFullyLoadedSet.has(roomId.value) : false),
     set: (v: boolean) => {
-      if (v) roomEventsFullyLoadedSet.add(room.value.roomId)
-      else roomEventsFullyLoadedSet.delete(room.value.roomId)
+      if (!roomId.value) return false
+
+      if (v) roomEventsFullyLoadedSet.add(roomId.value)
+      else roomEventsFullyLoadedSet.delete(roomId.value)
     },
   })
 
-  const sync = () => {
-    const liveEvents = room.value.getLiveTimeline().getEvents()
-
+  const selectEvents = (liveEvents: MatrixEvent[] | undefined) => {
     const cloned = [...(liveEvents ?? [])]
-    if (!opts?.filter) return (events.value = cloned)
-
-    events.value = filterMatrixEvents(cloned, opts.filter)
+    return opts?.filter ? filterMatrixEvents(cloned, opts.filter) : cloned
   }
 
-  whenever(room, sync, { immediate: true })
+  const renderableCount = () => selectEvents(room.value?.getLiveTimeline().getEvents()).length
 
-  let currentBatchSize = BATCH_SIZE
+  const isBackfilled = computed(() => (roomId.value ? roomEventsBackfilledSet.has(roomId.value) : false))
+
+  const isBootstrapping = () => !isBackfilled.value && !isFullyLoaded.value
+
+  const sync = () => {
+    if (isBootstrapping()) return
+    events.value = selectEvents(room.value?.getLiveTimeline().getEvents())
+  }
+
   const mutex = new Mutex()
   const {
     isPending: isScrolling,
     mutate: scrollEvents,
     mutateAsync: scrollEventsAsync,
-    status: scrollEventsStatus,
   } = useMutation({
     mutationFn: async (dir: Direction) => {
-      if (mutex.isLocked) return
+      if (mutex.isLocked) {
+        await mutex.acquire()
+        mutex.release()
+        return
+      }
 
       await mutex.acquire()
       try {
@@ -53,37 +69,45 @@ export function useRoomEvents(
         const targetRoomId = r.roomId
 
         if (dir === Direction.Backward) {
-          const canLoadMore = await retry(scrollBack, {
-            delay: attempts => {
-              currentBatchSize = currentBatchSize + 10
-              return attempts * 50
-            },
-            retries: 6,
-            shouldRetry: err => err instanceof $Error,
-          })
-
-          if (targetRoomId === toValue(room).roomId) isFullyLoaded.value = !canLoadMore
+          try {
+            const canLoadMore = await scrollBack()
+            if (targetRoomId === roomId.value) isFullyLoaded.value = !canLoadMore
+          } finally {
+            roomEventsBackfilledSet.add(targetRoomId)
+          }
         }
 
-        if (targetRoomId === toValue(room).roomId) sync()
+        if (targetRoomId === roomId.value) sync()
       } finally {
         mutex.release()
-        currentBatchSize = BATCH_SIZE
       }
     },
     mutationKey: $mk.scrollEvents(() => room.value?.roomId),
   })
 
+  watch(
+    roomId,
+    id => {
+      if (!id) return
+
+      if (roomEventsBackfilledSet.has(id) || isFullyLoaded.value) {
+        sync()
+        return
+      }
+      void scrollEventsAsync(Direction.Backward)
+    },
+    { immediate: true },
+  )
+
   let missedSync = false
   const shouldSuppressSync = () => isScrolling.value || (opts?.isBusy?.value ?? false)
-  if (opts?.isBusy) {
-    watch(opts.isBusy, busy => {
-      if (!busy && missedSync) {
-        missedSync = false
-        sync()
-      }
-    })
-  }
+
+  watch(shouldSuppressSync, suppressed => {
+    if (suppressed || !missedSync) return
+
+    missedSync = false
+    sync()
+  })
 
   const hookSync = () => {
     if (!shouldSuppressSync()) {
@@ -91,8 +115,9 @@ export function useRoomEvents(
     } else missedSync = true
   }
 
-  useRoomHooks(() => room.value.roomId, {
+  useRoomHooks(roomId, {
     onLocalEchoUpdated: hookSync,
+    onRedaction: hookSync,
     onTimeline: hookSync,
     onTimelineRefresh: hookSync,
     onTimelineReset: hookSync,
@@ -100,7 +125,7 @@ export function useRoomEvents(
 
   const { onDecrypted } = useMatrixHooks()
   onDecrypted(event => {
-    if (room.value.roomId !== event.getRoomId()) return
+    if (roomId.value !== event.getRoomId()) return
 
     const id = event.getId()
     if (!id) return
@@ -108,24 +133,26 @@ export function useRoomEvents(
     eventVersions.set(id, (eventVersions.get(id) ?? 0) + 1)
   })
 
-  function getEventVersion(id: string) {
-    return eventVersions.get(id) ?? 0
-  }
-
   async function scrollBack() {
-    if (isFullyLoaded.value) return false
+    if (isFullyLoaded.value || !room.value) return false
 
     const tl = room.value.getLiveTimeline()
-    const prevLen = tl.getEvents().length
 
-    const canLoadMore = await client.value.paginateEventTimeline(tl, { backwards: true, limit: BATCH_SIZE })
-    const newLen = tl.getEvents().length
+    const prevRenderable = renderableCount()
+    const known = new Set(tl.getEvents().map(e => e.getId()))
 
-    if (prevLen === newLen) {
-      if (!canLoadMore) return false
+    let canLoadMore = true
+    let limit = BATCH_SIZE
+    for (let attempt = 0; attempt < 7; attempt++) {
+      canLoadMore = await client.value.paginateEventTimeline(tl, { backwards: true, limit })
 
-      throw new $Error({ message: 'previous event length equals new event length', title: 'Unexpected error' })
+      if (!canLoadMore || renderableCount() !== prevRenderable) break
+
+      limit += 10
     }
+
+    const added = tl.getEvents().filter(e => !known.has(e.getId()))
+    await Promise.all(added.map(e => client.value.decryptEventIfNeeded(e)))
 
     return canLoadMore
   }
@@ -136,6 +163,5 @@ export function useRoomEvents(
     isFullyLoaded,
     scrollEvents,
     scrollEventsAsync,
-    scrollEventsStatus,
   }
 }

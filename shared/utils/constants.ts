@@ -1,6 +1,9 @@
-import { EventType } from 'matrix-js-sdk'
+import { AuthType, EventType } from 'matrix-js-sdk'
 
+import type { ErrorShape } from '../../app/utils/error'
 import type { AvatarImageSize } from '../../app/utils/matrix/types'
+
+import { ErrorCode } from '../../app/utils/error'
 
 export const appMeta = {
   description: 'A familiar Matrix client for humans',
@@ -8,6 +11,7 @@ export const appMeta = {
 }
 
 export const MATRIX_BASE_URL = 'https://matrix-client.matrix.org'
+export const MATRIX_TO_URL = 'https://matrix.to'
 
 export const IMG_PLACEHOLDER_URL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 
@@ -37,6 +41,16 @@ export const ASIDE_DISPLAY_MODES = {
 }
 
 export const MATRIX = {
+  AUTH: {
+    UIA: {
+      SUPPORTED_STAGES: new Set<AuthType | (string & {})>([
+        AuthType.Password,
+        AuthType.Recaptcha,
+        AuthType.Sso,
+        AuthType.Email,
+      ]),
+    },
+  },
   MESSAGING: {
     ALLOWED_ATTRS: [
       'href',
@@ -115,3 +129,16 @@ export const MATRIX = {
     },
   },
 } as const
+
+export const GENERIC_ERROR = {
+  INVALID_HOMESERVER: {
+    code: ErrorCode.InvalidHomeserver,
+    message: 'The provided homeserver is invalid. Please ensure the URL provided is correct with no misspellings.',
+    title: 'Invalid homeserver',
+  },
+  UNKNOWN: {
+    code: ErrorCode.Unknown,
+    message: 'An unexpected error occurred. Please try again later',
+    title: 'Unknown error',
+  },
+} satisfies Record<string, ErrorShape>

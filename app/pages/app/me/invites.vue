@@ -9,7 +9,7 @@ const { invites } = useInvites()
 
 const contextMenuOpen = ref(false)
 watch(
-  () => invites.value.length,
+  () => invites.value.size,
   () => (contextMenuOpen.value = false),
 )
 </script>
@@ -30,7 +30,7 @@ watch(
 
     <UShowcaseContent class="size-full">
       <UContextMenuRegionRoot v-model:open="contextMenuOpen" name="invite">
-        <template v-if="invites.length">
+        <template v-if="invites.size">
           <PageMeInvitesCard v-for="inviteRoom in invites" :key="inviteRoom.roomId" :invite-room />
         </template>
 
