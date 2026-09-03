@@ -2,7 +2,6 @@ import type { NuxtPage } from 'nuxt/schema'
 
 import { pwa } from './app/config/pwa'
 import { DEFAULT_COLOR_MODE } from './shared/constants/color-mode'
-import { appMeta } from './shared/utils/constants'
 
 export default defineNuxtConfig({
   app: {
@@ -118,7 +117,6 @@ export default defineNuxtConfig({
     'nuxt-security',
     '@vueuse/nuxt',
     'reka-ui/nuxt',
-    '@nuxtjs/seo',
     '@nuxtjs/color-mode',
     '@regle/nuxt',
     '@vite-pwa/nuxt',
@@ -182,11 +180,6 @@ export default defineNuxtConfig({
     },
   },
 
-  // nuxt-schema-org currently does not support unhead v3
-  schemaOrg: {
-    enabled: false,
-  },
-
   scripts: {
     registry: {
       googleRecaptcha: {
@@ -206,10 +199,6 @@ export default defineNuxtConfig({
     },
     rateLimiter: false,
     sri: false,
-  },
-
-  site: {
-    name: appMeta.name,
   },
 
   ssr: false,
