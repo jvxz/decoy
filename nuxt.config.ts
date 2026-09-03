@@ -167,6 +167,7 @@ export default defineNuxtConfig({
       },
     },
     rateLimiter: false,
+    removeLoggers: false,
     sri: false,
   },
 
